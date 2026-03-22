@@ -15,7 +15,6 @@ export default function LoginPage() {
   const { mutate: login } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const [, formAction, isPending] = useActionState(
     async (_, formData: FormData) => {
@@ -43,7 +42,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative bg-white overflow-hidden flex">
+    <div className="min-h-screen relative bg-white overflow-hidden flex w-full">
       {/* Background shape */}
       <div
         className="absolute inset-0 z-0 bg-[#136FB6]"
