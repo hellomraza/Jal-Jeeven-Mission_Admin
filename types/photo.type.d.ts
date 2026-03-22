@@ -5,8 +5,11 @@ type Photo = {
   longitude: string;
   timestamp: string;
   employee_id: string;
+  employee: Employee;
   component_id: string;
   work_item_id: string;
+  workItemComponent: WorkItemComponent;
+  workItem: WorkItem;
   is_selected: boolean;
   selected_by: string | null;
   selected_at: string | null;
