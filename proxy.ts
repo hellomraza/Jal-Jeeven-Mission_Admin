@@ -12,6 +12,9 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("admin_token")?.value;
   const isLoggedIn = Boolean(token);
+  const requestHeaders = new Headers(request.headers);
+
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
 
   if (pathname === "/") {
     const target = isLoggedIn ? "/dashboard" : "/login";
@@ -26,7 +29,11 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  return NextResponse.next();
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 export const config = {
