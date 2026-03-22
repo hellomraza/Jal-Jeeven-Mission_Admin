@@ -1,36 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  getWorkItemComponents,
-  updateWorkItemComponent,
-  getComponentDetails,
-} from "@/services/workService";
 import DashboardLayout from "@/components/layout/dashboard-layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Loader2,
-  ArrowLeft,
-  Eye,
-  Edit,
-  CheckCircle2,
-  Clock,
-  XSquare,
-  AlertCircle,
-  Camera,
-} from "lucide-react";
-import { toast } from "react-toastify";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +19,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  getComponentDetails,
+  getWorkItemComponents,
+  updateWorkItemComponent,
+} from "@/services/workService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Camera,
+  CheckCircle2,
+  Clock,
+  Edit,
+  Eye,
+  Loader2,
+  XSquare,
+} from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 export default function WorkOrderUpdatePage() {
   const { id } = useParams();
@@ -179,11 +179,11 @@ export default function WorkOrderUpdatePage() {
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Component Name
                   </TableHead>
-                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Unit
-                  </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12 text-center">
                     Quantity
+                  </TableHead>
+                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12 text-center">
+                    Progress
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12 text-center">
                     Status
@@ -235,13 +235,14 @@ export default function WorkOrderUpdatePage() {
                         {index + 1}
                       </TableCell>
                       <TableCell className="text-[13px] text-gray-900 py-4.5 font-bold">
-                        {row.component?.name || "N/A"}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-500 py-4.5 font-medium">
-                        {row.component?.unit || "N/A"}
+                        {row.component?.name || "N/A"}{" "}
+                        {row.component?.unit ? `(${row.component.unit})` : ""}
                       </TableCell>
                       <TableCell className="text-[13px] text-gray-900 py-4.5 font-extrabold text-center">
                         {row.quantity || "0"}
+                      </TableCell>
+                      <TableCell className="text-[13px] text-gray-900 py-4.5 font-extrabold text-center">
+                        {row.progress || "0"}
                       </TableCell>
                       <TableCell className="py-4.5 text-center">
                         <div className="flex justify-center">
