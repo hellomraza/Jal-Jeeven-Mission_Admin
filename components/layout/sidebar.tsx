@@ -1,23 +1,12 @@
 "use client";
 
-import * as React from "react";
+import { ClipboardList, Globe, LayoutDashboard, ListTodo } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import {
-  LogOut,
-  LayoutDashboard,
-  FileText,
-  Image as ImageIcon,
-  ClipboardList,
-  Monitor,
-  Globe,
-  FileUp,
-  ListTodo,
-} from "lucide-react";
+import { usePathname } from "next/navigation";
+import * as React from "react";
 
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import LogoutButton from "../LogoutButtton";
 
 interface SidebarItem {
   label: string;
@@ -36,51 +25,21 @@ const menuItems: SidebarItem[] = [
     href: "/work-order",
     icon: <ClipboardList size={20} />,
   },
-  { label: "GIS MAP", href: "/gis-map", icon: <Monitor size={20} /> },
-  { label: "Reports", href: "/reports", icon: <FileText size={20} /> },
+  // { label: "GIS MAP", href: "/gis-map", icon: <Monitor size={20} /> },
+  // { label: "Reports", href: "/reports", icon: <FileText size={20} /> },
   { label: "Agreement", href: "/agreement", icon: <Globe size={20} /> },
-  { label: "Pictures", href: "/pictures", icon: <ImageIcon size={20} /> },
-  { label: "Update", href: "/update", icon: <FileUp size={20} /> },
+  // { label: "Pictures", href: "/pictures", icon: <ImageIcon size={20} /> },
+  // { label: "Update", href: "/update", icon: <FileUp size={20} /> },
   { label: "Status", href: "/status", icon: <ListTodo size={20} /> },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      localStorage.removeItem("admin_token");
-      localStorage.removeItem("mock_user"); // Cleanup just in case
-      router.push("/login");
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
-  };
-
   return (
-    <aside className="fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-100 z-50 flex flex-col">
-      {/* Logo */}
-      <div className="flex-none">
-        <div className="flex flex-col items-center justify-center gap-2 px-4 py-8">
-          <div className="relative w-[60px] h-[60px]">
-            <Image
-              src="/logo.png"
-              alt="Jal Jeevan Mission Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-          <h1 className="text-[14px] font-bold text-[#1a2b3c] text-center tracking-wide leading-tight mt-1">
-            Jal Jeevan Mission
-          </h1>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full px-4">
-          <div className="space-y-1.5 pt-2">
+    <aside className="w-64 h-full  bg-white border-r border-gray-100 flex flex-col p-4">
+      <div className="flex-1 h-full overflow-hidden">
+        <ScrollArea className="h-full  flex-1">
+          <div className="space-y-1.5">
             {menuItems.map((item) => {
               const isActive = pathname.startsWith(item.href);
 
@@ -107,17 +66,7 @@ export default function Sidebar() {
         </ScrollArea>
       </div>
 
-      {/* Bottom Section: Logout */}
-      <div className="flex-none p-4 pb-6 bg-white mt-auto">
-        <Button
-          variant="ghost"
-          onClick={handleLogout}
-          className="gap-3 flex justify-start w-full text-[#64748B] hover:text-[#136FB6] hover:bg-[#DFEEF9] rounded-lg font-bold text-[13px] py-6"
-        >
-          <LogOut size={20} />
-          Logout
-        </Button>
-      </div>
+      <LogoutButton />
     </aside>
   );
 }
