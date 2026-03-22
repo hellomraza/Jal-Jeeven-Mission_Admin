@@ -1,17 +1,17 @@
-import axios from 'axios';
+import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
+  baseURL: "http://localhost:3000", // Update with your API base URL
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Request interceptor to add the auth token to headers
 apiClient.interceptors.request.use(
   (config) => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('admin_token');
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("admin_token");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -20,7 +20,7 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor for global error handling
@@ -35,7 +35,7 @@ apiClient.interceptors.response.use(
       // }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default apiClient;
