@@ -1,11 +1,10 @@
 "use client";
 
-import type React from "react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
-import { toast } from "react-toastify";
-import Sidebar from "./sidebar";
+import type React from "react";
+import { Suspense, useState } from "react";
 import Header from "./header";
+import Sidebar from "./sidebar";
 
 export default function DashboardLayout({
   children,
@@ -14,18 +13,18 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const adminToken = localStorage.getItem("admin_token");
-    setToken(adminToken);
-    setIsLoading(false);
+  // useEffect(() => {
+  //   const adminToken = localStorage.getItem("admin_token");
+  //   setToken(adminToken);
+  //   setIsLoading(false);
 
-    if (!adminToken) {
-      toast.error("Please login to access this page");
-      router.push("/login");
-    }
-  }, [router]);
+  //   if (!adminToken) {
+  //     toast.error("Please login to access this page");
+  //     router.push("/login");
+  //   }
+  // }, [router]);
 
   if (isLoading) {
     return (
@@ -38,9 +37,9 @@ export default function DashboardLayout({
     );
   }
 
-  if (!token) {
-    return null; // Will redirect
-  }
+  // if (!token) {
+  //   return null; // Will redirect
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
@@ -57,4 +56,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-

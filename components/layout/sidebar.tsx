@@ -1,20 +1,20 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
 import {
-  LogOut,
-  LayoutDashboard,
-  FileText,
-  Image as ImageIcon,
   ClipboardList,
-  Monitor,
-  Globe,
+  FileText,
   FileUp,
+  Globe,
+  Image as ImageIcon,
+  LayoutDashboard,
   ListTodo,
+  LogOut,
+  Monitor,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -52,6 +52,9 @@ export default function Sidebar() {
     try {
       localStorage.removeItem("admin_token");
       localStorage.removeItem("mock_user"); // Cleanup just in case
+      localStorage.removeItem("user_name");
+      localStorage.removeItem("user_role");
+      document.cookie = "admin_token=; path=/; max-age=0; SameSite=Lax";
       router.push("/login");
     } catch (err) {
       console.error("Logout failed", err);

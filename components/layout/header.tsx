@@ -1,10 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { logoutUserAction } from "@/actions/authAction";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Bell, ChevronDown, LogOut, Search } from "lucide-react";
 import Link from "next/link";
-import { Search, Bell } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Header() {
+  const router = useRouter();
   const [userName, setUserName] = useState("District Officer");
   const [userRole, setUserRole] = useState("DO");
 
@@ -14,6 +25,18 @@ export default function Header() {
     if (name) setUserName(name);
     if (role) setUserRole(role);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem("admin_token");
+      localStorage.removeItem("mock_user");
+      localStorage.removeItem("user_name");
+      localStorage.removeItem("user_role");
+      await logoutUserAction();
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-100 flex items-center justify-between px-6 py-4 h-20 transition-all shadow-[0_4px_24px_rgba(0,0,0,0.01)]">
@@ -51,19 +74,44 @@ export default function Header() {
           <div className="h-8 w-px bg-gray-200"></div>
 
           {/* User Profile */}
-          <div className="flex items-center gap-3 cursor-pointer group">
-            <div className="flex flex-col items-end">
-              <span className="text-[12px] font-bold text-[#1a2b3c] group-hover:text-[#136FB6] transition-colors leading-none tracking-wide">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-3 cursor-pointer group outline-none"
+              >
+                <div className="flex flex-col items-end">
+                  <span className="text-[12px] font-bold text-[#1a2b3c] group-hover:text-[#136FB6] transition-colors leading-none tracking-wide">
+                    {userName}
+                  </span>
+                  <span className="text-[10px] text-gray-500 font-medium tracking-wide mt-1">
+                    {userRole}
+                  </span>
+                </div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E2E8F0] text-[#475569] font-bold shadow-sm">
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+                <ChevronDown
+                  size={16}
+                  className="text-[#94A3B8] group-hover:text-[#136FB6] transition-colors"
+                />
+              </button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel className="text-[12px]">
                 {userName}
-              </span>
-              <span className="text-[10px] text-gray-500 font-medium tracking-wide mt-1">
-                {userRole}
-              </span>
-            </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E2E8F0] text-[#475569] font-bold shadow-sm">
-              {userName.charAt(0).toUpperCase()}
-            </div>
-          </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-[#475569] cursor-pointer"
+              >
+                <LogOut size={16} />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

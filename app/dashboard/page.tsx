@@ -1,32 +1,7 @@
 "use client";
 
-import { toast } from "react-toastify";
 import DashboardLayout from "@/components/layout/dashboard-layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from "recharts";
-import {
-  Users,
-  HardHat,
-  Building2,
-  MapPin,
-  Search,
-  FileEdit,
-  FileText,
-  Image as ImageIcon,
-  FileBarChart,
-} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -35,14 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  FileBarChart,
+  FileEdit,
+  FileText,
+  Image as ImageIcon,
+  Users,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 

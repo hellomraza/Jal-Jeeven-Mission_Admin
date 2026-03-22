@@ -1,15 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { loginUserAction } from "@/actions/authAction";
+import InputWithPassword from "@/components/InputWithPassword";
+import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { useLogin } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
+import { redirect } from "next/navigation";
+import { useActionState, useState } from "react";
 
 export default function LoginPage() {
-  const { mutate: login, isPending } = useLogin();
+  const { mutate: login } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const [, formAction, isPending] = useActionState(
+    async (_, formData: FormData) => {
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
+      const response = await loginUserAction({ email, password });
+      localStorage.setItem("admin_token", response.access_token);
+      redirect("/dashboard"); // Redirect to dashboard after successful login
+    },
+    null,
+  );
 
   const [error, setError] = useState("");
 
@@ -90,40 +107,28 @@ export default function LoginPage() {
               </div>
             )}
 
-            <form onSubmit={handleLogin} className="space-y-3">
+            <form action={formAction} className="space-y-3">
               <div>
-                <label className="block text-[11px] font-medium text-gray-500 mb-1 ml-0.5">
-                  Email / Mobile No.
-                </label>
-                <input
-                  type="text"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50/50 border border-gray-200 px-3.5 py-2.5 rounded-[8px] focus:ring-2 focus:ring-[#136FB6]/30 focus:border-[#136FB6] outline-none transition text-[13px] text-gray-800 placeholder:text-gray-400"
-                  placeholder="Enter email or mobile no."
-                />
+                <Field>
+                  <FieldLabel
+                    htmlFor="email"
+                    className="text-xs text-gray-500 font-semibold"
+                  >
+                    Email
+                  </FieldLabel>
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    name="email"
+                    placeholder="Enter email or mobile no."
+                  />
+                </Field>
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-gray-500 mb-1 ml-0.5">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-50/50 border border-gray-200 px-3.5 py-2.5 rounded-[8px] focus:ring-2 focus:ring-[#136FB6]/30 focus:border-[#136FB6] outline-none transition text-[13px] text-gray-800 tracking-widest placeholder:text-gray-400"
-                    placeholder="**********"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
-                  >
-                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
-                </div>
+                <InputWithPassword required name="password" />
                 <div className="flex justify-end mt-1.5">
                   <a
                     href="#"
@@ -135,11 +140,7 @@ export default function LoginPage() {
               </div>
 
               <div className="pt-1">
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="bg-[#136FB6] hover:bg-[#105E9A] text-white py-2 px-6 rounded-[6px] font-medium transition text-[12px] shadow-[0_4px_14px_0_rgba(19,111,182,0.39)] flex items-center gap-2 disabled:opacity-70"
-                >
+                <Button type="submit" disabled={isPending}>
                   {isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -148,7 +149,7 @@ export default function LoginPage() {
                   ) : (
                     "Sign In"
                   )}
-                </button>
+                </Button>
               </div>
             </form>
 
