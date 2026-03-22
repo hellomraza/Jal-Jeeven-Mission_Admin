@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useLogin } from "@/hooks/useAuth";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
 
 export default function LoginPage() {
   const { mutate: login, isPending } = useLogin();

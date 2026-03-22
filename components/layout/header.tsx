@@ -8,9 +8,8 @@ export default function Header() {
   const [userName, setUserName] = useState("District Officer");
   const [userRole, setUserRole] = useState("DO");
 
-  useEffect(() => {
-    const name = localStorage.getItem("user_name");
-    const role = localStorage.getItem("user_role");
+  // SECURITY: User data fetched from API (no localStorage)
+  // This automatically includes HTTP-only cookie authentication
     if (name) setUserName(name);
     if (role) setUserRole(role);
   }, []);

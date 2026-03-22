@@ -1,20 +1,20 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
 import {
-  LogOut,
-  LayoutDashboard,
-  FileText,
-  Image as ImageIcon,
   ClipboardList,
-  Monitor,
-  Globe,
+  FileText,
   FileUp,
+  Globe,
+  Image as ImageIcon,
+  LayoutDashboard,
   ListTodo,
+  LogOut,
+  Monitor,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -50,11 +50,24 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      localStorage.removeItem("admin_token");
-      localStorage.removeItem("mock_user"); // Cleanup just in case
-      router.push("/login");
+      // SECURITY: Call logout API to invalidate session on backend
+      // Backend will clear the HTTP-only cookie
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include", // Include cookies in request
+      });
+
+      if (response.ok) {
+        router.push("/login");
+      } else {
+        console.error("Logout failed on server");
+        // Still redirect to login on client-side failure
+        router.push("/login");
+      }
     } catch (err) {
-      console.error("Logout failed", err);
+      console.error("Logout error:", err);
+      // Redirect to login even if API call fails
+      router.push("/login");
     }
   };
 
