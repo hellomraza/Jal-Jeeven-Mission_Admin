@@ -1,18 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
-import DashboardLayout from "@/components/layout/dashboard-layout";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Search,
-  BellRing,
-  Info,
-  CheckCircle,
-  AlertTriangle,
-  Check,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  AlertTriangle,
+  BellRing,
+  Check,
+  CheckCircle,
+  Info,
+  Search,
+} from "lucide-react";
+import { useState } from "react";
 
 export default function NotificationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -91,93 +90,91 @@ export default function NotificationsPage() {
   );
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
-          <div className="flex items-center gap-3 px-2">
-            <div className="bg-[#DFEEF9] p-2 rounded-lg">
-              <BellRing className="text-[#136FB6]" size={20} />
-            </div>
-            <h2 className="text-[16px] font-bold text-[#1a2b3c]">
-              Notifications
-            </h2>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+        <div className="flex items-center gap-3 px-2">
+          <div className="bg-[#DFEEF9] p-2 rounded-lg">
+            <BellRing className="text-[#136FB6]" size={20} />
           </div>
-
-          <div className="flex items-center gap-3 w-full sm:w-auto mt-4 sm:mt-0">
-            <div className="relative flex-1 sm:w-auto">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={16}
-              />
-              <Input
-                placeholder="Search notifications..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-full sm:w-[280px] bg-[#F9FAFB] border-gray-100 text-[13px] h-10 shadow-none focus-visible:ring-1 focus-visible:ring-[#136FB6]/30"
-              />
-            </div>
-
-            <Button
-              onClick={handleMarkAllAsRead}
-              className="bg-white border hover:bg-gray-50 text-[#64748B] border-gray-200 h-10 px-4 rounded-lg text-[12px] font-bold shadow-sm whitespace-nowrap hidden sm:flex items-center gap-2"
-            >
-              <Check size={16} />
-              Mark all read
-            </Button>
-
-            {/* Mobile icon-only button */}
-            <Button
-              onClick={handleMarkAllAsRead}
-              className="bg-white border hover:bg-gray-50 text-[#64748B] border-gray-200 h-10 w-10 p-0 rounded-lg shadow-sm sm:hidden"
-            >
-              <Check size={18} />
-            </Button>
-          </div>
+          <h2 className="text-[16px] font-bold text-[#1a2b3c]">
+            Notifications
+          </h2>
         </div>
 
-        <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden bg-transparent">
-          <CardContent className="p-0 space-y-3">
-            {filteredNotifications.length > 0 ? (
-              filteredNotifications.map((notif) => (
-                <div
-                  key={notif.id}
-                  className={`${getBgColor(notif.read)} rounded-[16px] p-5 border border-gray-100/50 hover:shadow-md transition-shadow cursor-pointer flex gap-4 items-start`}
-                >
-                  <div className="mt-1 bg-white p-2 rounded-full shadow-sm">
-                    {getIcon(notif.type)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start gap-4">
-                      <h4 className="text-[14px] font-bold text-[#1a2b3c] leading-none mb-1.5">
-                        {notif.title}
-                      </h4>
-                      <span className="text-[11px] font-semibold text-gray-400 whitespace-nowrap">
-                        {notif.time}
-                      </span>
-                    </div>
-                    <p className="text-[13px] text-gray-500 font-medium leading-relaxed">
-                      {notif.message}
-                    </p>
-                  </div>
-                  {!notif.read && (
-                    <div className="h-2 w-2 rounded-full bg-[#136FB6] mt-2 self-start animate-pulse"></div>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="bg-white rounded-[16px] p-10 text-center border border-gray-100/50">
-                <BellRing className="mx-auto text-gray-300 mb-3" size={32} />
-                <h3 className="text-[15px] font-bold text-gray-800">
-                  No notifications found
-                </h3>
-                <p className="text-[13px] text-gray-400 font-medium mt-1">
-                  We couldn&apos;t find any matches for your search.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-3 w-full sm:w-auto mt-4 sm:mt-0">
+          <div className="relative flex-1 sm:w-auto">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={16}
+            />
+            <Input
+              placeholder="Search notifications..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-full sm:w-[280px] bg-[#F9FAFB] border-gray-100 text-[13px] h-10 shadow-none focus-visible:ring-1 focus-visible:ring-[#136FB6]/30"
+            />
+          </div>
+
+          <Button
+            onClick={handleMarkAllAsRead}
+            className="bg-white border hover:bg-gray-50 text-[#64748B] border-gray-200 h-10 px-4 rounded-lg text-[12px] font-bold shadow-sm whitespace-nowrap hidden sm:flex items-center gap-2"
+          >
+            <Check size={16} />
+            Mark all read
+          </Button>
+
+          {/* Mobile icon-only button */}
+          <Button
+            onClick={handleMarkAllAsRead}
+            className="bg-white border hover:bg-gray-50 text-[#64748B] border-gray-200 h-10 w-10 p-0 rounded-lg shadow-sm sm:hidden"
+          >
+            <Check size={18} />
+          </Button>
+        </div>
       </div>
-    </DashboardLayout>
+
+      <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden bg-transparent">
+        <CardContent className="p-0 space-y-3">
+          {filteredNotifications.length > 0 ? (
+            filteredNotifications.map((notif) => (
+              <div
+                key={notif.id}
+                className={`${getBgColor(notif.read)} rounded-[16px] p-5 border border-gray-100/50 hover:shadow-md transition-shadow cursor-pointer flex gap-4 items-start`}
+              >
+                <div className="mt-1 bg-white p-2 rounded-full shadow-sm">
+                  {getIcon(notif.type)}
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start gap-4">
+                    <h4 className="text-[14px] font-bold text-[#1a2b3c] leading-none mb-1.5">
+                      {notif.title}
+                    </h4>
+                    <span className="text-[11px] font-semibold text-gray-400 whitespace-nowrap">
+                      {notif.time}
+                    </span>
+                  </div>
+                  <p className="text-[13px] text-gray-500 font-medium leading-relaxed">
+                    {notif.message}
+                  </p>
+                </div>
+                {!notif.read && (
+                  <div className="h-2 w-2 rounded-full bg-[#136FB6] mt-2 self-start animate-pulse"></div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="bg-white rounded-[16px] p-10 text-center border border-gray-100/50">
+              <BellRing className="mx-auto text-gray-300 mb-3" size={32} />
+              <h3 className="text-[15px] font-bold text-gray-800">
+                No notifications found
+              </h3>
+              <p className="text-[13px] text-gray-400 font-medium mt-1">
+                We couldn&apos;t find any matches for your search.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

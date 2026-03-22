@@ -1,6 +1,5 @@
 "use client";
 
-import DashboardLayout from "@/components/layout/dashboard-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -113,11 +112,9 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#136FB6] mx-auto"></div>
-        </div>
-      </DashboardLayout>
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#136FB6] mx-auto"></div>
+      </div>
     );
   }
 
@@ -279,100 +276,98 @@ export default function DashboardPage() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Top Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {summaryData.map((item, index) => (
-            <div
-              key={index}
-              onClick={() => item.link && router.push(item.link)}
-              className={`bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex items-center justify-between transition-all ${item.link ? "cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]" : ""}`}
-            >
-              <div>
-                <p className="text-[12px] font-bold text-gray-500 mb-1 tracking-wide">
-                  {item.title}
-                </p>
-                <h3 className="text-[26px] font-extrabold text-[#1a2b3c] leading-none tracking-tight">
-                  {item.value}
-                </h3>
-              </div>
-              <div
-                className={`w-[48px] h-[48px] rounded-full flex items-center justify-center ${item.bgColor}`}
-              >
-                {item.icon}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Dynamic Role-Based Content */}
-        {userRole === "Head Officer" ? (
-          renderHeadOfficerTabs()
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-            <div
-              onClick={() => router.push("/agreement")}
-              className="bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
-            >
-              <div className="text-[#136FB6] mb-4">
-                <FileEdit size={26} strokeWidth={2.5} />
-              </div>
-              <h3 className="text-[#136FB6] font-extrabold text-[16px] mb-0.5 tracking-wide">
-                Agreement
-              </h3>
-              <p className="text-gray-500 text-[11px] font-bold tracking-wide">
-                Details
+    <div className="space-y-6">
+      {/* Top Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {summaryData.map((item, index) => (
+          <div
+            key={index}
+            onClick={() => item.link && router.push(item.link)}
+            className={`bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex items-center justify-between transition-all ${item.link ? "cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]" : ""}`}
+          >
+            <div>
+              <p className="text-[12px] font-bold text-gray-500 mb-1 tracking-wide">
+                {item.title}
               </p>
-            </div>
-
-            <div
-              onClick={() => router.push("/work-order")}
-              className="bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
-            >
-              <div className="text-[#136FB6] mb-4">
-                <FileText size={26} strokeWidth={2.5} />
-              </div>
-              <h3 className="text-[#136FB6] font-extrabold text-[16px] mb-0.5 tracking-wide">
-                Physical Progress
+              <h3 className="text-[26px] font-extrabold text-[#1a2b3c] leading-none tracking-tight">
+                {item.value}
               </h3>
-              <p className="text-gray-500 text-[11px] font-bold tracking-wide">
-                Details
-              </p>
             </div>
-
             <div
-              onClick={() => router.push("/pictures")}
-              className="bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
+              className={`w-[48px] h-[48px] rounded-full flex items-center justify-center ${item.bgColor}`}
             >
-              <div className="text-[#136FB6] mb-4">
-                <ImageIcon size={26} strokeWidth={2.5} />
-              </div>
-              <h3 className="text-[#136FB6] font-extrabold text-[16px] mb-0.5 tracking-wide">
-                Pictures
-              </h3>
-              <p className="text-gray-500 text-[11px] font-bold tracking-wide">
-                From GIS App
-              </p>
-            </div>
-
-            <div
-              onClick={() => router.push("/reports")}
-              className="bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
-            >
-              <div className="text-[#136FB6] mb-4">
-                <FileBarChart size={26} strokeWidth={2.5} />
-              </div>
-              <h3 className="text-[#136FB6] font-extrabold text-[16px] mb-0.5 tracking-wide">
-                Report
-              </h3>
-              <p className="text-gray-500 text-[11px] font-bold tracking-wide">
-                DO & Contractor Detail
-              </p>
+              {item.icon}
             </div>
           </div>
-        )}
+        ))}
       </div>
-    </DashboardLayout>
+
+      {/* Dynamic Role-Based Content */}
+      {userRole === "Head Officer" ? (
+        renderHeadOfficerTabs()
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+          <div
+            onClick={() => router.push("/agreement")}
+            className="bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
+          >
+            <div className="text-[#136FB6] mb-4">
+              <FileEdit size={26} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-[#136FB6] font-extrabold text-[16px] mb-0.5 tracking-wide">
+              Agreement
+            </h3>
+            <p className="text-gray-500 text-[11px] font-bold tracking-wide">
+              Details
+            </p>
+          </div>
+
+          <div
+            onClick={() => router.push("/work-order")}
+            className="bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
+          >
+            <div className="text-[#136FB6] mb-4">
+              <FileText size={26} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-[#136FB6] font-extrabold text-[16px] mb-0.5 tracking-wide">
+              Physical Progress
+            </h3>
+            <p className="text-gray-500 text-[11px] font-bold tracking-wide">
+              Details
+            </p>
+          </div>
+
+          <div
+            onClick={() => router.push("/pictures")}
+            className="bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
+          >
+            <div className="text-[#136FB6] mb-4">
+              <ImageIcon size={26} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-[#136FB6] font-extrabold text-[16px] mb-0.5 tracking-wide">
+              Pictures
+            </h3>
+            <p className="text-gray-500 text-[11px] font-bold tracking-wide">
+              From GIS App
+            </p>
+          </div>
+
+          <div
+            onClick={() => router.push("/reports")}
+            className="bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] cursor-pointer hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
+          >
+            <div className="text-[#136FB6] mb-4">
+              <FileBarChart size={26} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-[#136FB6] font-extrabold text-[16px] mb-0.5 tracking-wide">
+              Report
+            </h3>
+            <p className="text-gray-500 text-[11px] font-bold tracking-wide">
+              DO & Contractor Detail
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

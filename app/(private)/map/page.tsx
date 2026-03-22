@@ -1,22 +1,20 @@
 "use client";
 
-import React, { Suspense, useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { getWorkItem } from "@/services/workService";
-import DashboardLayout from "@/components/layout/dashboard-layout";
 import { Button } from "@/components/ui/button";
+import { getWorkItem } from "@/services/workService";
+import { useQuery } from "@tanstack/react-query";
+import "leaflet/dist/leaflet.css";
 import {
-  Loader2,
   ArrowLeft,
+  ExternalLink,
+  Loader2,
   MapPin,
   Navigation,
-  Info,
-  ExternalLink,
   Ruler,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import "leaflet/dist/leaflet.css";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 // Dynamic imports for Leaflet
 const MapContainer = dynamic(
@@ -380,16 +378,14 @@ function DataField({
 
 export default function MapPage() {
   return (
-    <DashboardLayout>
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center h-[70vh]">
-            <Loader2 className="h-12 w-12 animate-spin text-[#136FB6]" />
-          </div>
-        }
-      >
-        <MapContent />
-      </Suspense>
-    </DashboardLayout>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-[70vh]">
+          <Loader2 className="h-12 w-12 animate-spin text-[#136FB6]" />
+        </div>
+      }
+    >
+      <MapContent />
+    </Suspense>
   );
 }
