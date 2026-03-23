@@ -26,8 +26,6 @@ const WorkOrderUpdatePage = async ({
 
   const components = response.data;
 
-  console.log("Fetched components for work item:", components);
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "APPROVED":
