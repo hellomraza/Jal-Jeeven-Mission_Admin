@@ -19,7 +19,6 @@ export const createServerApiClient = async (
   const cookieStore = await cookies();
   const tokenFromCookie = cookieStore.get("admin_token")?.value;
   const token = options.token || tokenFromCookie;
-  console.log("Creating server API client with token:", token);
 
   const client = axios.create({
     baseURL: SERVER_API_BASE_URL,

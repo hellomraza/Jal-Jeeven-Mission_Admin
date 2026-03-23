@@ -16,7 +16,6 @@ const ReviewPhotos = async ({
   const photosData = response.data;
   const photos = photosData?.data || [];
 
-  console.log(photos, "fgkljdhfkgjdfhkj");
   const progress = photos[0]?.workItemComponent?.progress;
   const quantity = Number(photos[0]?.workItemComponent?.quantity);
   const progressPercentage =

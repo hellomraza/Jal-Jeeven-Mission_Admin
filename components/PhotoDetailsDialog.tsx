@@ -42,7 +42,6 @@ const PhotoDetailsDialog = ({
   const queryClient = useQueryClient();
 
   const { data: doInfo } = userDOInfoByWorkItem(component?.work_item_id);
-  console.log("DO Info for work item:", doInfo);
 
   const approveMutation = useMutation({
     mutationFn: (componentId: string) =>
