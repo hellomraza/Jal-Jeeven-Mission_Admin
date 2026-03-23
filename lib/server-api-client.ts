@@ -44,11 +44,10 @@ export const createServerApiClient = async (
         error.response?.data?.message.includes("User #") &&
         error.response?.data?.message.includes("not found")
       ) {
-        // Clear the authentication token from cookies
-        cookieStore.delete("admin_token");
-        
-        // Throw a specific error that client-side error handlers can catch and redirect
-        const userDeletedError = new Error("User account has been deleted or no longer exists");
+        // Throw a specific error that Server Actions/Route Handlers can catch to clear the token and redirect
+        const userDeletedError = new Error(
+          "User account has been deleted or no longer exists",
+        );
         (userDeletedError as any).code = "USER_DELETED";
         (userDeletedError as any).status = 404;
         return Promise.reject(userDeletedError);
