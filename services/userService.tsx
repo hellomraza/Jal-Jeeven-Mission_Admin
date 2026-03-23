@@ -9,3 +9,15 @@ export const getUserInfo = async () => {
     return null;
   }
 };
+
+export const getContractors = async (page = 1, limit = 500) => {
+  try {
+    const response = await apiClient.get(`/users?page=${page}&limit=${limit}`);
+    const users = response.data?.data || [];
+    return users.filter((user: any) => user.role === "CO");
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch contractors",
+    );
+  }
+};
