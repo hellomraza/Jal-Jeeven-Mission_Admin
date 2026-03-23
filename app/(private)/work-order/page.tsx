@@ -18,14 +18,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useUser } from "@/hooks/useUser";
 import { getWorkItems } from "@/services/workService";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, RefreshCw, Upload } from "lucide-react";
+import { Loader2, Plus, RefreshCw, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function WorkOrderPage() {
   const router = useRouter();
+  const { data: userInfo } = useUser();
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["workItems"],
     queryFn: () => getWorkItems(1, 100),
@@ -39,6 +41,8 @@ export default function WorkOrderPage() {
     }
   }, []);
 
+  const userRole = userInfo?.role || role;
+
   const workItems = Array.isArray(data) ? data : data?.data || [];
 
   const handleExport = () => {
@@ -51,12 +55,14 @@ export default function WorkOrderPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
-        <h2 className="text-[16px] font-bold text-[#1a2b3c] whitespace-nowrap px-2">
-          Work Code Details
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-[16px] font-bold text-[#1a2b3c] whitespace-nowrap px-2">
+            Work Code Details
+          </h2>
+        </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {role !== "CO" && (
+          {userRole !== "CO" && (
             <>
               <Select defaultValue="all">
                 <SelectTrigger className="w-[160px] bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
@@ -84,19 +90,21 @@ export default function WorkOrderPage() {
                   <SelectItem value="all">Work Code</SelectItem>
                 </SelectContent>
               </Select>
+              {userRole === "DO" && (
+                <Button
+                  onClick={() => router.push("/work-order/create")}
+                  className="bg-[#136FB6] hover:bg-[#105E9A] text-white h-9 px-4 rounded-lg text-[12px] font-medium shadow-md shadow-[#136FB6]/20"
+                >
+                  <Plus size={14} className="mr-1" />
+                  Create Work Item
+                </Button>
+              )}
             </>
           )}
-
-          <Button
-            onClick={() => router.back()}
-            className="bg-[#136FB6] hover:bg-[#105E9A] text-white h-9 px-8 rounded-lg text-[12px] font-medium shadow-md shadow-[#136FB6]/20"
-          >
-            Back
-          </Button>
         </div>
       </div>
 
-      <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden bg-white rounded-[16px]">
+      <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] py-0 overflow-hidden bg-white rounded-[16px]">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
