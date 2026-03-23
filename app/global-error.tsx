@@ -1,4 +1,5 @@
 "use client";
+import { logoutUserAction } from "@/actions/authAction";
 import { useEffect } from "react";
 
 // Error boundaries must be Client Components
@@ -11,7 +12,11 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Global error caught:");
+    if (error) {
+      if (error.message?.toString().includes("Unauthorized: User not found")) {
+        logoutUserAction();
+      }
+    }
   }, [error]);
   return (
     // global-error must include html and body tags

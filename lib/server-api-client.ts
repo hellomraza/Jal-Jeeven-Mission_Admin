@@ -32,7 +32,7 @@ export const createServerApiClient = async (
 
   client.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
       if (error.response?.status === 401) {
         console.warn("Unauthorized request - token may be invalid or expired");
       }
@@ -44,15 +44,8 @@ export const createServerApiClient = async (
         error.response?.data?.message.includes("User #") &&
         error.response?.data?.message.includes("not found")
       ) {
-        // Throw a specific error that Server Actions/Route Handlers can catch to clear the token and redirect
-        const userDeletedError = new Error(
-          "User account has been deleted or no longer exists",
-        );
-        (userDeletedError as any).code = "USER_DELETED";
-        (userDeletedError as any).status = 404;
-        return Promise.reject(userDeletedError);
+        return Promise.reject(new Error("Unauthorized: User not found"));
       }
-      console.log(error.response);
       return Promise.reject(error);
     },
   );
