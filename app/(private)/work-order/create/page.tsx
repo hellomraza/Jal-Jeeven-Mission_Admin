@@ -1,6 +1,7 @@
 "use client";
 
 import BackButton from "@/components/BackButton";
+import { ComboboxPopup } from "@/components/ComboboxPopup";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -299,10 +300,11 @@ export default function CreateWorkItemPage() {
     })),
   });
 
-  const { data: contractors = [], isLoading: isContractorLoading } = useQuery({
-    queryKey: ["contractors"],
-    queryFn: () => getContractors(1, 500),
-  });
+  const { data: contractorsData = [], isLoading: isContractorLoading } =
+    useQuery({
+      queryKey: ["contractors"],
+      queryFn: () => getContractors(1, 500),
+    });
 
   const locationDataByType = useMemo(() => {
     const map = {} as Record<LocationType, LocationOption[]>;
@@ -533,39 +535,35 @@ export default function CreateWorkItemPage() {
                   <FormField
                     control={form.control}
                     name="contractor_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Contractor *</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={(value) => field.onChange(value)}
-                        >
+                    render={({ field }) => {
+                      const contractorItems = contractorsData.map((c: any) => ({
+                        label: c.name,
+                        value: c.id,
+                      }));
+
+                      const selectedContractor = contractorsData.find(
+                        (c: any) => c.id === field.value,
+                      );
+
+                      return (
+                        <FormItem>
+                          <FormLabel>Contractor *</FormLabel>
                           <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select contractor" />
-                            </SelectTrigger>
+                            <ComboboxPopup
+                              items={contractorItems}
+                              value={field.value}
+                              onValueChange={(item) => {
+                                field.onChange(item?.value || "");
+                              }}
+                              placeholder="Search contractor by name"
+                              isLoading={isContractorLoading}
+                              emptyMessage="No contractors found"
+                            />
                           </FormControl>
-                          <SelectContent>
-                            {isContractorLoading ? (
-                              <SelectItem value="loading" disabled>
-                                Loading contractors...
-                              </SelectItem>
-                            ) : (
-                              contractors.map((contractor: any) => (
-                                <SelectItem
-                                  key={contractor.id}
-                                  value={contractor.id}
-                                >
-                                  {contractor.name} (
-                                  {contractor.code || contractor.email})
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   <FormField
