@@ -4,3 +4,11 @@ export enum UserRole {
   Contractor = "CO", // Contractor
   Employee = "EM", // Employee
 }
+
+export enum WorkItemComponentStatus {
+  PENDING = "PENDING",
+  SUBMITTED = "SUBMITTED",
+  IN_PROGRESS = "IN_PROGRESS",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+}
