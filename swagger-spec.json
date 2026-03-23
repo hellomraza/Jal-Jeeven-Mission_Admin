@@ -1,0 +1,3937 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "description": "Returns basic server availability message",
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Service is reachable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Hello World!"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Service health endpoint",
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/users": {
+      "post": {
+        "description": "Creates a new user account with role and optional district",
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "409": {
+            "description": "User with email already exists"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Create user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "get": {
+        "description": "Returns paginated user list without password field",
+        "operationId": "UsersController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UserResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "List users",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/my-profile": {
+      "get": {
+        "description": "Returns the profile details of the currently authenticated user",
+        "operationId": "UsersController_getMyProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get my profile",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "description": "Returns a single user details by user ID",
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get user by ID",
+        "tags": [
+          "Users"
+        ]
+      },
+      "patch": {
+        "description": "Updates selected fields of an existing user",
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "Email already in use"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Update user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "description": "Deletes an existing user by ID",
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Delete user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "Authenticate using email/password and return JWT access token",
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request payload"
+          },
+          "401": {
+            "description": "Invalid email or password"
+          }
+        },
+        "summary": "User login",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/agreements": {
+      "post": {
+        "description": "Creates a new agreement/work order linked to contractor and work item",
+        "operationId": "AgreementsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgreementDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Agreement created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgreementResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "422": {
+            "description": "contractor_id or work_id does not exist"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Create agreement",
+        "tags": [
+          "Agreements"
+        ]
+      },
+      "get": {
+        "description": "Returns paginated agreements list",
+        "operationId": "AgreementsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AgreementResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "List agreements",
+        "tags": [
+          "Agreements"
+        ]
+      }
+    },
+    "/agreements/{id}": {
+      "get": {
+        "description": "Returns agreement details by agreement ID",
+        "operationId": "AgreementsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Agreement ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agreement found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgreementResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Agreement not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get agreement by ID",
+        "tags": [
+          "Agreements"
+        ]
+      },
+      "patch": {
+        "description": "Updates selected fields of an agreement",
+        "operationId": "AgreementsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Agreement ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAgreementDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agreement updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgreementResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Agreement not found"
+          },
+          "422": {
+            "description": "contractor_id or work_id does not exist"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Update agreement",
+        "tags": [
+          "Agreements"
+        ]
+      },
+      "delete": {
+        "description": "Deletes an agreement by ID",
+        "operationId": "AgreementsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Agreement ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agreement deleted successfully"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Agreement not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Delete agreement",
+        "tags": [
+          "Agreements"
+        ]
+      }
+    },
+    "/work-items/my-work-items": {
+      "get": {
+        "description": "Returns paginated work items filtered by logged-in user role and assignment scope",
+        "operationId": "WorkItemsController_getMyWorkItems",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/WorkItemResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "List my work items",
+        "tags": [
+          "Work Items"
+        ]
+      }
+    },
+    "/work-items": {
+      "post": {
+        "description": "Creates a new work item with location and assignment details",
+        "operationId": "WorkItemsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Work item created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkItemResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Create work item",
+        "tags": [
+          "Work Items"
+        ]
+      },
+      "get": {
+        "description": "Returns paginated work items list",
+        "operationId": "WorkItemsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/WorkItemResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "List work items",
+        "tags": [
+          "Work Items"
+        ]
+      }
+    },
+    "/work-items/{id}/assign-employee": {
+      "post": {
+        "description": "Assigns an employee to a contractor-owned work item",
+        "operationId": "WorkItemsController_assignEmployee",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Work item ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignWorkItemEmployeeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Employee assigned to work item successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkItemEmployeeAssignmentResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Work item not found"
+          },
+          "422": {
+            "description": "employee_id does not exist or is not an employee user"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Assign employee to work item",
+        "tags": [
+          "Work Items"
+        ]
+      }
+    },
+    "/work-items/{id}": {
+      "get": {
+        "description": "Returns work item details by ID",
+        "operationId": "WorkItemsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Work item ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Work item found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkItemResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Work item not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get work item by ID",
+        "tags": [
+          "Work Items"
+        ]
+      },
+      "patch": {
+        "description": "Updates editable fields of a work item",
+        "operationId": "WorkItemsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Work item ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Work item updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkItemResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Work item not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Update work item",
+        "tags": [
+          "Work Items"
+        ]
+      },
+      "delete": {
+        "description": "Deletes a work item by ID",
+        "operationId": "WorkItemsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Work item ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Work item deleted successfully"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Work item not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Delete work item",
+        "tags": [
+          "Work Items"
+        ]
+      }
+    },
+    "/work-items/{id}/status": {
+      "patch": {
+        "description": "Updates status of a work item",
+        "operationId": "WorkItemsController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Work item ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "PENDING",
+                      "IN_PROGRESS",
+                      "COMPLETED"
+                    ],
+                    "example": "IN_PROGRESS"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Work item status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkItemResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status value"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Work item not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Update work item status",
+        "tags": [
+          "Work Items"
+        ]
+      }
+    },
+    "/components/master": {
+      "get": {
+        "description": "Returns predefined static master components in display order",
+        "operationId": "ComponentsController_findMasterComponents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Master components list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ComponentResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "List master components",
+        "tags": [
+          "Components"
+        ]
+      }
+    },
+    "/components/{componentId}/photos": {
+      "post": {
+        "description": "Employee uploads photo for a work item component mapping",
+        "operationId": "ComponentsController_uploadComponentPhoto",
+        "parameters": [
+          {
+            "name": "componentId",
+            "required": true,
+            "in": "path",
+            "description": "Work item component mapping ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "progress",
+                  "latitude",
+                  "longitude",
+                  "timestamp"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (jpg/jpeg/png, max 5MB)"
+                  },
+                  "progress": {
+                    "type": "number",
+                    "example": 25,
+                    "description": "Completed work progress for the component"
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "example": 25.5941
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "example": 85.1376
+                  },
+                  "timestamp": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-03-07T10:30:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Photo uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid upload payload"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Upload photo for a component",
+        "tags": [
+          "Components"
+        ]
+      },
+      "get": {
+        "description": "Contractor views all photos uploaded for a component",
+        "operationId": "ComponentsController_getComponentPhotos",
+        "parameters": [
+          {
+            "name": "componentId",
+            "required": true,
+            "in": "path",
+            "description": "Work item component mapping ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PhotoResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get photos uploaded for a component",
+        "tags": [
+          "Components"
+        ]
+      }
+    },
+    "/components/{componentId}/select-photo": {
+      "post": {
+        "description": "Ensures only one selected photo per component and moves component to submitted state",
+        "operationId": "ComponentsController_selectPhoto",
+        "parameters": [
+          {
+            "name": "componentId",
+            "required": true,
+            "in": "path",
+            "description": "Work item component mapping ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectPhotoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Photo selected and component submitted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid selection or component state"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Component or photo not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Contractor selects one photo and submits component",
+        "tags": [
+          "Components"
+        ]
+      }
+    },
+    "/components/{componentId}/approve": {
+      "post": {
+        "description": "Moves submitted component to approved status",
+        "operationId": "ComponentsController_approveComponent",
+        "parameters": [
+          {
+            "name": "componentId",
+            "required": true,
+            "in": "path",
+            "description": "Work item component mapping ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Component approved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "District officer approves selected photo",
+        "tags": [
+          "Components"
+        ]
+      }
+    },
+    "/components/{componentId}/reject": {
+      "post": {
+        "description": "Moves submitted component to rejected status so contractor can select another photo",
+        "operationId": "ComponentsController_rejectComponent",
+        "parameters": [
+          {
+            "name": "componentId",
+            "required": true,
+            "in": "path",
+            "description": "Work item component mapping ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Component rejected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "District officer rejects selected photo",
+        "tags": [
+          "Components"
+        ]
+      }
+    },
+    "/components/pending-approval": {
+      "get": {
+        "description": "Returns submitted components pending approval for district officer district",
+        "operationId": "ComponentsController_getPendingApproval",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/WorkItemComponentResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "District officer pending approval dashboard",
+        "tags": [
+          "Components"
+        ]
+      }
+    },
+    "/components/approved": {
+      "get": {
+        "description": "Returns components with approved status for head office",
+        "operationId": "ComponentsController_getApprovedComponents",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/WorkItemComponentResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Head office approved components view",
+        "tags": [
+          "Components"
+        ]
+      }
+    },
+    "/components/work-item/{workItemId}": {
+      "get": {
+        "description": "Returns component mappings for a work item sorted by master order",
+        "operationId": "ComponentsController_findByWorkItem",
+        "parameters": [
+          {
+            "name": "workItemId",
+            "required": true,
+            "in": "path",
+            "description": "Work item ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Work item component mappings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkItemComponentResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "List work item component mappings",
+        "tags": [
+          "Components"
+        ]
+      }
+    },
+    "/components/{id}": {
+      "get": {
+        "description": "Returns mapping details by work item component mapping ID",
+        "operationId": "ComponentsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Work item component mapping ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mapping found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkItemComponentResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Mapping not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get work item component mapping by ID",
+        "tags": [
+          "Components"
+        ]
+      },
+      "patch": {
+        "description": "Updates only quantity, remarks, and status on mapping row",
+        "operationId": "ComponentsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Work item component mapping ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkItemComponentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mapping updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkItemComponentResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Mapping not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Update work item component mapping",
+        "tags": [
+          "Components"
+        ]
+      }
+    },
+    "/components/{componentId}/submit-photo": {
+      "post": {
+        "description": "Contractor selects a single uploaded photo for a component and submits it for district approval",
+        "operationId": "ComponentsController_submitPhoto",
+        "parameters": [
+          {
+            "name": "componentId",
+            "required": true,
+            "in": "path",
+            "description": "Work item component mapping ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitPhotoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Photo submitted for approval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid submission state or payload"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Component mapping or photo not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Submit selected photo for component approval",
+        "tags": [
+          "Components"
+        ]
+      }
+    },
+    "/photos/upload": {
+      "post": {
+        "description": "Uploads photo to S3 and stores metadata for employee work evidence",
+        "operationId": "PhotosController_upload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "latitude",
+                  "longitude",
+                  "component_id",
+                  "work_item_id",
+                  "timestamp"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (jpg/jpeg/png, max 5MB)"
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "example": 25.5941
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "example": 85.1376
+                  },
+                  "component_id": {
+                    "type": "number",
+                    "example": 2001
+                  },
+                  "work_item_id": {
+                    "type": "number",
+                    "example": 101
+                  },
+                  "timestamp": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-03-07T10:30:00.000Z"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Photo uploaded and metadata stored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid upload payload or file type/size"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Upload photo",
+        "tags": [
+          "Photos"
+        ]
+      }
+    },
+    "/photos": {
+      "get": {
+        "description": "Returns paginated photo metadata list",
+        "operationId": "PhotosController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PhotoResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "List photos",
+        "tags": [
+          "Photos"
+        ]
+      }
+    },
+    "/photos/component/{componentId}/review": {
+      "get": {
+        "description": "Contractor reviews paginated photos for a specific component",
+        "operationId": "PhotosController_reviewUploadedPhotos",
+        "parameters": [
+          {
+            "name": "componentId",
+            "required": true,
+            "in": "path",
+            "description": "Component ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PhotoResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Review component photos",
+        "tags": [
+          "Photos"
+        ]
+      }
+    },
+    "/photos/{id}/select": {
+      "patch": {
+        "description": "Marks one photo as selected for the component",
+        "operationId": "PhotosController_selectBestPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Photo ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Photo selected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid photo state for selection"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Photo not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Select best photo",
+        "tags": [
+          "Photos"
+        ]
+      }
+    },
+    "/photos/{id}/forward": {
+      "patch": {
+        "description": "Forwards selected photo to district office for approval flow",
+        "operationId": "PhotosController_forwardSelectedPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Photo ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Photo forwarded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Photo not selected, already forwarded, or invalid contractor"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Photo not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Forward selected photo",
+        "tags": [
+          "Photos"
+        ]
+      }
+    },
+    "/photos/{id}": {
+      "get": {
+        "description": "Returns single photo metadata and relations by ID",
+        "operationId": "PhotosController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Photo ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Photo found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Photo not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get photo by ID",
+        "tags": [
+          "Photos"
+        ]
+      }
+    },
+    "/locations/{type}": {
+      "post": {
+        "description": "Creates record in districts/blocks/panchayats/villages/subdivisions/circles/zones",
+        "operationId": "LocationsController_create",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "description": "Location master type",
+            "schema": {
+              "enum": [
+                "districts",
+                "blocks",
+                "panchayats",
+                "villages",
+                "subdivisions",
+                "circles",
+                "zones"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLocationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Location record created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid type or request body"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Create location master record",
+        "tags": [
+          "Locations"
+        ]
+      },
+      "get": {
+        "description": "Returns paginated location records by type",
+        "operationId": "LocationsController_findAll",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "description": "Location master type",
+            "schema": {
+              "enum": [
+                "districts",
+                "blocks",
+                "panchayats",
+                "villages",
+                "subdivisions",
+                "circles",
+                "zones"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/LocationResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "List location master records",
+        "tags": [
+          "Locations"
+        ]
+      }
+    },
+    "/locations/{type}/{id}": {
+      "get": {
+        "description": "Returns one location record by type and numeric ID",
+        "operationId": "LocationsController_findOne",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "description": "Location master type",
+            "schema": {
+              "enum": [
+                "districts",
+                "blocks",
+                "panchayats",
+                "villages",
+                "subdivisions",
+                "circles",
+                "zones"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Record ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location record found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Location record not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get location master record by ID",
+        "tags": [
+          "Locations"
+        ]
+      },
+      "patch": {
+        "description": "Updates location record fields by type and numeric ID",
+        "operationId": "LocationsController_update",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "description": "Location master type",
+            "schema": {
+              "enum": [
+                "districts",
+                "blocks",
+                "panchayats",
+                "villages",
+                "subdivisions",
+                "circles",
+                "zones"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Record ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLocationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Location record updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid type or request body"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Location record not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Update location master record",
+        "tags": [
+          "Locations"
+        ]
+      },
+      "delete": {
+        "description": "Deletes location record by type and numeric ID",
+        "operationId": "LocationsController_remove",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "description": "Location master type",
+            "schema": {
+              "enum": [
+                "districts",
+                "blocks",
+                "panchayats",
+                "villages",
+                "subdivisions",
+                "circles",
+                "zones"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Record ID",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location record deleted successfully"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Location record not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Delete location master record",
+        "tags": [
+          "Locations"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Cats example",
+    "description": "The cats API description",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "access-token": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Paste JWT access token"
+      }
+    },
+    "schemas": {
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Unique email address for the user",
+            "example": "district.officer@jjm.local"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password with minimum 8 characters",
+            "example": "StrongPass@123",
+            "minLength": 8
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name of the user",
+            "example": "District Officer"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the user in the system",
+            "enum": [
+              "HO",
+              "DO",
+              "CO",
+              "EM"
+            ],
+            "example": "DO"
+          },
+          "district_id": {
+            "type": "number",
+            "description": "District ID for district-level users, nullable for HO",
+            "example": 10
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "name",
+          "role"
+        ]
+      },
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the user",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "description": "Unique generated code for the user",
+            "example": "DO123456789012"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user",
+            "example": "user@example.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the user",
+            "example": "Aman Kumar"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role assigned to the user",
+            "enum": [
+              "HO",
+              "DO",
+              "CO",
+              "EM"
+            ],
+            "example": "DO"
+          },
+          "district_id": {
+            "type": "object",
+            "description": "District identifier for district-bound users",
+            "nullable": true,
+            "example": 10
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the user was created",
+            "example": "2026-03-07T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the user was last updated",
+            "example": "2026-03-08T12:15:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "email",
+          "name",
+          "role",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "PaginatedResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Array of items for the current page",
+            "type": "array",
+            "items": {
+              "type": "array"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of items",
+            "example": 100
+          },
+          "limit": {
+            "type": "number",
+            "description": "Number of items per page",
+            "example": 20
+          },
+          "page": {
+            "type": "number",
+            "description": "Current page number",
+            "example": 1
+          },
+          "totalPages": {
+            "type": "number",
+            "description": "Total number of pages",
+            "example": 5
+          }
+        },
+        "required": [
+          "data",
+          "total",
+          "limit",
+          "page",
+          "totalPages"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User email address",
+            "example": "test.user@jjm.local"
+          },
+          "password": {
+            "type": "string",
+            "description": "User password",
+            "example": "Test@1234"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "LoginUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique user identifier",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the logged-in user",
+            "example": "user@example.com"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the logged-in user",
+            "enum": [
+              "HO",
+              "DO",
+              "CO",
+              "EM"
+            ],
+            "example": "DO"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "JWT access token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "user": {
+            "description": "Basic logged-in user details",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LoginUserResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "access_token",
+          "user"
+        ]
+      },
+      "CreateAgreementDto": {
+        "type": "object",
+        "properties": {
+          "contractor_id": {
+            "type": "string",
+            "description": "Contractor user ID",
+            "example": "550e8400-e29b-41d4-a716-446655440001"
+          },
+          "work_id": {
+            "type": "string",
+            "description": "Work item ID",
+            "example": "550e8400-e29b-41d4-a716-446655440010"
+          }
+        },
+        "required": [
+          "contractor_id",
+          "work_id"
+        ]
+      },
+      "AgreementContractorResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the contractor user",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "description": "Unique generated code for the contractor user",
+            "example": "CO123456789012"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the contractor user",
+            "example": "contractor@example.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the contractor user",
+            "example": "Ravi Kumar"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role assigned to the contractor user",
+            "enum": [
+              "HO",
+              "DO",
+              "CO",
+              "EM"
+            ],
+            "example": "CO"
+          },
+          "district_id": {
+            "type": "object",
+            "description": "District identifier for district-bound users",
+            "nullable": true,
+            "example": 10
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the contractor user was created",
+            "example": "2026-03-07T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the contractor user was last updated",
+            "example": "2026-03-08T12:15:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "email",
+          "name",
+          "role",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "AgreementWorkItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the work item",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "work_code": {
+            "type": "string",
+            "description": "Unique code for the work item",
+            "example": "WI-2024-0001"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the work item",
+            "example": "Road Construction"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the work item",
+            "example": "Construction of a new road connecting village A to village B"
+          },
+          "district_id": {
+            "type": "number",
+            "description": "ID of the district to which the work item belongs",
+            "example": 10
+          },
+          "schemetype": {
+            "type": "string",
+            "description": "Type of scheme under which the work item is categorized",
+            "example": "Water Supply"
+          },
+          "contractor_id": {
+            "type": "string",
+            "description": "ID of the contractor responsible for executing the work item",
+            "example": "contractor-123"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude coordinate of the work item location",
+            "example": 28.7041
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude coordinate of the work item location",
+            "example": 77.1025
+          },
+          "progress_percentage": {
+            "type": "number",
+            "description": "Progress percentage of the work item",
+            "example": 75
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of the work item",
+            "enum": [
+              "PENDING",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ],
+            "example": "IN_PROGRESS"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the work item was created",
+            "example": "2024-01-01T12:00:00Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the work item was last updated",
+            "example": "2024-01-15T15:30:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "work_code",
+          "title",
+          "district_id",
+          "schemetype",
+          "contractor_id",
+          "latitude",
+          "longitude",
+          "progress_percentage",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "AgreementResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the agreement",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "agreementno": {
+            "type": "string",
+            "description": "Agreement number",
+            "example": "AGR/2026/001"
+          },
+          "agreementyear": {
+            "type": "string",
+            "description": "Agreement year",
+            "example": "2025-2026"
+          },
+          "contractor_id": {
+            "type": "string",
+            "description": "Contractor user ID",
+            "example": "contractor-123"
+          },
+          "work_id": {
+            "type": "string",
+            "description": "Work item ID",
+            "example": "work-item-123"
+          },
+          "contractor": {
+            "description": "Contractor user details",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AgreementContractorResponseDto"
+              }
+            ]
+          },
+          "workItem": {
+            "description": "Work item details",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AgreementWorkItemResponseDto"
+              }
+            ]
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the agreement was created",
+            "example": "2026-03-07T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the agreement was last updated",
+            "example": "2026-03-08T12:15:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "agreementno",
+          "agreementyear",
+          "contractor_id",
+          "work_id",
+          "contractor",
+          "workItem",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "UpdateAgreementDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "DistrictDetailsDto": {
+        "type": "object",
+        "properties": {
+          "districtid": {
+            "type": "number",
+            "example": 10
+          },
+          "districtname": {
+            "type": "string",
+            "example": "Patna"
+          },
+          "district_code": {
+            "type": "string",
+            "example": "DIST-001"
+          }
+        },
+        "required": [
+          "districtid",
+          "districtname",
+          "district_code"
+        ]
+      },
+      "BlockDetailsDto": {
+        "type": "object",
+        "properties": {
+          "blockid": {
+            "type": "number",
+            "example": 101
+          },
+          "blockname": {
+            "type": "string",
+            "example": "Phulwari"
+          },
+          "block_code": {
+            "type": "string",
+            "example": "BLK-001"
+          },
+          "district_id": {
+            "type": "number",
+            "example": 10
+          }
+        },
+        "required": [
+          "blockid",
+          "blockname",
+          "block_code",
+          "district_id"
+        ]
+      },
+      "PanchayatDetailsDto": {
+        "type": "object",
+        "properties": {
+          "panchayatid": {
+            "type": "number",
+            "example": 201
+          },
+          "panchayatname": {
+            "type": "string",
+            "example": "Rampur"
+          },
+          "panchayat_code": {
+            "type": "string",
+            "example": "PAN-001"
+          }
+        },
+        "required": [
+          "panchayatid",
+          "panchayatname",
+          "panchayat_code"
+        ]
+      },
+      "VillageDetailsDto": {
+        "type": "object",
+        "properties": {
+          "villageid": {
+            "type": "number",
+            "example": 301
+          },
+          "villagename": {
+            "type": "string",
+            "example": "Village A"
+          },
+          "village_code": {
+            "type": "string",
+            "example": "VIL-001"
+          },
+          "district_id": {
+            "type": "number",
+            "example": 10
+          }
+        },
+        "required": [
+          "villageid",
+          "villagename",
+          "village_code",
+          "district_id"
+        ]
+      },
+      "SubdivisionDetailsDto": {
+        "type": "object",
+        "properties": {
+          "subdivisionid": {
+            "type": "number",
+            "example": 401
+          },
+          "subdivisionname": {
+            "type": "string",
+            "example": "Subdivision A"
+          },
+          "subdivision_code": {
+            "type": "string",
+            "example": "SUB-001"
+          }
+        },
+        "required": [
+          "subdivisionid",
+          "subdivisionname",
+          "subdivision_code"
+        ]
+      },
+      "CircleDetailsDto": {
+        "type": "object",
+        "properties": {
+          "circleid": {
+            "type": "number",
+            "example": 501
+          },
+          "circlename": {
+            "type": "string",
+            "example": "Circle A"
+          },
+          "circle_code": {
+            "type": "string",
+            "example": "CIR-001"
+          }
+        },
+        "required": [
+          "circleid",
+          "circlename",
+          "circle_code"
+        ]
+      },
+      "ZoneDetailsDto": {
+        "type": "object",
+        "properties": {
+          "zoneid": {
+            "type": "number",
+            "example": 601
+          },
+          "zonename": {
+            "type": "string",
+            "example": "Zone A"
+          },
+          "zone_code": {
+            "type": "string",
+            "example": "ZON-001"
+          }
+        },
+        "required": [
+          "zoneid",
+          "zonename",
+          "zone_code"
+        ]
+      },
+      "WorkItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the work item",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "work_code": {
+            "type": "string",
+            "description": "Unique code for the work item",
+            "example": "WI-2024-0001"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the work item",
+            "example": "Road Construction"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the work item",
+            "example": "Construction of a new road connecting village A to village B"
+          },
+          "district_id": {
+            "type": "number",
+            "description": "ID of the district to which the work item belongs",
+            "example": 10
+          },
+          "district": {
+            "description": "District details mapped from district_id",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DistrictDetailsDto"
+              }
+            ]
+          },
+          "block_id": {
+            "type": "number",
+            "description": "ID of the block to which the work item belongs",
+            "example": 101
+          },
+          "block": {
+            "description": "Block details mapped from block_id",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BlockDetailsDto"
+              }
+            ]
+          },
+          "panchayat_id": {
+            "type": "number",
+            "description": "ID of the panchayat to which the work item belongs",
+            "example": 201
+          },
+          "panchayat": {
+            "description": "Panchayat details mapped from panchayat_id",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PanchayatDetailsDto"
+              }
+            ]
+          },
+          "village_id": {
+            "type": "number",
+            "description": "ID of the village to which the work item belongs",
+            "example": 301
+          },
+          "village": {
+            "description": "Village details mapped from village_id",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VillageDetailsDto"
+              }
+            ]
+          },
+          "subdivision_id": {
+            "type": "number",
+            "description": "ID of the subdivision to which the work item belongs",
+            "example": 401
+          },
+          "subdivision": {
+            "description": "Subdivision details mapped from subdivision_id",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubdivisionDetailsDto"
+              }
+            ]
+          },
+          "circle_id": {
+            "type": "number",
+            "description": "ID of the circle to which the work item belongs",
+            "example": 501
+          },
+          "circle": {
+            "description": "Circle details mapped from circle_id",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CircleDetailsDto"
+              }
+            ]
+          },
+          "zone_id": {
+            "type": "number",
+            "description": "ID of the zone to which the work item belongs",
+            "example": 601
+          },
+          "zone": {
+            "description": "Zone details mapped from zone_id",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ZoneDetailsDto"
+              }
+            ]
+          },
+          "schemetype": {
+            "type": "string",
+            "description": "Type of scheme under which the work item is categorized",
+            "example": "Water Supply"
+          },
+          "nofhtc": {
+            "type": "string",
+            "description": "No of FHTC (Functional Household Tap Connections) associated with the work item",
+            "example": "150"
+          },
+          "amount_approved": {
+            "type": "number",
+            "description": "Approved amount for the work item",
+            "example": 5000000
+          },
+          "payment_amount": {
+            "type": "number",
+            "description": "Payment amount released for the work item",
+            "example": 2000000
+          },
+          "serial_no": {
+            "type": "number",
+            "description": "Serial number for ordering the work items",
+            "example": 1
+          },
+          "contractor_id": {
+            "type": "string",
+            "description": "ID of the contractor responsible for executing the work item",
+            "example": "contractor-123"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude coordinate of the work item location",
+            "example": 28.7041
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude coordinate of the work item location",
+            "example": 77.1025
+          },
+          "progress_percentage": {
+            "type": "number",
+            "description": "Progress percentage of the work item",
+            "example": 75
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of the work item",
+            "example": "IN_PROGRESS"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the work item was created",
+            "example": "2024-01-01T12:00:00Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the work item was last updated",
+            "example": "2024-01-15T15:30:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "work_code",
+          "title",
+          "description",
+          "district_id",
+          "block_id",
+          "panchayat_id",
+          "village_id",
+          "subdivision_id",
+          "circle_id",
+          "zone_id",
+          "schemetype",
+          "nofhtc",
+          "amount_approved",
+          "payment_amount",
+          "serial_no",
+          "contractor_id",
+          "latitude",
+          "longitude",
+          "progress_percentage",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateWorkItemDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Work item title",
+            "example": "Pipeline extension phase 1"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the work item",
+            "example": "Laying distribution pipeline for village sector A"
+          },
+          "district_id": {
+            "type": "number",
+            "description": "District ID",
+            "example": 10
+          },
+          "block_id": {
+            "type": "number",
+            "description": "Block ID",
+            "example": 101
+          },
+          "panchayat_id": {
+            "type": "number",
+            "description": "Panchayat ID",
+            "example": 201
+          },
+          "village_id": {
+            "type": "number",
+            "description": "Village ID",
+            "example": 301
+          },
+          "subdivision_id": {
+            "type": "number",
+            "description": "Subdivision ID",
+            "example": 401
+          },
+          "circle_id": {
+            "type": "number",
+            "description": "Circle ID",
+            "example": 501
+          },
+          "zone_id": {
+            "type": "number",
+            "description": "Zone ID",
+            "example": 601
+          },
+          "schemetype": {
+            "type": "string",
+            "description": "Scheme type (NVARCHAR 100 equivalent)",
+            "example": "PWS"
+          },
+          "nofhtc": {
+            "type": "string",
+            "description": "Number of FHTC (NVARCHAR 110 equivalent)",
+            "example": "1250"
+          },
+          "amount_approved": {
+            "type": "number",
+            "description": "Amount approved (FLOAT 53 equivalent)",
+            "example": 1250000.5
+          },
+          "payment_amount": {
+            "type": "number",
+            "description": "Payment amount (FLOAT 53 equivalent)",
+            "example": 450000.75
+          },
+          "serial_no": {
+            "type": "number",
+            "description": "Serial number (INT)",
+            "example": 1
+          },
+          "contractor_id": {
+            "type": "string",
+            "description": "Contractor user ID",
+            "example": "550e8400-e29b-41d4-a716-446655440001"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude of work location",
+            "example": 25.5941
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude of work location",
+            "example": 85.1376
+          },
+          "progress_percentage": {
+            "type": "number",
+            "description": "Initial progress percentage (0-100)",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 0
+          },
+          "status": {
+            "type": "string",
+            "description": "Initial work item status",
+            "enum": [
+              "PENDING",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ],
+            "example": "PENDING"
+          }
+        },
+        "required": [
+          "title",
+          "district_id",
+          "schemetype",
+          "contractor_id",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "AssignWorkItemEmployeeDto": {
+        "type": "object",
+        "properties": {
+          "employee_id": {
+            "type": "string",
+            "description": "Employee user ID to assign to the work item",
+            "example": "550e8400-e29b-41d4-a716-446655440010"
+          }
+        },
+        "required": [
+          "employee_id"
+        ]
+      },
+      "WorkItemEmployeeAssignmentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this assignment",
+            "example": "550e8400-e29b-41d4-a716-446655440100"
+          },
+          "work_item_id": {
+            "type": "string",
+            "description": "Assigned work item ID",
+            "example": "550e8400-e29b-41d4-a716-446655440001"
+          },
+          "employee_id": {
+            "type": "string",
+            "description": "Assigned employee user ID",
+            "example": "550e8400-e29b-41d4-a716-446655440010"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when assignment was created",
+            "example": "2026-03-20T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "work_item_id",
+          "employee_id",
+          "created_at"
+        ]
+      },
+      "UpdateWorkItemDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "ComponentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for master component",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Component display name",
+            "example": "Earth Work"
+          },
+          "unit": {
+            "type": "string",
+            "description": "Measurement unit",
+            "example": "m3"
+          },
+          "order_number": {
+            "type": "number",
+            "description": "Display order number",
+            "example": 1
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the component was created",
+            "example": "2026-03-07T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the component was last updated",
+            "example": "2026-03-08T12:15:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "unit",
+          "order_number",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "PhotoResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the photo",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "image_url": {
+            "type": "string",
+            "description": "Public URL of the uploaded photo",
+            "example": "https://bucket.s3.ap-south-1.amazonaws.com/work-items/1/photo.jpg"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitude where the photo was captured",
+            "example": 25.5941
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude where the photo was captured",
+            "example": 85.1376
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp captured on device",
+            "example": "2026-03-07T10:30:00.000Z"
+          },
+          "employee_id": {
+            "type": "string",
+            "description": "Employee ID who uploaded the photo",
+            "example": "employee-123"
+          },
+          "component_id": {
+            "type": "string",
+            "description": "Work item component mapping ID",
+            "example": "component-map-123"
+          },
+          "work_item_id": {
+            "type": "string",
+            "description": "Work item ID",
+            "example": "work-item-123"
+          },
+          "is_selected": {
+            "type": "boolean",
+            "description": "Whether this photo is selected by contractor",
+            "example": false
+          },
+          "selected_by": {
+            "type": "object",
+            "description": "User ID who selected this photo",
+            "nullable": true,
+            "example": "contractor-123"
+          },
+          "selected_at": {
+            "type": "object",
+            "description": "Timestamp when this photo was selected",
+            "nullable": true,
+            "example": "2026-03-08T12:15:00.000Z"
+          },
+          "is_forwarded_to_do": {
+            "type": "boolean",
+            "description": "Whether this photo is forwarded to district office",
+            "example": false
+          },
+          "forwarded_at": {
+            "type": "object",
+            "description": "Timestamp when this photo was forwarded",
+            "nullable": true,
+            "example": "2026-03-08T12:20:00.000Z"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when this record was created",
+            "example": "2026-03-07T10:35:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "image_url",
+          "latitude",
+          "longitude",
+          "timestamp",
+          "employee_id",
+          "component_id",
+          "work_item_id",
+          "is_selected",
+          "is_forwarded_to_do",
+          "created_at"
+        ]
+      },
+      "SelectPhotoDto": {
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "string",
+            "description": "Photo ID selected by contractor for submission",
+            "example": "de305d54-75b4-431b-adb2-eb6b9e546014"
+          }
+        },
+        "required": [
+          "photoId"
+        ]
+      },
+      "ActionResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Success status of the operation",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Human readable action message",
+            "example": "Photo selected and submitted for approval"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      },
+      "WorkItemComponentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for work item component mapping",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "work_item_id": {
+            "type": "string",
+            "description": "Work item ID",
+            "example": "work-item-123"
+          },
+          "component_id": {
+            "type": "string",
+            "description": "Master component ID",
+            "example": "component-123"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Total quantity assigned to this component in work item",
+            "example": 100
+          },
+          "progress": {
+            "type": "number",
+            "description": "Current progress value for this component",
+            "example": 25
+          },
+          "remarks": {
+            "type": "object",
+            "description": "Additional remarks for this component mapping",
+            "nullable": true,
+            "example": "Initial trenching completed"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current workflow status",
+            "enum": [
+              "PENDING",
+              "SUBMITTED",
+              "IN_PROGRESS",
+              "APPROVED",
+              "REJECTED"
+            ],
+            "example": "IN_PROGRESS"
+          },
+          "approved_photo_id": {
+            "type": "object",
+            "description": "Selected/approved photo ID",
+            "nullable": true,
+            "example": "photo-123"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the mapping was created",
+            "example": "2026-03-07T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the mapping was last updated",
+            "example": "2026-03-08T12:15:00.000Z"
+          },
+          "component": {
+            "description": "Related master component details",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ComponentResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "work_item_id",
+          "component_id",
+          "progress",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "UpdateWorkItemComponentDto": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "description": "Quantity for this component mapping",
+            "example": 25,
+            "minimum": 0
+          },
+          "remarks": {
+            "type": "string",
+            "description": "Remarks for this component mapping",
+            "example": "Material delivered and verified on-site.",
+            "maxLength": 1000
+          },
+          "status": {
+            "type": "string",
+            "description": "Status for this component mapping",
+            "enum": [
+              "PENDING",
+              "SUBMITTED",
+              "IN_PROGRESS",
+              "APPROVED",
+              "REJECTED"
+            ],
+            "example": "IN_PROGRESS"
+          }
+        }
+      },
+      "SubmitPhotoDto": {
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "string",
+            "description": "Photo ID selected by contractor for submission",
+            "example": "de305d54-75b4-431b-adb2-eb6b9e546014"
+          }
+        },
+        "required": [
+          "photoId"
+        ]
+      },
+      "CreateLocationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Master name",
+            "example": "Sample Name"
+          },
+          "code": {
+            "type": "string",
+            "description": "Master business code",
+            "example": "CODE-001"
+          },
+          "district_id": {
+            "type": "number",
+            "description": "District ID (required for block and village)",
+            "example": 1
+          }
+        },
+        "required": [
+          "name",
+          "code"
+        ]
+      },
+      "LocationResponseDto": {
+        "type": "object",
+        "properties": {
+          "districtid": {
+            "type": "number",
+            "example": 1
+          },
+          "districtname": {
+            "type": "string",
+            "example": "Patna"
+          },
+          "district_code": {
+            "type": "string",
+            "example": "DIST-001"
+          },
+          "blockid": {
+            "type": "number",
+            "example": 1
+          },
+          "blockname": {
+            "type": "string",
+            "example": "Phulwari"
+          },
+          "block_code": {
+            "type": "string",
+            "example": "BLK-001"
+          },
+          "panchayatid": {
+            "type": "number",
+            "example": 1
+          },
+          "panchayatname": {
+            "type": "string",
+            "example": "Rampur"
+          },
+          "panchayat_code": {
+            "type": "string",
+            "example": "PAN-001"
+          },
+          "villageid": {
+            "type": "number",
+            "example": 1
+          },
+          "villagename": {
+            "type": "string",
+            "example": "Village A"
+          },
+          "village_code": {
+            "type": "string",
+            "example": "VIL-001"
+          },
+          "subdivisionid": {
+            "type": "number",
+            "example": 1
+          },
+          "subdivisionname": {
+            "type": "string",
+            "example": "Subdivision A"
+          },
+          "subdivision_code": {
+            "type": "string",
+            "example": "SUB-001"
+          },
+          "circleid": {
+            "type": "number",
+            "example": 1
+          },
+          "circlename": {
+            "type": "string",
+            "example": "Circle A"
+          },
+          "circle_code": {
+            "type": "string",
+            "example": "CIR-001"
+          },
+          "zoneid": {
+            "type": "number",
+            "example": 1
+          },
+          "zonename": {
+            "type": "string",
+            "example": "Zone A"
+          },
+          "zone_code": {
+            "type": "string",
+            "example": "ZON-001"
+          },
+          "district_id": {
+            "type": "number",
+            "description": "Parent district id for district-bound masters",
+            "example": 1
+          }
+        }
+      },
+      "UpdateLocationDto": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}
