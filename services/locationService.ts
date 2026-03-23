@@ -1,14 +1,5 @@
 import apiClient from "@/lib/api-client";
 
-export type LocationType =
-  | "districts"
-  | "blocks"
-  | "panchayats"
-  | "villages"
-  | "subdivisions"
-  | "circles"
-  | "zones";
-
 export const getLocationsByType = async (
   type: LocationType,
   page = 1,
