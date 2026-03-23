@@ -1,5 +1,4 @@
 import BackButton from "@/components/BackButton";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -9,9 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ViewPhoto from "@/components/ViewPhoto";
 import { createServerApiClient } from "@/lib/server-api-client";
+import { WorkItemComponentStatus } from "@/types/usertypes";
 import { AlertCircle, CheckCircle2, Clock, XSquare } from "lucide-react";
-import Link from "next/link";
 
 const WorkOrderUpdatePage = async ({
   params,
@@ -24,23 +24,45 @@ const WorkOrderUpdatePage = async ({
 
   const response = await apiClient.get(`/components/work-item/${id}`);
 
+  const userResponse = await apiClient.get("/users/my-profile");
+  const userRole = userResponse.data?.role;
+
   const components = response.data;
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (
+    status: string,
+    progress: number,
+    quantity: number,
+  ) => {
     switch (status) {
-      case "APPROVED":
+      case WorkItemComponentStatus.APPROVED:
         return (
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-[11px] font-bold">
             <CheckCircle2 size={13} /> Approved
           </span>
         );
-      case "IN_PROGRESS":
+      case WorkItemComponentStatus.IN_PROGRESS: {
+        if (progress === quantity && quantity > 0) {
+          return (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-bold">
+              <Clock size={13} /> Completed
+            </span>
+          );
+        } else if (progress > 0) {
+          return (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-bold">
+              <Clock size={13} /> In Progress
+            </span>
+          );
+        }
+      }
+      case WorkItemComponentStatus.SUBMITTED:
         return (
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-bold">
-            <Clock size={13} /> In Progress
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-700 text-[11px] font-bold">
+            <Clock size={13} /> Submitted
           </span>
         );
-      case "REJECTED":
+      case WorkItemComponentStatus.REJECTED:
         return (
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 text-red-700 text-[11px] font-bold">
             <XSquare size={13} /> Rejected
@@ -109,7 +131,7 @@ const WorkOrderUpdatePage = async ({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  components.map((row: any, index: number) => {
+                  components.map((row, index: number) => {
                     const quantity = row.quantity || 0;
                     const progress = row.progress || 0;
                     const percentageProgress =
@@ -139,22 +161,15 @@ const WorkOrderUpdatePage = async ({
                         </TableCell>
                         <TableCell className="py-4.5 text-center">
                           <div className="flex justify-center">
-                            {getStatusBadge(row.status)}
+                            {getStatusBadge(
+                              row.status,
+                              row.progress,
+                              row.quantity,
+                            )}
                           </div>
                         </TableCell>
-                        <TableCell className="py-4.5 text-center">
-                          <Link href={`/work-order/review-photos/${row.id}`}>
-                            <div className="flex justify-center">
-                              <Button
-                                variant="default"
-                                size="sm"
-                                className="rounded-lghover:bg-emerald-50"
-                                title="Review Photos"
-                              >
-                                View Photos
-                              </Button>
-                            </div>
-                          </Link>
+                        <TableCell className="py-4.5 ">
+                          <ViewPhoto component={row} role={userRole} />
                         </TableCell>
                       </TableRow>
                     );

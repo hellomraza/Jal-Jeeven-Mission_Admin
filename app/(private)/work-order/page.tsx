@@ -43,9 +43,10 @@ export default function WorkOrderPage() {
 
   const userRole = userInfo?.role || role;
 
-  const workItems = Array.isArray(data) ? data : data?.data || [];
+  const workItems = data?.data;
 
   const handleExport = () => {
+    if (!workItems) return;
     const ws = XLSX.utils.json_to_sheet(workItems);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Work_Orders");
@@ -54,7 +55,7 @@ export default function WorkOrderPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
         <div className="flex items-center gap-3">
           <h2 className="text-[16px] font-bold text-[#1a2b3c] whitespace-nowrap px-2">
             Work Code Details
@@ -65,7 +66,7 @@ export default function WorkOrderPage() {
           {userRole !== "CO" && (
             <>
               <Select defaultValue="all">
-                <SelectTrigger className="w-[160px] bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
+                <SelectTrigger className="w-40 bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
                   <SelectValue placeholder="District Name" />
                 </SelectTrigger>
                 <SelectContent>
@@ -74,7 +75,7 @@ export default function WorkOrderPage() {
               </Select>
 
               <Select defaultValue="all">
-                <SelectTrigger className="w-[160px] bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
+                <SelectTrigger className="w-40 bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
                   <SelectValue placeholder="Block Name" />
                 </SelectTrigger>
                 <SelectContent>
@@ -83,7 +84,7 @@ export default function WorkOrderPage() {
               </Select>
 
               <Select defaultValue="all">
-                <SelectTrigger className="w-[160px] bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
+                <SelectTrigger className="w-40 bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
                   <SelectValue placeholder="Work Code" />
                 </SelectTrigger>
                 <SelectContent>
@@ -104,7 +105,7 @@ export default function WorkOrderPage() {
         </div>
       </div>
 
-      <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] py-0 overflow-hidden bg-white rounded-[16px]">
+      <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] py-0 overflow-hidden bg-white rounded-2xl">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -150,7 +151,7 @@ export default function WorkOrderPage() {
                     Description
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Contractor ID
+                    Contractor Code
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Latitude
@@ -189,7 +190,7 @@ export default function WorkOrderPage() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ) : workItems.length === 0 ? (
+                ) : workItems?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={17} className="h-24 text-center">
                       <p className="text-[12px] text-gray-500 font-medium">
@@ -198,7 +199,7 @@ export default function WorkOrderPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  workItems.map((row: any, index: number) => (
+                  workItems?.map((row, index: number) => (
                     <TableRow
                       key={row.id}
                       className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer"
@@ -219,13 +220,13 @@ export default function WorkOrderPage() {
                         {row.district?.districtname || row.district_id || "---"}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.block?.blockname || row.block || "---"}
+                        {row.block?.blockname || "---"}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.panchayat?.panchayatname || row.panchayat || "---"}
+                        {row.panchayat?.panchayatname || "---"}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.village?.villagename || row.village || "---"}
+                        {row.village?.villagename || "---"}
                       </TableCell>
 
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
@@ -255,11 +256,11 @@ export default function WorkOrderPage() {
                           {row.status || "PENDING"}
                         </span>
                       </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium min-w-[150px]">
+                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium min-w-37.5">
                         {row.description || "---"}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.contractor_id || "---"}
+                        {row.contractor?.code || "---"}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.latitude || "---"}
