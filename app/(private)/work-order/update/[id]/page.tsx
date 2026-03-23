@@ -22,7 +22,9 @@ const WorkOrderUpdatePage = async ({
 
   const apiClient = await createServerApiClient();
 
-  const response = await apiClient.get(`/components/work-item/${id}`);
+  const response = await apiClient.get<WorkItemComponent[]>(
+    `/components/work-item/${id}`,
+  );
 
   const userResponse = await apiClient.get("/users/my-profile");
   const userRole = userResponse.data?.role;
@@ -121,7 +123,7 @@ const WorkOrderUpdatePage = async ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {components.length === 0 ? (
+                {components?.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={6}
@@ -131,9 +133,9 @@ const WorkOrderUpdatePage = async ({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  components.map((row, index: number) => {
-                    const quantity = row.quantity || 0;
-                    const progress = row.progress || 0;
+                  components?.map((row, index) => {
+                    const quantity = Number(row.quantity) || 0;
+                    const progress = Number(row.progress) || 0;
                     const percentageProgress =
                       quantity > 0 ? (progress / quantity) * 100 : 0;
                     return (
@@ -163,8 +165,8 @@ const WorkOrderUpdatePage = async ({
                           <div className="flex justify-center">
                             {getStatusBadge(
                               row.status,
-                              row.progress,
-                              row.quantity,
+                              Number(row.progress),
+                              Number(row.quantity),
                             )}
                           </div>
                         </TableCell>
