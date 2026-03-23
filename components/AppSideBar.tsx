@@ -48,7 +48,6 @@ const menuItems: SidebarItem[] = [
 export async function AppSidebar() {
   const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
-  console.log("Current pathname in AppSidebar:", pathname);
   return (
     <Sidebar>
       <div className="w-full h-24" />
@@ -56,9 +55,6 @@ export async function AppSidebar() {
         <SidebarMenu>
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
-            console.log(
-              `Rendering menu item: ${pathname}, href: ${item.href}, isActive: ${isActive}`,
-            );
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton asChild isActive={isActive}>

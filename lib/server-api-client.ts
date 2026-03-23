@@ -19,6 +19,7 @@ export const createServerApiClient = async (
   const cookieStore = await cookies();
   const tokenFromCookie = cookieStore.get("admin_token")?.value;
   const token = options.token || tokenFromCookie;
+  console.log("Creating server API client with token:", token);
 
   const client = axios.create({
     baseURL: SERVER_API_BASE_URL,
@@ -28,6 +29,27 @@ export const createServerApiClient = async (
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
+
+  client.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        console.warn("Unauthorized request - token may be invalid or expired");
+      }
+
+      // if error message is "User #some-uuid not found" and status is 404, it means the token is valid but the user does not exist
+      if (
+        error.response?.status === 404 &&
+        typeof error.response?.data?.message === "string" &&
+        error.response.data.message.includes("User #") &&
+        error.response.data.message.includes("not found")
+      ) {
+        //TODO: logout user and redirect to login page
+      }
+      console.log(error.response);
+      return Promise.reject(error);
+    },
+  );
 
   return client;
 };
