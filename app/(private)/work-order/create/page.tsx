@@ -32,10 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/hooks/useUser";
-import {
-  getLocationsByType,
-  type LocationType,
-} from "@/services/locationService";
+import { getLocationsByType } from "@/services/locationService";
 import { getContractors } from "@/services/userService";
 import { createWorkItem } from "@/services/workService";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -434,7 +431,7 @@ export default function CreateWorkItemPage() {
 
   if (!isOnlyDistrictOfficer) {
     return (
-      <div className="max-w-[720px] mx-auto mt-10 bg-white rounded-xl border border-red-100 p-6">
+      <div className="max-w-180 mx-auto mt-10 bg-white rounded-xl border border-red-100 p-6">
         <h2 className="text-[18px] font-bold text-[#1a2b3c]">
           Access Restricted
         </h2>
@@ -449,7 +446,7 @@ export default function CreateWorkItemPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-[980px] mx-auto">
+    <div className="space-y-6 max-w-245 mx-auto">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <BackButton />
