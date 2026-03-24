@@ -8,13 +8,13 @@ import * as React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import LogoutButton from "../LogoutButtton";
 
-interface SidebarItem {
+export interface SidebarItem {
   label: string;
   href: string;
   icon: React.ReactNode;
 }
 
-const menuItems: SidebarItem[] = [
+export const menuItems: SidebarItem[] = [
   {
     label: "Dashboard",
     href: "/dashboard",
