@@ -6,9 +6,15 @@ import HeaderMenu from "../HeaderMenu";
 
 export default async function Header() {
   const apiClient = await createServerApiClient();
-  const response = await apiClient.get("/users/my-profile");
-  const userName = response.data.name || "User";
-  const userRole = response.data.role || "Role";
+  let user = null;
+  try {
+    const response = await apiClient.get("/users/my-profile");
+    user = response.data;
+  } catch (error) {
+    console.error("Failed to fetch user profile:", error);
+  }
+  const userName = user?.name || "User";
+  const userRole = user?.role || "Role";
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-100 flex items-center justify-between px-6 py-4 h-24 transition-all shadow-[0_4px_24px_rgba(0,0,0,0.01)]">
