@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { useUser } from "@/hooks/useUser";
 import { getWorkItems } from "@/services/workService";
+import { UserRole } from "@/types/usertypes";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Plus, RefreshCw, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -63,7 +64,7 @@ export default function WorkOrderPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {userRole !== "CO" && (
+          {userRole === UserRole.HeadOfficer && (
             <>
               <Select defaultValue="all">
                 <SelectTrigger className="w-40 bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
@@ -91,16 +92,16 @@ export default function WorkOrderPage() {
                   <SelectItem value="all">Work Code</SelectItem>
                 </SelectContent>
               </Select>
-              {userRole === "DO" && (
-                <Button
-                  onClick={() => router.push("/work-order/create")}
-                  className="bg-[#136FB6] hover:bg-[#105E9A] text-white h-9 px-4 rounded-lg text-[12px] font-medium shadow-md shadow-[#136FB6]/20"
-                >
-                  <Plus size={14} className="mr-1" />
-                  Create Work Item
-                </Button>
-              )}
             </>
+          )}
+          {userRole === UserRole.DistrictOfficer && (
+            <Button
+              onClick={() => router.push("/work-order/create")}
+              className="bg-[#136FB6] hover:bg-[#105E9A] text-white h-9 px-4 rounded-lg text-[12px] font-medium shadow-md shadow-[#136FB6]/20"
+            >
+              <Plus size={14} className="mr-1" />
+              Create Work Item
+            </Button>
           )}
         </div>
       </div>
