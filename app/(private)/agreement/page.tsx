@@ -4,13 +4,6 @@ import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -28,7 +21,7 @@ export default function AgreementPage() {
   const [userRole, setUserRole] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    const role = localStorage.getItem("user_role");
+    const role = localStorage.getItem("admin_role");
     setUserRole(role);
     fetchAgreements();
   }, []);
@@ -68,13 +61,13 @@ export default function AgreementPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+      <div className="flex flex-col md:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
         <h2 className="text-[16px] font-bold text-[#1a2b3c] whitespace-nowrap px-2">
           Agreement Details {userRole === "CO" ? "(My Agreements)" : ""}
         </h2>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {userRole !== "CO" && (
+        {/* {userRole !== "CO" && (
+          <div className="flex flex-wrap items-center gap-3">
             <>
               <Select defaultValue="2022-2023">
                 <SelectTrigger className="w-[140px] bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
@@ -94,34 +87,12 @@ export default function AgreementPage() {
                   <SelectItem value="all">Contractor Name</SelectItem>
                 </SelectContent>
               </Select>
-
-              <Select defaultValue="all">
-                <SelectTrigger className="w-[160px] bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
-                  <SelectValue placeholder="Contractor Code" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Contractor Code</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select defaultValue="all">
-                <SelectTrigger className="w-[160px] bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
-                  <SelectValue placeholder="Division" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Division</SelectItem>
-                </SelectContent>
-              </Select>
             </>
-          )}
-
-          <Button className="bg-[#136FB6] hover:bg-[#105E9A] text-white h-9 px-8 rounded-lg text-[12px] font-medium shadow-md shadow-[#136FB6]/20">
-            Back
-          </Button>
-        </div>
+          </div>
+        )} */}
       </div>
 
-      <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden bg-white rounded-[16px]">
+      <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden bg-white rounded-[16px] py-0">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -153,9 +124,6 @@ export default function AgreementPage() {
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Agreement Year
-                  </TableHead>
-                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12 text-center">
-                    Action
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -212,11 +180,6 @@ export default function AgreementPage() {
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.agreementyear}
-                      </TableCell>
-                      <TableCell className="text-center py-4">
-                        <Button className="h-7 px-4 bg-[#DFEEF9] hover:bg-[#136FB6] text-[#136FB6] hover:text-white transition-colors text-[11px] font-bold rounded-md">
-                          Details
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
