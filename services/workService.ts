@@ -118,3 +118,14 @@ export const getDOInfoByWorkItemId = async (workItemId: string) => {
     );
   }
 };
+
+export const getWorkItemEmployees = async (workItemId: string) => {
+  try {
+    const response = await apiClient.get(`/work-items/${workItemId}/employees`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch work item employees",
+    );
+  }
+};
