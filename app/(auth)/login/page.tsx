@@ -40,10 +40,10 @@ export default function LoginPage() {
       ></div>
 
       {/* Main Container */}
-      <div className="  flex w-full mx-auto">
+      <div className="flex w-full mx-auto">
         {/* Left Side: Login Form */}
-        <div className="  w-full max-h-[200px] h-full max-w-[424px] flex items-center justify-center p-8 mx-auto my-auto relative z-20">
-          <div className="bg-white rounded-[24px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-full max-w-[400px] xl:max-w-[420px] flex flex-col">
+        <div className="  w-full max-h-50 h-full max-w-106 flex items-center justify-center p-8 mx-auto my-auto relative z-20">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-full max-w-100 xl:max-w-105 flex flex-col">
             <div className="flex flex-col items-center mb-4">
               <Image
                 src="/logo.png"
@@ -155,7 +155,7 @@ export default function LoginPage() {
         </div>
 
         {/* Right Side: Visuals */}
-        <div className=" lg:flex w-[65%] relative z-10 items-center justify-center pointer-events-none">
+        <div className=" lg:flex md:w-[65%] relative z-10 items-center justify-center pointer-events-none">
           <div className="absolute bottom-[0] right-[26.5%] w-full max-w-[625px] h-full max-h-[260px] opacity-[0.85]">
             <Image
               src="/login-logo.png"
