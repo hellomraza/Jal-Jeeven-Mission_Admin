@@ -2,21 +2,21 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { Field, FieldLabel } from "./ui/field";
 
 const InputWithPassword = (props: React.ComponentProps<"input">) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="w-full max-w-sm space-y-2">
-      <Label
+    <Field className="w-full max-w-lg">
+      <FieldLabel
         htmlFor="password-toggle"
         className="text-xs text-gray-500 font-semibold"
       >
         Password
-      </Label>
+      </FieldLabel>
       <div className="relative">
         <Input
           placeholder="Enter your password"
@@ -37,7 +37,7 @@ const InputWithPassword = (props: React.ComponentProps<"input">) => {
           )}
         </Button>
       </div>
-    </div>
+    </Field>
   );
 };
 
