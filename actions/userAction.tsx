@@ -20,7 +20,6 @@ export const assignEmployees = async (
       workItemId,
       employeeIds,
     };
-    console.log("Assigning employees:", { workItemId, employeeIds });
 
     const result = assignEmployeesSchema.safeParse(payload);
     if (!result.success) {
@@ -30,12 +29,10 @@ export const assignEmployees = async (
     await apiClient.post(`/work-items/${workItemId}/assign-employee`, {
       employee_ids: result.data.employeeIds,
     });
-    console.log("Employees assigned successfully");
 
     return { success: "Employees assigned successfully", error: "" };
   } catch (err) {
     if (err instanceof AxiosError) {
-      console.log("Error response from API:", err.response);
       return {
         success: "",
         error:
@@ -59,7 +56,6 @@ export const createEmployee = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const response = await apiClient.post("/users/employee", data);
-      console.log("Create employee response:", response);
       if (response.data) {
         return { success: "Employee created successfully", error: "" };
       }

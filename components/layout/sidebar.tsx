@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import * as React from "react";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { UserRole } from "@/types/usertypes";
 import LogoutButton from "../LogoutButtton";
 
 export interface SidebarItem {
@@ -20,7 +21,7 @@ const getMenuItems = (userRole?: string): SidebarItem[] => {
       label: "Dashboard",
       href: "/dashboard",
       icon: <LayoutDashboard size={20} />,
-      roles: ["Head Officer", "District Officer"], // Hide for contractors
+      roles: [UserRole.HeadOfficer, UserRole.DistrictOfficer], // Hide for contractors
     },
     {
       label: "Work Order",

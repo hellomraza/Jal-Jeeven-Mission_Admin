@@ -158,7 +158,7 @@ export default function LoginPage() {
         <div className=" lg:flex w-[65%] relative z-10 items-center justify-center pointer-events-none">
           <div className="absolute bottom-[0] right-[26.5%] w-full max-w-[625px] h-full max-h-[260px] opacity-[0.85]">
             <Image
-              src="/login logo.png"
+              src="/login-logo.png"
               alt="Login Background Element"
               fill
               className="object-contain object-right-top"
@@ -169,7 +169,7 @@ export default function LoginPage() {
               src="/tank.png"
               alt="Tank construction"
               fill
-              className="object-contain object-right-bottom mix-blend-multiply"
+              className="object-contain"
             />
           </div>
         </div>
