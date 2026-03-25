@@ -14,6 +14,16 @@ export function proxy(request: NextRequest) {
   const isLoggedIn = Boolean(token);
   const requestHeaders = new Headers(request.headers);
 
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/images") ||
+    pathname.endsWith(".png") ||
+    pathname.endsWith(".jpg") ||
+    pathname.endsWith(".svg")
+  ) {
+    return;
+  }
+
   requestHeaders.set("x-pathname", request.nextUrl.pathname);
 
   if (pathname === "/") {
