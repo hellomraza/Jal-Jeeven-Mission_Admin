@@ -5,41 +5,31 @@ import InputWithPassword from "@/components/InputWithPassword";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useLogin } from "@/hooks/useAuth";
+import { ActionState } from "@/utils/action-helper";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 
 export default function LoginPage() {
-  const { mutate: login } = useLogin();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [state, formAction, isPending] = useActionState(
+    async (_: ActionState, formData: FormData) => {
+      const response = await loginUserAction(formData);
+      if (response.error || !response.data) {
+        return { error: response.error, success: "", data: null };
+      }
+      localStorage.setItem("admin_token", response.data.access_token);
+      localStorage.setItem("admin_role", response.data.user?.role);
 
-  const [, formAction, isPending] = useActionState(
-    async (_, formData: FormData) => {
-      const email = formData.get("email") as string;
-      const password = formData.get("password") as string;
-      const response = await loginUserAction({ email, password });
-      localStorage.setItem("admin_token", response.access_token);
-      redirect("/dashboard"); // Redirect to dashboard after successful login
+      // Redirect contractors to work-order page, others to dashboard
+      const role = response.data.user?.role;
+      const redirectPath = role?.toLowerCase().includes("contractor")
+        ? "/work-order"
+        : "/dashboard";
+      redirect(redirectPath);
     },
-    null,
+    { error: "", success: "", data: null },
   );
-
-  const [error, setError] = useState("");
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (!email || !password) {
-      setError("Please enter both email and password.");
-      return;
-    }
-
-    login({ email, password });
-  };
 
   return (
     <div className="min-h-screen relative bg-white overflow-hidden flex w-full">
@@ -100,9 +90,9 @@ export default function LoginPage() {
               <div className="flex-1 h-[1px] bg-gray-200"></div>
             </div>
 
-            {error && (
+            {state.error && (
               <div className="bg-red-50 text-red-500 text-[11px] p-2 rounded mb-3 border border-red-100 font-medium">
-                {error}
+                {state.error}
               </div>
             )}
 
@@ -117,8 +107,6 @@ export default function LoginPage() {
                   </FieldLabel>
                   <Input
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     required
                     name="email"
                     placeholder="Enter email or mobile no."
@@ -170,7 +158,7 @@ export default function LoginPage() {
         <div className=" lg:flex w-[65%] relative z-10 items-center justify-center pointer-events-none">
           <div className="absolute bottom-[0] right-[26.5%] w-full max-w-[625px] h-full max-h-[260px] opacity-[0.85]">
             <Image
-              src="/login logo.png"
+              src="/login-logo.png"
               alt="Login Background Element"
               fill
               className="object-contain object-right-top"
@@ -181,7 +169,7 @@ export default function LoginPage() {
               src="/tank.png"
               alt="Tank construction"
               fill
-              className="object-contain object-right-bottom mix-blend-multiply"
+              className="object-contain"
             />
           </div>
         </div>

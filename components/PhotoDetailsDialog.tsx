@@ -4,6 +4,7 @@ import apiClient from "@/lib/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Clock, Loader2, MapPin, User } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import {
@@ -36,19 +37,20 @@ const PhotoDetailsDialog = ({
   isLoading: boolean;
   role?: string;
 }) => {
+  const router = useRouter();
   const [confirmAction, setConfirmAction] = useState<
     "approve" | "reject" | null
   >(null);
   const queryClient = useQueryClient();
 
   const { data: doInfo } = userDOInfoByWorkItem(component?.work_item_id);
-  console.log("DO Info for work item:", doInfo);
 
   const approveMutation = useMutation({
     mutationFn: (componentId: string) =>
       apiClient.post(`/components/${componentId}/approve`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workitem"] });
+      router.refresh();
       toast.success("Component approved successfully");
       setConfirmAction(null);
     },
@@ -63,6 +65,7 @@ const PhotoDetailsDialog = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workitem"] });
       toast.success("Component rejected successfully");
+      router.refresh();
       setConfirmAction(null);
     },
     onError: (error: any) => {

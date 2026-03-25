@@ -1,6 +1,10 @@
 import BackButton from "@/components/BackButton";
 import ReviewPhotosComponent from "@/components/ReviewPhotosComponent";
+import { Button } from "@/components/ui/button";
 import { createServerApiClient } from "@/lib/server-api-client";
+import { WorkItemComponentStatus } from "@/types/usertypes";
+import { Map } from "lucide-react";
+import Link from "next/link";
 
 const ReviewPhotos = async ({
   params,
@@ -16,28 +20,49 @@ const ReviewPhotos = async ({
   const photosData = response.data;
   const photos = photosData?.data || [];
 
-  console.log(photos, "fgkljdhfkgjdfhkj");
-  const progress = photos[0]?.workItemComponent?.progress;
+  const progress = Number(photos[0]?.workItemComponent?.progress);
   const quantity = Number(photos[0]?.workItemComponent?.quantity);
   const progressPercentage =
     quantity && quantity > 0 ? (Number(progress) / Number(quantity)) * 100 : 0;
 
-  const shouldShowApprovalDisclaimer = photos.some((photo: any) => {
-    const quantity = Number(photo.workItemComponent?.quantity);
-    const progress = Number(photo.workItemComponent?.progress);
-    const isQuantityProgressMismatch =
-      !Number.isFinite(quantity) ||
-      !Number.isFinite(progress) ||
-      quantity !== progress;
+  const approveButtonDisabledReason = () => {
+    if (
+      photos?.some(
+        (photo) =>
+          photo.workItemComponent?.status === WorkItemComponentStatus.APPROVED,
+      )
+    ) {
+      return "This component has already been approved.";
+    }
+    if (
+      photos?.some(
+        (photo) =>
+          photo.workItemComponent?.status === WorkItemComponentStatus.SUBMITTED,
+      )
+    ) {
+      return "This component has already been submitted for approval.";
+    }
+    if (isNaN(quantity) || isNaN(progress)) {
+      return "Quantity or progress is not a valid number.";
+    }
+    if (quantity !== progress) {
+      return (
+        "Component is not completed yet" +
+        ` (Progress: ${progressPercentage.toFixed(2)}%)`
+      );
+    }
 
-    return (
-      photo.workItemComponent?.status === "APPROVED" ||
-      isQuantityProgressMismatch
-    );
-  });
+    return "";
+  };
+
+  // Filter photos that have coordinates
+  const photosWithCoordinates = photos.filter(
+    (photo: any) => photo.latitude && photo.longitude,
+  );
+  const hasMapData = photosWithCoordinates.length > 0;
 
   return (
-    <div className="space-y-6 max-w-[1200px] mx-auto">
+    <div className="space-y-6 max-w-300 mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <BackButton />
@@ -50,11 +75,19 @@ const ReviewPhotos = async ({
             </p>
           </div>
         </div>
+        {hasMapData && (
+          <Link href={`/work-order/review-photos/${componentId}/map`}>
+            <Button className="flex items-center gap-2 bg-[#136FB6] hover:bg-[#0d5a99]">
+              <Map size={18} />
+              View Map
+            </Button>
+          </Link>
+        )}
       </div>
 
-      {shouldShowApprovalDisclaimer && (
+      {approveButtonDisabledReason() && (
         <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] text-amber-800">
-          Approval is disabled because the component is not completed yet
+          {approveButtonDisabledReason()}
         </div>
       )}
       {photos.length === 0 ? (

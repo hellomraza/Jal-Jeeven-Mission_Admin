@@ -41,6 +41,7 @@ type WorkItem = {
 type WorkItemComponent = {
   approved_photo_id: string | null;
   component_id: string;
+  component: Component | null;
   created_at: string;
   id: string;
   progress: string;
@@ -49,4 +50,13 @@ type WorkItemComponent = {
   status: "PENDING" | "APPROVED" | "REJECTED" | "IN_PROGRESS" | "SUBMITTED";
   updated_at: string;
   work_item_id: string;
+};
+
+type Component = {
+  id: string;
+  name: string;
+  unit: string;
+  order_number: number;
+  created_at: string;
+  updated_at: string;
 };

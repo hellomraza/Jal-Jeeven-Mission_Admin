@@ -21,3 +21,14 @@ export const getContractors = async (page = 1, limit = 500) => {
     );
   }
 };
+
+export const getEmployees = async (page = 1, limit = 500) => {
+  try {
+    const response = await apiClient.get(`/users/employees`);
+    return response.data || [];
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch employees",
+    );
+  }
+};

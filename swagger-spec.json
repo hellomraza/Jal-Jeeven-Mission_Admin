@@ -140,6 +140,56 @@
         ]
       }
     },
+    "/users/employee": {
+      "post": {
+        "description": "Creates a new employee account with name, email, and password",
+        "operationId": "UsersController_createEmployee",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmployeeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Employee created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "409": {
+            "description": "User with email already exists"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Create employee",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/users/my-profile": {
       "get": {
         "description": "Returns the profile details of the currently authenticated user",
@@ -169,6 +219,90 @@
           }
         ],
         "summary": "Get my profile",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/employees": {
+      "get": {
+        "description": "Returns a list of all employees (users with EM role) without password field",
+        "operationId": "UsersController_getAllEmployees",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Employees retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get all employees",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/work-item/{workItemId}/employees": {
+      "get": {
+        "description": "Returns a list of all employees assigned to a specific work item",
+        "operationId": "UsersController_getEmployeesByWorkItemId",
+        "parameters": [
+          {
+            "name": "workItemId",
+            "required": true,
+            "in": "path",
+            "description": "Work item ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Employees retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get employees by work item",
         "tags": [
           "Users"
         ]
@@ -801,7 +935,7 @@
     },
     "/work-items/{id}/assign-employee": {
       "post": {
-        "description": "Assigns an employee to a contractor-owned work item",
+        "description": "Assigns one or more employees to a contractor-owned work item",
         "operationId": "WorkItemsController_assignEmployee",
         "parameters": [
           {
@@ -826,11 +960,11 @@
         },
         "responses": {
           "201": {
-            "description": "Employee assigned to work item successfully",
+            "description": "Employees assigned to work item",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WorkItemEmployeeAssignmentResponseDto"
+                  "$ref": "#/components/schemas/AssignMultipleEmployeesResponseDto"
                 }
               }
             }
@@ -845,7 +979,7 @@
             "description": "Work item not found"
           },
           "422": {
-            "description": "employee_id does not exist or is not an employee user"
+            "description": "One or more employee_ids are invalid or not employee users"
           }
         },
         "security": [
@@ -853,7 +987,7 @@
             "access-token": []
           }
         ],
-        "summary": "Assign employee to work item",
+        "summary": "Assign employees to work item",
         "tags": [
           "Work Items"
         ]
@@ -997,6 +1131,83 @@
           }
         ],
         "summary": "Delete work item",
+        "tags": [
+          "Work Items"
+        ]
+      }
+    },
+    "/work-items/{id}/do-info": {
+      "get": {
+        "description": "Returns the District Officer (DO) assigned to the district of the work item",
+        "operationId": "WorkItemsController_getDistrictOfficerByWorkItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Work item ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "District Officer found",
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "district_id": {
+                  "type": "number"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          },
+          "404": {
+            "description": "Work item or District Officer not found"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get District Officer info by work item ID",
         "tags": [
           "Work Items"
         ]
@@ -2488,6 +2699,50 @@
           "Locations"
         ]
       }
+    },
+    "/dashboard/stats": {
+      "get": {
+        "description": "Returns statistics based on user role. HO users get comprehensive application statistics. DO users get district-specific statistics with work items and progress percentages. CO users get their assigned work items with component and employee details.",
+        "operationId": "DashboardController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Statistics retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DashboardStatsDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DistrictDashboardDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ContractorDashboardDto"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Insufficient role permission"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Get dashboard statistics",
+        "tags": [
+          "Dashboard"
+        ]
+      }
     }
   },
   "info": {
@@ -2612,6 +2867,32 @@
           "role",
           "created_at",
           "updated_at"
+        ]
+      },
+      "CreateEmployeeDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Full name of the employee",
+            "example": "John Doe"
+          },
+          "email": {
+            "type": "string",
+            "description": "Unique email address for the employee",
+            "example": "employee@jjm.local"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password with minimum 8 characters",
+            "example": "StrongPass@123",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password"
         ]
       },
       "PaginatedResponse": {
@@ -3141,6 +3422,43 @@
           "zone_code"
         ]
       },
+      "ContractorDetailsDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the contractor user",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "description": "Unique generated code for the contractor user",
+            "example": "CO123456789012"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the contractor user",
+            "example": "contractor@example.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the contractor",
+            "example": "Ravi Kumar"
+          },
+          "district_id": {
+            "type": "object",
+            "description": "District ID for the contractor",
+            "example": 10,
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "email",
+          "name"
+        ]
+      },
       "WorkItemResponseDto": {
         "type": "object",
         "properties": {
@@ -3291,6 +3609,15 @@
             "type": "string",
             "description": "ID of the contractor responsible for executing the work item",
             "example": "contractor-123"
+          },
+          "contractor": {
+            "description": "Contractor details mapped from contractor_id",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractorDetailsDto"
+              }
+            ]
           },
           "latitude": {
             "type": "number",
@@ -3469,14 +3796,20 @@
       "AssignWorkItemEmployeeDto": {
         "type": "object",
         "properties": {
-          "employee_id": {
-            "type": "string",
-            "description": "Employee user ID to assign to the work item",
-            "example": "550e8400-e29b-41d4-a716-446655440010"
+          "employee_ids": {
+            "description": "Array of employee user IDs to assign to the work item",
+            "example": [
+              "550e8400-e29b-41d4-a716-446655440010",
+              "550e8400-e29b-41d4-a716-446655440011"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
-          "employee_id"
+          "employee_ids"
         ]
       },
       "WorkItemEmployeeAssignmentResponseDto": {
@@ -3509,6 +3842,45 @@
           "work_item_id",
           "employee_id",
           "created_at"
+        ]
+      },
+      "AssignMultipleEmployeesResponseDto": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "description": "Array of successfully created assignments",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemEmployeeAssignmentResponseDto"
+            }
+          },
+          "failed": {
+            "description": "Array of employees that failed to assign (with error reasons)",
+            "example": [
+              {
+                "employee_id": "550e8400-e29b-41d4-a716-446655440010",
+                "error": "Employee not found"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "summary": {
+            "type": "object",
+            "description": "Summary of the operation",
+            "example": {
+              "total": 2,
+              "created": 1,
+              "failed": 1
+            }
+          }
+        },
+        "required": [
+          "created",
+          "failed",
+          "summary"
         ]
       },
       "UpdateWorkItemDto": {
@@ -3931,6 +4303,313 @@
       "UpdateLocationDto": {
         "type": "object",
         "properties": {}
+      },
+      "WorkItemStatsDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "description": "Total number of work items",
+            "example": 150
+          },
+          "pending": {
+            "type": "number",
+            "description": "Number of pending work items",
+            "example": 50
+          },
+          "inProgress": {
+            "type": "number",
+            "description": "Number of in-progress work items",
+            "example": 75
+          },
+          "completed": {
+            "type": "number",
+            "description": "Number of completed work items",
+            "example": 25
+          }
+        },
+        "required": [
+          "total",
+          "pending",
+          "inProgress",
+          "completed"
+        ]
+      },
+      "WorkItemWithProgressDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Work item unique identifier",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "work_code": {
+            "type": "string",
+            "description": "Work item code",
+            "example": "WI-001"
+          },
+          "title": {
+            "type": "string",
+            "description": "Work item title",
+            "example": "Water Pipeline Construction"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of work item",
+            "enum": [
+              "PENDING",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ],
+            "example": "IN_PROGRESS"
+          },
+          "progress_percentage": {
+            "type": "number",
+            "description": "Progress percentage (0-100)",
+            "example": 75
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the work item",
+            "example": "Construction of water pipeline in village X"
+          }
+        },
+        "required": [
+          "id",
+          "work_code",
+          "title",
+          "status",
+          "progress_percentage",
+          "description"
+        ]
+      },
+      "DistrictDashboardDto": {
+        "type": "object",
+        "properties": {
+          "districtName": {
+            "type": "string",
+            "description": "District name",
+            "example": "District Name"
+          },
+          "workItems": {
+            "description": "Work item statistics for the district",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkItemStatsDto"
+              }
+            ]
+          },
+          "workItemsList": {
+            "description": "List of work items with their progress",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkItemWithProgressDto"
+            }
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the statistics were generated",
+            "example": "2026-03-25T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "districtName",
+          "workItems",
+          "workItemsList",
+          "generatedAt"
+        ]
+      },
+      "UserStatsDto": {
+        "type": "object",
+        "properties": {
+          "employees": {
+            "type": "number",
+            "description": "Total number of employees",
+            "example": 200
+          },
+          "contractors": {
+            "type": "number",
+            "description": "Total number of contractors",
+            "example": 30
+          },
+          "districtOfficers": {
+            "type": "number",
+            "description": "Total number of district officers",
+            "example": 20
+          },
+          "headOffice": {
+            "type": "number",
+            "description": "Total number of head office users",
+            "example": 5
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of users",
+            "example": 255
+          }
+        },
+        "required": [
+          "employees",
+          "contractors",
+          "districtOfficers",
+          "headOffice",
+          "total"
+        ]
+      },
+      "DashboardStatsDto": {
+        "type": "object",
+        "properties": {
+          "workItems": {
+            "description": "Work item statistics",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WorkItemStatsDto"
+              }
+            ]
+          },
+          "users": {
+            "description": "User statistics by role",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserStatsDto"
+              }
+            ]
+          },
+          "totalAgreements": {
+            "type": "number",
+            "description": "Total number of agreements",
+            "example": 45
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the statistics were generated",
+            "example": "2026-03-25T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "workItems",
+          "users",
+          "totalAgreements",
+          "generatedAt"
+        ]
+      },
+      "ComponentStatusCountDto": {
+        "type": "object",
+        "properties": {
+          "pending": {
+            "type": "number",
+            "description": "Number of pending components",
+            "example": 5
+          },
+          "submitted": {
+            "type": "number",
+            "description": "Number of submitted components",
+            "example": 3
+          },
+          "inProgress": {
+            "type": "number",
+            "description": "Number of in-progress components",
+            "example": 2
+          },
+          "approved": {
+            "type": "number",
+            "description": "Number of approved components",
+            "example": 7
+          },
+          "rejected": {
+            "type": "number",
+            "description": "Number of rejected components",
+            "example": 1
+          }
+        },
+        "required": [
+          "pending",
+          "submitted",
+          "inProgress",
+          "approved",
+          "rejected"
+        ]
+      },
+      "ContractorWorkItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Work item unique identifier",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "work_code": {
+            "type": "string",
+            "description": "Work item code",
+            "example": "WI-001"
+          },
+          "title": {
+            "type": "string",
+            "description": "Work item title",
+            "example": "Water Pipeline Construction"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of work item",
+            "enum": [
+              "PENDING",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ],
+            "example": "IN_PROGRESS"
+          },
+          "componentStats": {
+            "description": "Component status breakdown",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ComponentStatusCountDto"
+              }
+            ]
+          },
+          "assignedEmployees": {
+            "type": "number",
+            "description": "Number of employees assigned to this work item",
+            "example": 5
+          }
+        },
+        "required": [
+          "id",
+          "work_code",
+          "title",
+          "status",
+          "componentStats",
+          "assignedEmployees"
+        ]
+      },
+      "ContractorDashboardDto": {
+        "type": "object",
+        "properties": {
+          "totalWorkItems": {
+            "type": "number",
+            "description": "Total number of work items assigned to contractor",
+            "example": 10
+          },
+          "workItems": {
+            "description": "List of work items with component and employee details",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractorWorkItemDto"
+            }
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the statistics were generated",
+            "example": "2026-03-25T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "totalWorkItems",
+          "workItems",
+          "generatedAt"
+        ]
       }
     }
   }

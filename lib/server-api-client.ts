@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 const SERVER_API_BASE_URL =
   process.env.API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "http://localhost:3000";
+  "https://jjm-backend.vercel.app";
 
 type ServerApiClientOptions = {
   token?: string;
@@ -19,7 +19,6 @@ export const createServerApiClient = async (
   const cookieStore = await cookies();
   const tokenFromCookie = cookieStore.get("admin_token")?.value;
   const token = options.token || tokenFromCookie;
-  console.log("Creating server API client with token:", token);
 
   const client = axios.create({
     baseURL: SERVER_API_BASE_URL,

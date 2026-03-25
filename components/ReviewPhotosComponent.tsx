@@ -1,8 +1,10 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { selectComponentPhoto } from "@/services/workService";
+import { WorkItemComponentStatus } from "@/types/usertypes";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Expand, Loader2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Button } from "./ui/button";
@@ -15,6 +17,7 @@ const ReviewPhotosComponent = ({
   photo,
   componentId,
 }: ReviewPhotosComponentProps) => {
+  const router = useRouter();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   useEffect(() => {
@@ -50,7 +53,8 @@ const ReviewPhotosComponent = ({
     !Number.isFinite(progressValue) ||
     quantityValue !== progressValue;
   const shouldDisableApprove =
-    photo.workItemComponent?.status === "APPROVED" ||
+    photo.workItemComponent?.status === WorkItemComponentStatus.APPROVED ||
+    photo.workItemComponent?.status === WorkItemComponentStatus.SUBMITTED ||
     isQuantityProgressMismatch;
 
   const queryClient = useQueryClient();
@@ -61,6 +65,7 @@ const ReviewPhotosComponent = ({
       queryClient.invalidateQueries({
         queryKey: ["componentPhotos", componentId],
       });
+      router.refresh();
       toast.success("Photo selected and submitted for approval");
     },
     onError: (error: any) => {

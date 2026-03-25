@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { useUser } from "@/hooks/useUser";
 import { getWorkItems } from "@/services/workService";
+import { UserRole } from "@/types/usertypes";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Plus, RefreshCw, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -32,6 +33,9 @@ export default function WorkOrderPage() {
     queryKey: ["workItems"],
     queryFn: () => getWorkItems(1, 100),
   });
+  const [selectedDistrict, setSelectedDistrict] = React.useState<string | null>(
+    null,
+  );
 
   const [role, setRole] = React.useState<string | null>(null);
 
@@ -41,13 +45,43 @@ export default function WorkOrderPage() {
     }
   }, []);
 
+  const resetFilters = () => {
+    setSelectedDistrict(null);
+  };
+
   const userRole = userInfo?.role || role;
 
   const workItems = data?.data;
 
+  const filteredWorkItems = selectedDistrict
+    ? workItems?.filter(
+        (item) => item.district_id.toString() === selectedDistrict,
+      )
+    : workItems;
+
+  let availableDistricts: {
+    value: number;
+    label: string;
+  }[] = [];
+
+  if (userRole === UserRole.HeadOfficer) {
+    const districtsSet = new Set<string>();
+    workItems?.forEach((item) => {
+      if (item.district) {
+        districtsSet.add(
+          JSON.stringify({
+            value: item.district_id,
+            label: item.district.districtname,
+          }),
+        );
+      }
+    });
+    availableDistricts = Array.from(districtsSet).map((str) => JSON.parse(str));
+  }
+
   const handleExport = () => {
-    if (!workItems) return;
-    const ws = XLSX.utils.json_to_sheet(workItems);
+    if (!filteredWorkItems) return;
+    const ws = XLSX.utils.json_to_sheet(filteredWorkItems);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Work_Orders");
     XLSX.writeFile(wb, "WorkOrders.xlsx");
@@ -55,7 +89,7 @@ export default function WorkOrderPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+      <div className="flex flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
         <div className="flex items-center gap-3">
           <h2 className="text-[16px] font-bold text-[#1a2b3c] whitespace-nowrap px-2">
             Work Code Details
@@ -63,44 +97,42 @@ export default function WorkOrderPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {userRole !== "CO" && (
+          {userRole === UserRole.HeadOfficer && (
             <>
-              <Select defaultValue="all">
+              <Select
+                key={selectedDistrict}
+                value={selectedDistrict || undefined}
+                onValueChange={setSelectedDistrict}
+              >
                 <SelectTrigger className="w-40 bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
                   <SelectValue placeholder="District Name" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">District Name</SelectItem>
+                  {availableDistricts.length > 0 ? (
+                    availableDistricts.map((district) => (
+                      <SelectItem
+                        key={district.value}
+                        value={district.value.toString()}
+                      >
+                        {district.label}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="all">No Districts Available</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
-
-              <Select defaultValue="all">
-                <SelectTrigger className="w-40 bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
-                  <SelectValue placeholder="Block Name" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Block Name</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select defaultValue="all">
-                <SelectTrigger className="w-40 bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
-                  <SelectValue placeholder="Work Code" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Work Code</SelectItem>
-                </SelectContent>
-              </Select>
-              {userRole === "DO" && (
-                <Button
-                  onClick={() => router.push("/work-order/create")}
-                  className="bg-[#136FB6] hover:bg-[#105E9A] text-white h-9 px-4 rounded-lg text-[12px] font-medium shadow-md shadow-[#136FB6]/20"
-                >
-                  <Plus size={14} className="mr-1" />
-                  Create Work Item
-                </Button>
-              )}
+              <Button onClick={resetFilters}>Reset Filters</Button>
             </>
+          )}
+          {userRole === UserRole.DistrictOfficer && (
+            <Button
+              onClick={() => router.push("/work-order/create")}
+              className="bg-[#136FB6] hover:bg-[#105E9A] text-white h-9 px-4 rounded-lg text-[12px] font-medium shadow-md shadow-[#136FB6]/20"
+            >
+              <Plus size={14} className="mr-1" />
+              Create Work Item
+            </Button>
           )}
         </div>
       </div>
@@ -159,9 +191,6 @@ export default function WorkOrderPage() {
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Longitude
                   </TableHead>
-                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12 text-center">
-                    Action
-                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -190,7 +219,7 @@ export default function WorkOrderPage() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ) : workItems?.length === 0 ? (
+                ) : filteredWorkItems?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={17} className="h-24 text-center">
                       <p className="text-[12px] text-gray-500 font-medium">
@@ -199,7 +228,7 @@ export default function WorkOrderPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  workItems?.map((row, index: number) => (
+                  filteredWorkItems?.map((row, index: number) => (
                     <TableRow
                       key={row.id}
                       className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer"
@@ -256,8 +285,51 @@ export default function WorkOrderPage() {
                           {row.status || "PENDING"}
                         </span>
                       </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium min-w-37.5">
-                        {row.description || "---"}
+                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium min-w-37.5 max-w-sm truncate">
+                        {row.description || "---"} Lorem ipsum dolor sit amet
+                        consectetur adipisicing elit. Debitis molestiae
+                        obcaecati eum tempore at! Obcaecati architecto, ipsum
+                        enim ullam a sapiente blanditiis asperiores itaque eius
+                        nulla nesciunt ipsa aliquid cum impedit sed natus harum
+                        quasi deleniti doloribus magni saepe laborum dolore
+                        quidem. Libero, ducimus iure. Quae accusamus aspernatur
+                        id a dolore ipsam aliquam sapiente autem qui tempore
+                        rerum et dignissimos rem perspiciatis omnis corporis
+                        mollitia maxime, at hic pariatur sed officiis
+                        cupiditate? Corrupti modi beatae, necessitatibus quaerat
+                        dolore quasi, blanditiis minima fugit a qui quod ex
+                        eaque id, soluta optio! Illo laborum accusamus maiores,
+                        repudiandae corporis vitae quam dicta quaerat ratione!
+                        Architecto quo quae nemo modi eos, suscipit dolorem aut
+                        fuga repudiandae consectetur adipisci culpa repellat
+                        facilis ex ea tempora sunt dolores eligendi nihil
+                        accusantium, maxime placeat ipsa hic. Voluptatum iusto
+                        sequi eligendi nam iure illum aspernatur distinctio ut
+                        rem quod sint, quae unde deleniti corporis aut ea
+                        dolores, ratione eveniet. Facilis amet placeat maxime
+                        sapiente nesciunt odit atque dolorum, officiis natus sit
+                        corporis ipsum rerum itaque libero nobis, eaque ducimus
+                        reprehenderit minima. Sapiente culpa odit, nihil,
+                        repudiandae rerum quo nobis debitis nulla vel pariatur
+                        deserunt nostrum beatae quisquam sit laboriosam aliquam.
+                        Quo recusandae corporis autem consectetur, nostrum
+                        repellat asperiores tenetur ullam expedita molestias
+                        eaque laboriosam doloremque. Ab aut iste, omnis quasi
+                        fugiat reprehenderit! Minima neque voluptatem animi
+                        ipsam sequi asperiores fugiat veritatis quas. Vitae vel
+                        modi doloremque facilis possimus velit quisquam
+                        molestiae adipisci quos non eveniet veritatis fugiat
+                        nesciunt libero iure, repudiandae impedit sequi nobis.
+                        Distinctio enim laborum ipsa facere ratione qui, autem
+                        vel! Est molestias sint excepturi expedita rem obcaecati
+                        esse asperiores velit amet harum dicta, architecto illum
+                        sed rerum tenetur necessitatibus laboriosam praesentium
+                        neque ex eum nostrum eos. Excepturi distinctio, rerum
+                        fugiat qui ut sed quam fugit reiciendis dignissimos
+                        animi. Perspiciatis iusto magnam, itaque voluptates
+                        nulla ipsa quis, nisi nam pariatur, fuga id architecto
+                        debitis dignissimos animi nostrum eum incidunt. Aperiam
+                        molestias officiis ut doloribus quod itaque rerum!
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.contractor?.code || "---"}
@@ -267,11 +339,6 @@ export default function WorkOrderPage() {
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.longitude || "---"}
-                      </TableCell>
-                      <TableCell className="text-center py-4">
-                        <Button className="h-7 px-4 bg-[#136FB6] hover:bg-[#105E9A] text-white transition-colors text-[11px] font-bold rounded-md">
-                          Details
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
