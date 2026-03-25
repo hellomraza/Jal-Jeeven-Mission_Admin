@@ -1,5 +1,6 @@
 "use client";
 
+import { updateComponent } from "@/actions/componentAction";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,18 +21,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import ViewPhoto from "@/components/ViewPhoto";
-import apiClient from "@/lib/api-client";
 import { UserRole, WorkItemComponentStatus } from "@/types/usertypes";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
+  Check,
   CheckCircle2,
   Clock,
+  Edit,
   Loader2,
   XSquare,
 } from "lucide-react";
-import { useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { Field, FieldLabel } from "./ui/field";
 
 interface WorkItemComponent {
   approved_photo_id: string | null;
@@ -146,19 +148,6 @@ const WorkOrderComponentsTableRow = ({
   const [confirmingComponent, setConfirmingComponent] = useState<string | null>(
     null,
   );
-  const handleQuantityChange = (componentId: string, newValue: string) => {
-    const numValue = parseInt(newValue, 10) || 0;
-    const original = Number(row.quantity) || 0;
-
-    setQuantityEdits((prev) => ({
-      ...prev,
-      originalValue: original,
-      currentValue: numValue,
-      hasChanged: numValue !== original,
-    }));
-  };
-
-  const queryClient = useQueryClient();
 
   const getStatusBadge = (
     status: string,
@@ -208,27 +197,22 @@ const WorkOrderComponentsTableRow = ({
     }
   };
 
-  const updateComponentMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiClient.patch(`/components/${row.id}`, {
-        quantity: quantityEdits?.currentValue,
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      toast.success("Component quantity updated successfully");
-      queryClient.invalidateQueries({
-        queryKey: ["components", workItemId],
-      });
+  const [state, update, isPending] = useActionState(updateComponent, {
+    error: "",
+    success: "",
+  });
+
+  useEffect(() => {
+    if (state.error) {
+      toast.error(state.error);
       setQuantityEdits(null);
       setConfirmingComponent(null);
-    },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message || "Failed to update component",
-      );
-    },
-  });
+    } else if (state.success) {
+      toast.success(state.success);
+      setQuantityEdits(null);
+      setConfirmingComponent(null);
+    }
+  }, [state]);
 
   const isEditableStatus = () => {
     return (
@@ -237,23 +221,9 @@ const WorkOrderComponentsTableRow = ({
     );
   };
 
-  const handleUpdate = () => {
-    if (quantityEdits && quantityEdits?.hasChanged) {
-      setConfirmingComponent(row.id);
-    }
-  };
-
-  const confirmUpdate = () => {
-    if (quantityEdits) {
-      updateComponentMutation.mutate();
-    }
-  };
-
   const quantity = Number(row.quantity) || 0;
   const progress = Number(row.progress) || 0;
   const percentageProgress = quantity > 0 ? (progress / quantity) * 100 : 0;
-  const isEditable =
-    userRole === UserRole.DistrictOfficer && isEditableStatus();
   const displayQuantity = quantityEdits ? quantityEdits.currentValue : quantity;
 
   return (
@@ -270,19 +240,7 @@ const WorkOrderComponentsTableRow = ({
           {row.component?.unit ? `(${row.component.unit})` : ""}
         </TableCell>
         <TableCell className="text-[13px] text-gray-900 py-4.5 font-extrabold text-center">
-          {userRole === UserRole.DistrictOfficer ? (
-            <Input
-              type="number"
-              min="0"
-              disabled={!isEditable}
-              value={displayQuantity}
-              onChange={(e) => handleQuantityChange(row.id, e.target.value)}
-              className="w-24 h-8 text-center text-[12px]"
-              placeholder="0"
-            />
-          ) : (
-            <span>{displayQuantity}</span>
-          )}
+          <span>{displayQuantity}</span>
         </TableCell>
         <TableCell className="text-[13px] text-gray-900 py-4.5 font-extrabold text-center">
           {row.progress || "0"}
@@ -306,19 +264,14 @@ const WorkOrderComponentsTableRow = ({
           <TableCell className="py-4.5 text-center">
             <Button
               size="sm"
-              disabled={
-                !quantityEdits?.hasChanged || updateComponentMutation.isPending
-              }
-              onClick={() => handleUpdate()}
+              disabled={!isEditableStatus() || isPending}
+              onClick={() => setConfirmingComponent(row.id)}
               className="h-8 px-3 text-[11px] bg-[#136FB6] hover:bg-[#105E9A] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {updateComponentMutation.isPending ? (
-                <>
-                  <Loader2 size={12} className="mr-1 animate-spin" />
-                  Updating...
-                </>
+              {isPending ? (
+                <Loader2 size={12} className="mr-1 animate-spin" />
               ) : (
-                "Update"
+                <Edit size={14} className="stroke-[2.5]" />
               )}
             </Button>
           </TableCell>
@@ -327,38 +280,63 @@ const WorkOrderComponentsTableRow = ({
       <AlertDialog
         open={!!confirmingComponent}
         onOpenChange={(open: boolean) => {
-          if (!open) setConfirmingComponent(null);
+          if (!open) {
+            setConfirmingComponent(null);
+            setQuantityEdits(null);
+          }
         }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Update Component Quantity?</AlertDialogTitle>
+            <AlertDialogTitle>Edit Component Quantity</AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmingComponent && (
-                <>
-                  <p className="mb-2">
-                    Are you sure you want to update the quantity for this
-                    component?
-                  </p>
-                  <p className="text-sm font-medium text-gray-900">
-                    New Quantity:{" "}
-                    <span className="text-[#136FB6]">
-                      {quantityEdits?.currentValue}
-                    </span>
-                  </p>
-                </>
-              )}
+              Enter the new quantity for this component.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex gap-2 justify-end">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmUpdate}
-              className="bg-[#136FB6] hover:bg-[#105E9A]"
-            >
-              Confirm Update
-            </AlertDialogAction>
-          </div>
+          <form action={update}>
+            <Field>
+              <FieldLabel
+                htmlFor="quantity"
+                className="text-sm font-medium text-gray-700"
+              >
+                New Quantity
+              </FieldLabel>
+              <Input
+                type="number"
+                min="0"
+                defaultValue={quantity}
+                name="quantity"
+                placeholder="Enter quantity"
+              />
+            </Field>
+            <Input
+              type="hidden"
+              defaultValue={row.id}
+              name="componentId"
+              placeholder="Enter quantity"
+            />
+            <Input
+              type="hidden"
+              defaultValue={workItemId}
+              name="workItemId"
+              placeholder="Enter quantity"
+            />
+            <div className="flex gap-2 justify-end mt-4">
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                type="submit"
+                disabled={isPending}
+                className="bg-[#136FB6] hover:bg-[#105E9A] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isPending ? (
+                  <Loader2 size={14} className="mr-1 animate-spin" />
+                ) : (
+                  <Check size={14} className="stroke-[2.5] mr-1" />
+                )}
+                Update Quantity
+              </AlertDialogAction>
+            </div>
+          </form>
         </AlertDialogContent>
       </AlertDialog>
     </>
