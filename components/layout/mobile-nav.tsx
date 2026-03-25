@@ -2,16 +2,52 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { ClipboardList, Globe, LayoutDashboard, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LogoutButton from "../LogoutButtton";
-import { menuItems } from "./sidebar";
+
+export interface MobileNavItem {
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+  roles?: string[];
+}
+
+const getMenuItems = (userRole?: string): MobileNavItem[] => {
+  const baseItems: MobileNavItem[] = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: <LayoutDashboard size={20} />,
+      roles: ["Head Officer", "District Officer"],
+    },
+    {
+      label: "Work Order",
+      href: "/work-order",
+      icon: <ClipboardList size={20} />,
+    },
+    { label: "Agreement", href: "/agreement", icon: <Globe size={20} /> },
+  ];
+
+  return baseItems.filter((item) => {
+    if (!item.roles) return true;
+    return item.roles.includes(userRole || "");
+  });
+};
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string>();
   const pathname = usePathname();
+
+  useEffect(() => {
+    const role = localStorage.getItem("admin_role");
+    setUserRole(role || undefined);
+  }, []);
+
+  const menuItems = getMenuItems(userRole);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

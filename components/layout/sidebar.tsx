@@ -1,6 +1,5 @@
 "use client";
-
-import { ClipboardList, Globe, LayoutDashboard, ListTodo } from "lucide-react";
+import { ClipboardList, Globe, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
@@ -12,29 +11,43 @@ export interface SidebarItem {
   label: string;
   href: string;
   icon: React.ReactNode;
+  roles?: string[]; // If specified, only show for these roles
 }
 
-export const menuItems: SidebarItem[] = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: <LayoutDashboard size={20} />,
-  },
-  {
-    label: "Work Order",
-    href: "/work-order",
-    icon: <ClipboardList size={20} />,
-  },
-  // { label: "GIS MAP", href: "/gis-map", icon: <Monitor size={20} /> },
-  // { label: "Reports", href: "/reports", icon: <FileText size={20} /> },
-  { label: "Agreement", href: "/agreement", icon: <Globe size={20} /> },
-  // { label: "Pictures", href: "/pictures", icon: <ImageIcon size={20} /> },
-  // { label: "Update", href: "/update", icon: <FileUp size={20} /> },
-  { label: "Status", href: "/status", icon: <ListTodo size={20} /> },
-];
+const getMenuItems = (userRole?: string): SidebarItem[] => {
+  const baseItems: SidebarItem[] = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: <LayoutDashboard size={20} />,
+      roles: ["Head Officer", "District Officer"], // Hide for contractors
+    },
+    {
+      label: "Work Order",
+      href: "/work-order",
+      icon: <ClipboardList size={20} />,
+    },
+    { label: "Agreement", href: "/agreement", icon: <Globe size={20} /> },
+  ];
+
+  // Filter items based on user role
+  return baseItems.filter((item) => {
+    if (!item.roles) return true; // Show if no role restriction
+    return item.roles.includes(userRole || "");
+  });
+};
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [userRole, setUserRole] = React.useState<string>();
+
+  React.useEffect(() => {
+    const role = localStorage.getItem("admin_role");
+    setUserRole(role || undefined);
+  }, []);
+
+  const menuItems = getMenuItems(userRole);
+
   return (
     <aside className="w-64 h-full  bg-white border-r border-gray-100 flex flex-col p-4">
       <div className="flex-1 h-full overflow-hidden">
