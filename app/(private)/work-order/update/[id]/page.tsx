@@ -1,6 +1,7 @@
 import BackButton from "@/components/BackButton";
-import WorkOrderComponentsTable from "@/components/WorkOrderComponentsTable";
+import EmployeeManagementSheet from "@/components/EmployeeManagementSheet";
 import { Card, CardContent } from "@/components/ui/card";
+import WorkOrderComponentsTable from "@/components/WorkOrderComponentsTable";
 import { createServerApiClient } from "@/lib/server-api-client";
 
 const WorkOrderUpdatePage = async ({
@@ -33,6 +34,7 @@ const WorkOrderUpdatePage = async ({
             </p>
           </div>
         </div>
+        <EmployeeManagementSheet workItemId={id} />
       </div>
       <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white  py-0 my-6">
         <CardContent className="p-0 ">
