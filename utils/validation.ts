@@ -14,7 +14,7 @@ export const nameValidation = z
   .string()
   .min(2, "Name must be at least 2 characters");
 
-export const createEmployeeSchema = z.object({
+export const createUserSchema = z.object({
   name: nameValidation,
   email: emailValidation,
   password: passwordValidation,

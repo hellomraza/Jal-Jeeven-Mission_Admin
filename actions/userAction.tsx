@@ -1,10 +1,7 @@
 "use server";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { ActionState, validatedAction } from "@/utils/action-helper";
-import {
-  assignEmployeesSchema,
-  createEmployeeSchema,
-} from "@/utils/validation";
+import { assignEmployeesSchema, createUserSchema } from "@/utils/validation";
 import { AxiosError } from "axios";
 import { revalidatePath } from "next/cache";
 
@@ -51,7 +48,7 @@ export const assignEmployees = async (
 };
 
 export const createEmployee = validatedAction(
-  createEmployeeSchema,
+  createUserSchema,
   async (data: { name: string; email: string; password: string }) => {
     try {
       const apiClient = await createServerApiClient();
@@ -75,6 +72,35 @@ export const createEmployee = validatedAction(
       };
     } finally {
       revalidatePath("/work-order/update/[id]/employees");
+    }
+  },
+);
+
+export const createContractor = validatedAction(
+  createUserSchema,
+  async (data: { name: string; email: string; password: string }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const response = await apiClient.post("/users/contractor", data);
+      if (response.data) {
+        return { success: "Contractor created successfully", error: "" };
+      }
+      return { success: "", error: "Failed to create contractor" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to create contractor. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to create contractor",
+      };
+    } finally {
+      revalidatePath("/contractors");
     }
   },
 );
