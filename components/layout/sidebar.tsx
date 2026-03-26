@@ -28,6 +28,12 @@ const getMenuItems = (userRole?: string): SidebarItem[] => {
       href: "/work-order",
       icon: <ClipboardList size={20} />,
     },
+    {
+      label: "Contractors",
+      href: "/contractors",
+      icon: <ClipboardList size={20} />,
+      roles: [UserRole.DistrictOfficer, UserRole.HeadOfficer], // Only for DO and HO
+    },
     { label: "Agreement", href: "/agreement", icon: <Globe size={20} /> },
   ];
 
