@@ -12,10 +12,10 @@ export const getUserInfo = async () => {
 
 export const getContractors = async (page = 1, limit = 500) => {
   try {
-    const response = await apiClient.get(`/users?page=${page}&limit=${limit}`);
-    const users = response.data?.data || [];
-    return users.filter((user: any) => user.role === "CO");
+    const response = await apiClient.get<Contractor[]>(`/users/contractors`);
+    return response.data || [];
   } catch (error: any) {
+    console.log(error.response);
     throw new Error(
       error.response?.data?.message || "Failed to fetch contractors",
     );
