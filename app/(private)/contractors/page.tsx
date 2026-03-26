@@ -3,12 +3,17 @@ import CreateContractorButton from "@/components/CreateContractorButton";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
 import { cookies } from "next/headers";
+import { forbidden } from "next/navigation";
 
 export default async function ContractorsPage() {
   const cookieStore = await cookies();
   const role = cookieStore.get("admin_role")?.value;
   let contractors: Contractor[] = [];
   let error = null;
+
+  if (role !== UserRole.DistrictOfficer && role !== UserRole.HeadOfficer) {
+    forbidden();
+  }
 
   try {
     const apiClient = await createServerApiClient();
