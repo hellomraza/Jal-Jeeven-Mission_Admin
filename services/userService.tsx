@@ -32,3 +32,14 @@ export const getEmployees = async (page = 1, limit = 500) => {
     );
   }
 };
+
+export const getDistrictOfficers = async () => {
+  try {
+    const response = await apiClient.get(`/users/dos`);
+    return response.data || [];
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch district officers",
+    );
+  }
+};

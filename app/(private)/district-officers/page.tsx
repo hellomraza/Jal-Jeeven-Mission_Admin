@@ -1,24 +1,23 @@
-import ContractorManagementTable from "@/components/ContractorManagementTable";
-import CreateContractorButton from "@/components/CreateContractorButton";
+import CreateDOButton from "@/components/CreateDOButton";
+import DOManagementTable from "@/components/DOManagementTable";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
 import { cookies } from "next/headers";
 import { forbidden } from "next/navigation";
 
-export default async function ContractorsPage() {
+export default async function DistrictOfficersPage() {
+  let districtOfficers = [];
+  let error = null;
   const cookieStore = await cookies();
   const role = cookieStore.get("admin_role")?.value;
-  let contractors: Contractor[] = [];
-  let error = null;
 
-  if (role !== UserRole.DistrictOfficer && role !== UserRole.HeadOfficer) {
+  if (role !== UserRole.HeadOfficer) {
     forbidden();
   }
 
   try {
     const apiClient = await createServerApiClient();
-    contractors = (await apiClient.get<Contractor[]>(`/users/contractors`))
-      ?.data;
+    districtOfficers = (await apiClient.get(`/users/dos`))?.data;
   } catch (err: any) {
     error = err.message;
   }
@@ -29,16 +28,14 @@ export default async function ContractorsPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-[28px] font-bold text-[#1a2b3c]">
-              Contractors Management
+              District Officers Management
             </h1>
-            {role === UserRole.DistrictOfficer && (
-              <p className="text-[14px] text-gray-500 font-medium mt-2">
-                Create and manage contractors for your projects
-              </p>
-            )}
+            <p className="text-[14px] text-gray-500 font-medium mt-2">
+              Create and manage District Officers for your organization
+            </p>
           </div>
 
-          {role === UserRole.DistrictOfficer && <CreateContractorButton />}
+          <CreateDOButton />
         </div>
 
         {error ? (
@@ -46,7 +43,7 @@ export default async function ContractorsPage() {
             <p className="text-sm font-medium">{error}</p>
           </div>
         ) : (
-          <ContractorManagementTable contractors={contractors} />
+          <DOManagementTable districtOfficers={districtOfficers} />
         )}
       </div>
     </div>
