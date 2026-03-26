@@ -104,3 +104,32 @@ export const createContractor = validatedAction(
     }
   },
 );
+
+export const createDistrictOfficer = validatedAction(
+  createUserSchema,
+  async (data: { name: string; email: string; password: string }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const response = await apiClient.post("/users/do", data);
+      if (response.data) {
+        return { success: "District Officer created successfully", error: "" };
+      }
+      return { success: "", error: "Failed to create District Officer" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to create District Officer. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to create District Officer",
+      };
+    } finally {
+      revalidatePath("/district-officers");
+    }
+  },
+);
