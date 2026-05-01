@@ -130,7 +130,7 @@ const PhotoDetailsDialog = ({
                     alt="Photo"
                     width={500}
                     height={400}
-                    className="w-full h-auto object-cover"
+                    className="w-full h-auto object-cover aspect-square"
                     priority
                   />
                 </div>
@@ -318,7 +318,7 @@ const PhotoDetailsDialog = ({
               }
               className={
                 confirmAction === "reject"
-                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  ? "bg-destructive hover:bg-destructive/90"
                   : ""
               }
             >
