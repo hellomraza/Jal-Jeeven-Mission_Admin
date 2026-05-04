@@ -7,6 +7,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+import { UserRole } from "@/types/usertypes";
 import {
   ClipboardList,
   FileText,
@@ -16,8 +17,9 @@ import {
   LayoutDashboard,
   ListTodo,
   Monitor,
+  Users,
 } from "lucide-react";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Link from "next/link";
 
 interface SidebarItem {
@@ -46,14 +48,31 @@ const menuItems: SidebarItem[] = [
 ];
 
 export async function AppSidebar() {
+  const cookieStore = await cookies();
+  const role = cookieStore.get("admin_role")?.value;
   const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
+  console.log("Current pathname:", pathname, "User role:", role);
+
+  const roleBasedMenuItems = [
+    ...menuItems,
+    ...(role === UserRole.Contractor
+      ? [
+          {
+            label: "Employees",
+            href: "/employees",
+            icon: <Users size={20} />,
+          },
+        ]
+      : []),
+  ];
+
   return (
     <Sidebar>
       <div className="w-full h-24" />
       <SidebarContent>
         <SidebarMenu>
-          {menuItems.map((item) => {
+          {roleBasedMenuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <SidebarMenuItem key={item.href}>
