@@ -282,7 +282,7 @@ export default function CreateWorkItemPage() {
       schemetype: "",
       nofhtc: "",
       amount_approved: undefined,
-      payment_amount: undefined,
+      payment_amount: 0,
       serial_no: undefined,
       contractor_id: "",
     },
@@ -851,7 +851,7 @@ export default function CreateWorkItemPage() {
                     )}
                   />
 
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="payment_amount"
                     render={({ field }) => (
@@ -868,7 +868,7 @@ export default function CreateWorkItemPage() {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
                 </div>
               )}
 
