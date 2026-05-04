@@ -93,7 +93,7 @@ const PhotoDetailsDialog = ({
             View Photo
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <div className="flex items-start justify-between gap-4 pr-4">
               <DialogTitle className="text-lg font-semibold">
@@ -124,13 +124,12 @@ const PhotoDetailsDialog = ({
             <>
               <div className="space-y-6">
                 {/* Photo Image */}
-                <div className="relative w-full bg-gray-100 rounded-lg overflow-hidden">
+                <div className="relative w-full bg-gray-100 rounded-lg overflow-hidden aspect-video">
                   <Image
                     src={photoData.image_url}
                     alt="Photo"
-                    width={500}
-                    height={400}
-                    className="w-full h-auto object-cover aspect-square"
+                    fill
+                    className="h-auto object-cover"
                     priority
                   />
                 </div>
@@ -138,14 +137,14 @@ const PhotoDetailsDialog = ({
                 {/* Photo Metadata */}
                 <div className="space-y-3">
                   {/* Uploaded By Section */}
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 shrink-0">
                       <User size={16} className="text-gray-600" />
                       <p className="text-xs font-semibold text-gray-700">
                         UPLOADED BY:
                       </p>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 flex gap-2">
                       <p className="text-sm font-semibold text-gray-900">
                         {photoData.employee?.name ||
                           photoData.employee_id ||
@@ -160,14 +159,14 @@ const PhotoDetailsDialog = ({
                   </div>
 
                   {/* When Submitted */}
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 shrink-0">
                       <Clock size={16} className="text-gray-600" />
                       <p className="text-xs font-semibold text-gray-700">
                         WHEN SUBMITTED:
                       </p>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 flex gap-2">
                       <p className="text-sm font-semibold text-gray-900">
                         {photoData.timestamp
                           ? new Date(photoData.timestamp).toLocaleString(
@@ -179,14 +178,14 @@ const PhotoDetailsDialog = ({
                   </div>
 
                   {/* Submitted Where */}
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 shrink-0">
                       <MapPin size={16} className="text-gray-600" />
                       <p className="text-xs font-semibold text-gray-700">
                         SUBMITTED WHERE:
                       </p>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 flex gap-2">
                       <p className="text-sm font-semibold text-gray-900">
                         {photoData.latitude && photoData.longitude
                           ? `${Number(photoData.latitude).toFixed(6)}, ${Number(photoData.longitude).toFixed(6)}`
@@ -197,14 +196,14 @@ const PhotoDetailsDialog = ({
 
                   {/* Selected By (Contractor) */}
                   {photoData.is_selected && photoData.selectedByUser && (
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2 shrink-0">
                         <User size={16} className="text-gray-600" />
                         <p className="text-xs font-semibold text-gray-700">
                           SELECTED BY:
                         </p>
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 flex gap-2">
                         <p className="text-sm font-semibold text-gray-900">
                           {photoData.selectedByUser.name || "Unknown"}
                         </p>
@@ -219,14 +218,14 @@ const PhotoDetailsDialog = ({
 
                   {/* When Selected */}
                   {photoData.is_selected && photoData.selected_at && (
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2 shrink-0">
                         <Clock size={16} className="text-gray-600" />
                         <p className="text-xs font-semibold text-gray-700">
                           WHEN SELECTED:
                         </p>
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 flex gap-2">
                         <p className="text-sm font-semibold text-gray-900">
                           {new Date(
                             photoData.selected_at as string,
@@ -240,24 +239,45 @@ const PhotoDetailsDialog = ({
                   {role === "HO" &&
                     component?.status === "APPROVED" &&
                     doInfo && (
-                      <div className="flex items-start gap-4">
-                        <div className="flex items-center gap-2 shrink-0">
-                          <User size={16} className="text-gray-600" />
-                          <p className="text-xs font-semibold text-gray-700">
-                            APPROVED BY (DO):
-                          </p>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-900">
-                            {doInfo.name || "Unknown"}
-                          </p>
-                          {doInfo.email && (
-                            <p className="text-xs text-gray-600">
-                              {doInfo.email}
+                      <>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2 shrink-0">
+                            <User size={16} className="text-gray-600" />
+                            <p className="text-xs font-semibold text-gray-700">
+                              APPROVED BY (DO):
                             </p>
-                          )}
+                          </div>
+                          <div className="flex-1 flex gap-2">
+                            <p className="text-sm font-semibold text-gray-900">
+                              {doInfo.name || "Unknown"}
+                            </p>
+                            {doInfo.email && (
+                              <p className="text-xs text-gray-600">
+                                {doInfo.email}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
+
+                        {component?.status === "APPROVED" &&
+                          component?.approved_at && (
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2 shrink-0">
+                                <Clock size={16} className="text-gray-600" />
+                                <p className="text-xs font-semibold text-gray-700">
+                                  APPROVED AT:
+                                </p>
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {new Date(
+                                    component.approved_at as string,
+                                  ).toLocaleString("en-IN")}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                      </>
                     )}
                 </div>
               </div>
