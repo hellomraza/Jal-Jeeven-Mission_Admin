@@ -29,8 +29,10 @@ import {
   Clock,
   Edit,
   Loader2,
+  Map,
   XSquare,
 } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Field, FieldLabel } from "./ui/field";
@@ -97,6 +99,12 @@ export default function WorkOrderComponentsTable({
               <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12 text-center">
                 Photos
               </TableHead>
+              {(userRole === UserRole.HeadOfficer ||
+                userRole === UserRole.DistrictOfficer) && (
+                <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12 text-center">
+                  Map
+                </TableHead>
+              )}
               {userRole === UserRole.DistrictOfficer && (
                 <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12 text-center">
                   Action
@@ -108,7 +116,13 @@ export default function WorkOrderComponentsTable({
             {components?.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={userRole === UserRole.DistrictOfficer ? 8 : 7}
+                  colSpan={
+                    userRole === UserRole.DistrictOfficer
+                      ? 9
+                      : userRole === UserRole.HeadOfficer
+                        ? 8
+                        : 7
+                  }
                   className="h-40 text-center text-gray-500"
                 >
                   No components found for this work item.
@@ -258,8 +272,38 @@ const WorkOrderComponentsTableRow = ({
           </div>
         </TableCell>
         <TableCell className="py-4.5 ">
-          <ViewPhoto component={row} role={userRole ?? ""} />
+          <div className="flex flex-col items-center gap-2">
+            <ViewPhoto component={row} role={userRole ?? ""} />
+          </div>
         </TableCell>
+        {(userRole === UserRole.HeadOfficer ||
+          userRole === UserRole.DistrictOfficer) && (
+          <TableCell className="py-4.5 text-center">
+            {row.status === WorkItemComponentStatus.APPROVED ? (
+              <Link href={`/work-order/review-photos/${row.id}/approved-photo`}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-3 rounded-lg border-[#136FB6]/20 text-[#136FB6] hover:bg-[#DFEEF9] hover:text-[#105E9A]"
+                >
+                  <Map size={14} className="mr-1.5" />
+                  View Map
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled
+                className="h-8 px-3 rounded-lg border-gray-200 text-gray-400"
+                title="Available only after the component is approved"
+              >
+                <Map size={14} className="mr-1.5" />
+                View Map
+              </Button>
+            )}
+          </TableCell>
+        )}
         {userRole === UserRole.DistrictOfficer && (
           <TableCell className="py-4.5 text-center">
             <Button
