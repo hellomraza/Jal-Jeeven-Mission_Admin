@@ -236,7 +236,7 @@ export default function WorkOrderPage() {
                       key={row.id}
                       className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer"
                       onClick={() =>
-                        router.push(`/work-order/update/${row.id}`)
+                        router.push(`/work-order/details/${row.id}`)
                       }
                     >
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
