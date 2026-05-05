@@ -1,7 +1,7 @@
+import ApprovedPhotoViewer from "@/components/ApprovedPhotoViewer";
 import BackButton from "@/components/BackButton";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { MapPin, ShieldCheck } from "lucide-react";
-import Image from "next/image";
 
 function buildGoogleMapsUrl(latitude: number, longitude: number) {
   return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
@@ -89,16 +89,10 @@ export default async function ApprovedPhotoPage({
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
         <div className="overflow-hidden rounded-[28px] border border-gray-100 bg-white shadow-sm">
-          <div className="relative aspect-video bg-gray-100">
-            <Image
-              src={approvedPhoto.image_url}
-              alt="Approved component photo"
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 1024px) 100vw, 420px"
-            />
-          </div>
+          <ApprovedPhotoViewer
+            imageUrl={approvedPhoto.image_url}
+            alt="Approved component photo"
+          />
           <div className="space-y-3 p-5">
             <div className="flex items-center gap-2 text-[#136FB6]">
               <ShieldCheck size={18} />
