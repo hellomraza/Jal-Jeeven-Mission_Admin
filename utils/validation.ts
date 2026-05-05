@@ -20,6 +20,25 @@ export const createUserSchema = z.object({
   password: passwordValidation,
 });
 
+export const panValidation = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .regex(/^[A-Z]{5}[0-9]{4}[A-Z]$/, "PAN must follow the format AAAAA9999A");
+
+export const createContractorSchema = z.object({
+  name: nameValidation,
+  email: emailValidation,
+  password: passwordValidation,
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
+  pan_number: panValidation,
+  district_name: z.string().min(1, "District is required"),
+  address: z.string().trim().min(5, "Address is required"),
+});
+
 export const loginSchema = z.object({
   email: emailValidation,
   password: passwordValidation,

@@ -1,7 +1,11 @@
 "use server";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { ActionState, validatedAction } from "@/utils/action-helper";
-import { assignEmployeesSchema, createUserSchema } from "@/utils/validation";
+import {
+  assignEmployeesSchema,
+  createContractorSchema,
+  createUserSchema,
+} from "@/utils/validation";
 import { AxiosError } from "axios";
 import { revalidatePath } from "next/cache";
 
@@ -78,8 +82,16 @@ export const createEmployee = validatedAction(
 );
 
 export const createContractor = validatedAction(
-  createUserSchema,
-  async (data: { name: string; email: string; password: string }) => {
+  createContractorSchema,
+  async (data: {
+    name: string;
+    email: string;
+    password: string;
+    mobile: string;
+    pan_number: string;
+    district_name: string;
+    address: string;
+  }) => {
     try {
       const apiClient = await createServerApiClient();
       const response = await apiClient.post("/users/contractor", data);
