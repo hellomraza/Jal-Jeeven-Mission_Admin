@@ -62,7 +62,7 @@ export default function LoginPage() {
               Sign In
             </h1>
 
-            <button
+            {/* <button
               type="button"
               disabled={isPending}
               onClick={() => {}} // Google Sign In Not Implemented
@@ -80,15 +80,15 @@ export default function LoginPage() {
                 />
               </svg>
               Sign In With Google
-            </button>
+            </button> */}
 
-            <div className="flex items-center mb-4">
+            {/* <div className="flex items-center mb-4">
               <div className="flex-1 h-[1px] bg-gray-200"></div>
               <span className="px-3 text-[11px] text-zinc-800 font-bold">
                 Or
               </span>
               <div className="flex-1 h-[1px] bg-gray-200"></div>
-            </div>
+            </div> */}
 
             {state.error && (
               <div className="bg-red-50 text-red-500 text-[11px] p-2 rounded mb-3 border border-red-100 font-medium">
@@ -116,14 +116,14 @@ export default function LoginPage() {
 
               <div>
                 <InputWithPassword required name="password" />
-                <div className="flex justify-end mt-1.5">
+                {/* <div className="flex justify-end mt-1.5">
                   <a
                     href="#"
                     className="text-[10px] text-slate-700 font-bold hover:text-[#136FB6] transition decoration-[1.5px] border-b border-transparent hover:border-[#136FB6]"
                   >
                     Forgot Password?
                   </a>
-                </div>
+                </div> */}
               </div>
 
               <div className="pt-1">
@@ -140,7 +140,7 @@ export default function LoginPage() {
               </div>
             </form>
 
-            <div className="mt-5 mb-1">
+            {/* <div className="mt-5 mb-1">
               <p className="text-center text-[11px] text-gray-800 font-medium">
                 No Account ?{" "}
                 <a
@@ -150,7 +150,7 @@ export default function LoginPage() {
                   Sign Up
                 </a>
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
 

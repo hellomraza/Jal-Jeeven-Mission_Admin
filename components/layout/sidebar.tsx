@@ -41,6 +41,12 @@ const getMenuItems = (userRole?: string): SidebarItem[] => {
       roles: [UserRole.DistrictOfficer, UserRole.HeadOfficer], // Only for DO and HO
     },
     { label: "Agreement", href: "/agreement", icon: <Globe size={20} /> },
+    {
+      label: "Employees",
+      href: "/employees",
+      icon: <ClipboardList size={20} />,
+      roles: [UserRole.Contractor], // Only for contractors
+    },
   ];
 
   // Filter items based on user role

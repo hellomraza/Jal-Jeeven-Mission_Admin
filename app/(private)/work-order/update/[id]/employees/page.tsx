@@ -15,11 +15,11 @@ export default async function EmployeesPage({
   const cookieStore = await cookies();
   const role = cookieStore.get("admin_role")?.value;
   const apiClient = await createServerApiClient();
-  const allEmployeesResponse = await apiClient.get("/users/employees");
+  const allEmployeesResponse = await apiClient.get<PaginatedResponse<Employee>>("/users/my-created-users");
   const response = await apiClient.get(`/users/work-item/${id}/employees`);
 
   const assignedEmployees = response.data || [];
-  const allEmployees = allEmployeesResponse.data || [];
+  const allEmployees = allEmployeesResponse?.data?.data || [];
   const availableEmployees = allEmployees.filter(
     (emp: any) =>
       !assignedEmployees.some((assigned: any) => assigned.id === emp.id),

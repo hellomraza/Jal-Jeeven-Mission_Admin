@@ -183,14 +183,17 @@ export default function WorkOrderPage() {
                     Description
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Contractor Code
+                    Contractor Name
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                    Contractor Code
+                  </TableHead>
+                  {/* <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Latitude
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Longitude
-                  </TableHead>
+                  </TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -286,60 +289,20 @@ export default function WorkOrderPage() {
                         </span>
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium min-w-37.5 max-w-sm truncate">
-                        {row.description || "---"} Lorem ipsum dolor sit amet
-                        consectetur adipisicing elit. Debitis molestiae
-                        obcaecati eum tempore at! Obcaecati architecto, ipsum
-                        enim ullam a sapiente blanditiis asperiores itaque eius
-                        nulla nesciunt ipsa aliquid cum impedit sed natus harum
-                        quasi deleniti doloribus magni saepe laborum dolore
-                        quidem. Libero, ducimus iure. Quae accusamus aspernatur
-                        id a dolore ipsam aliquam sapiente autem qui tempore
-                        rerum et dignissimos rem perspiciatis omnis corporis
-                        mollitia maxime, at hic pariatur sed officiis
-                        cupiditate? Corrupti modi beatae, necessitatibus quaerat
-                        dolore quasi, blanditiis minima fugit a qui quod ex
-                        eaque id, soluta optio! Illo laborum accusamus maiores,
-                        repudiandae corporis vitae quam dicta quaerat ratione!
-                        Architecto quo quae nemo modi eos, suscipit dolorem aut
-                        fuga repudiandae consectetur adipisci culpa repellat
-                        facilis ex ea tempora sunt dolores eligendi nihil
-                        accusantium, maxime placeat ipsa hic. Voluptatum iusto
-                        sequi eligendi nam iure illum aspernatur distinctio ut
-                        rem quod sint, quae unde deleniti corporis aut ea
-                        dolores, ratione eveniet. Facilis amet placeat maxime
-                        sapiente nesciunt odit atque dolorum, officiis natus sit
-                        corporis ipsum rerum itaque libero nobis, eaque ducimus
-                        reprehenderit minima. Sapiente culpa odit, nihil,
-                        repudiandae rerum quo nobis debitis nulla vel pariatur
-                        deserunt nostrum beatae quisquam sit laboriosam aliquam.
-                        Quo recusandae corporis autem consectetur, nostrum
-                        repellat asperiores tenetur ullam expedita molestias
-                        eaque laboriosam doloremque. Ab aut iste, omnis quasi
-                        fugiat reprehenderit! Minima neque voluptatem animi
-                        ipsam sequi asperiores fugiat veritatis quas. Vitae vel
-                        modi doloremque facilis possimus velit quisquam
-                        molestiae adipisci quos non eveniet veritatis fugiat
-                        nesciunt libero iure, repudiandae impedit sequi nobis.
-                        Distinctio enim laborum ipsa facere ratione qui, autem
-                        vel! Est molestias sint excepturi expedita rem obcaecati
-                        esse asperiores velit amet harum dicta, architecto illum
-                        sed rerum tenetur necessitatibus laboriosam praesentium
-                        neque ex eum nostrum eos. Excepturi distinctio, rerum
-                        fugiat qui ut sed quam fugit reiciendis dignissimos
-                        animi. Perspiciatis iusto magnam, itaque voluptates
-                        nulla ipsa quis, nisi nam pariatur, fuga id architecto
-                        debitis dignissimos animi nostrum eum incidunt. Aperiam
-                        molestias officiis ut doloribus quod itaque rerum!
+                        {row.description || "---"}
+                      </TableCell>
+                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                        {row.contractor?.name || "---"}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.contractor?.code || "---"}
                       </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                      {/* <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.latitude || "---"}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.longitude || "---"}
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))
                 )}

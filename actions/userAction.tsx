@@ -71,6 +71,7 @@ export const createEmployee = validatedAction(
         error: "Failed to create employee",
       };
     } finally {
+      revalidatePath("/employees");
       revalidatePath("/work-order/update/[id]/employees");
     }
   },

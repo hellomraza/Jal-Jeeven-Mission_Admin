@@ -17,8 +17,10 @@ export default async function ContractorsPage() {
 
   try {
     const apiClient = await createServerApiClient();
-    contractors = (await apiClient.get<Contractor[]>(`/users/contractors`))
-      ?.data;
+    const res = await apiClient.get<PaginatedResponse<Contractor>>(
+      `/users/my-created-users`,
+    );
+    contractors = res.data?.data || [];
   } catch (err: any) {
     error = err.message;
   }
