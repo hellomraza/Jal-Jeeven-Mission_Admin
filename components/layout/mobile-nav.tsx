@@ -2,6 +2,7 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { UserRole } from "@/types/usertypes";
 import { ClipboardList, Globe, LayoutDashboard, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,14 +22,32 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
       label: "Dashboard",
       href: "/dashboard",
       icon: <LayoutDashboard size={20} />,
-      roles: ["Head Officer", "District Officer"],
+      roles: [UserRole.HeadOfficer, UserRole.DistrictOfficer], // Hide for contractors
     },
     {
       label: "Work Order",
       href: "/work-order",
       icon: <ClipboardList size={20} />,
     },
+    {
+      label: "District Officers",
+      href: "/district-officers",
+      icon: <ClipboardList size={20} />,
+      roles: [UserRole.HeadOfficer], // Only for HO
+    },
+    {
+      label: "Contractors",
+      href: "/contractors",
+      icon: <ClipboardList size={20} />,
+      roles: [UserRole.DistrictOfficer, UserRole.HeadOfficer], // Only for DO and HO
+    },
     { label: "Agreement", href: "/agreement", icon: <Globe size={20} /> },
+    {
+      label: "Employees",
+      href: "/employees",
+      icon: <ClipboardList size={20} />,
+      roles: [UserRole.Contractor], // Only for contractors
+    },
   ];
 
   return baseItems.filter((item) => {

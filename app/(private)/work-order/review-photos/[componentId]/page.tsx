@@ -1,9 +1,15 @@
+"use server";
 import BackButton from "@/components/BackButton";
 import ReviewPhotosComponent from "@/components/ReviewPhotosComponent";
 import { Button } from "@/components/ui/button";
 import { createServerApiClient } from "@/lib/server-api-client";
-import { WorkItemComponentStatus } from "@/types/usertypes";
+import {
+  PhotoStatusRecord,
+  PhotoStatusState,
+} from "@/services/photoStatusService";
+import { UserRole } from "@/types/usertypes";
 import { Map } from "lucide-react";
+import { cookies } from "next/headers";
 import Link from "next/link";
 
 const ReviewPhotos = async ({
@@ -14,52 +20,41 @@ const ReviewPhotos = async ({
   const { componentId } = await params; // Await the params to get the componentId
   const apiClient = await createServerApiClient();
 
-  const response = await apiClient.get<PaginatedResponse<Photo>>(
-    `/photos/component/${componentId}/review`,
+  const response = await apiClient.get<PaginatedResponse<PhotoStatusRecord>>(
+    `/photo-status/component/${componentId}?page=1&limit=100`,
   );
-  const photosData = response.data;
-  const photos = photosData?.data || [];
 
-  const progress = Number(photos[0]?.workItemComponent?.progress);
-  const quantity = Number(photos[0]?.workItemComponent?.quantity);
-  const progressPercentage =
-    quantity && quantity > 0 ? (Number(progress) / Number(quantity)) * 100 : 0;
-
-  const approveButtonDisabledReason = () => {
-    if (
-      photos?.some(
-        (photo) =>
-          photo.workItemComponent?.status === WorkItemComponentStatus.APPROVED,
-      )
-    ) {
-      return "This component has already been approved.";
-    }
-    if (
-      photos?.some(
-        (photo) =>
-          photo.workItemComponent?.status === WorkItemComponentStatus.SUBMITTED,
-      )
-    ) {
-      return "This component has already been submitted for approval.";
-    }
-    if (isNaN(quantity) || isNaN(progress)) {
-      return "Quantity or progress is not a valid number.";
-    }
-    if (quantity !== progress) {
-      return (
-        "Component is not completed yet" +
-        ` (Progress: ${progressPercentage.toFixed(2)}%)`
-      );
-    }
-
-    return "";
-  };
-
-  // Filter photos that have coordinates
-  const photosWithCoordinates = photos.filter(
-    (photo: any) => photo.latitude && photo.longitude,
+  const photoStatuses = response?.data?.data || [];
+  // fetch component details (quantity, progress, status) to enforce CO selection rules
+  const componentResponse = await apiClient.get<Component>(
+    `/components/${componentId}`,
   );
-  const hasMapData = photosWithCoordinates.length > 0;
+  const componentDetails = componentResponse?.data;
+  const cookieStore = await cookies();
+  const role = cookieStore.get("admin_role")?.value as UserRole | undefined;
+
+  // Filter visible photos per role
+  let visiblePhotoStatuses = photoStatuses;
+  if (role === UserRole.DistrictOfficer) {
+    visiblePhotoStatuses = photoStatuses.filter((p: any) =>
+      [
+        PhotoStatusState.SELECTED,
+        PhotoStatusState.APPROVED,
+        PhotoStatusState.REJECTED,
+      ].includes(p.status),
+    );
+  } else if (role === UserRole.HeadOfficer) {
+    visiblePhotoStatuses = photoStatuses.filter(
+      (p: any) => p.status === PhotoStatusState.APPROVED,
+    );
+  } else if (role === UserRole.Contractor) {
+    visiblePhotoStatuses = photoStatuses; // CO sees all uploaded/selected
+  }
+  const hasMapData = photoStatuses.some(
+    (photoStatus) =>
+      photoStatus.photo.latitude !== null &&
+      photoStatus.photo.longitude !== null,
+  );
 
   return (
     <div className="space-y-6 max-w-300 mx-auto">
@@ -71,7 +66,9 @@ const ReviewPhotos = async ({
               Review Component Photos
             </h1>
             <p className="text-[12px] text-gray-500 font-medium">
-              Component ID: {componentId}
+              Component: {componentDetails?.component?.name} (
+              {(componentDetails as any)?.progress ?? "0"} /{" "}
+              {(componentDetails as any)?.quantity ?? "0"} completed)
             </p>
           </div>
         </div>
@@ -85,12 +82,7 @@ const ReviewPhotos = async ({
         )}
       </div>
 
-      {approveButtonDisabledReason() && (
-        <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] text-amber-800">
-          {approveButtonDisabledReason()}
-        </div>
-      )}
-      {photos.length === 0 ? (
+      {visiblePhotoStatuses.length === 0 ? (
         <div className="p-20 text-center bg-white rounded-[20px] shadow-sm">
           <p className="text-gray-500 text-[14px]">
             No photos uploaded for this component yet.
@@ -98,11 +90,13 @@ const ReviewPhotos = async ({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {photos.map((photo: any) => (
+          {visiblePhotoStatuses.map((photoStatus: any) => (
             <ReviewPhotosComponent
-              key={photo.id}
-              photo={photo}
+              key={photoStatus.id}
+              photo={photoStatus}
               componentId={componentId}
+              userRole={role ?? UserRole.Contractor}
+              componentDetails={componentDetails}
             />
           ))}
         </div>

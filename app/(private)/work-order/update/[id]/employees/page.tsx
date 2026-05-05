@@ -4,6 +4,7 @@ import CreateEmployeeButton from "@/components/CreateEmployeeButton";
 import EmployeeManagementTable from "@/components/EmployeeManagementTable";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
+import { AxiosResponse } from "axios";
 import { cookies } from "next/headers";
 
 export default async function EmployeesPage({
@@ -15,7 +16,14 @@ export default async function EmployeesPage({
   const cookieStore = await cookies();
   const role = cookieStore.get("admin_role")?.value;
   const apiClient = await createServerApiClient();
-  const allEmployeesResponse = await apiClient.get<PaginatedResponse<Employee>>("/users/my-created-users");
+  let allEmployeesResponse: AxiosResponse<PaginatedResponse<Employee>> | null =
+    null;
+
+  if (role === UserRole.Contractor) {
+    allEmployeesResponse = await apiClient.get<PaginatedResponse<Employee>>(
+      "/users/my-created-users",
+    );
+  }
   const response = await apiClient.get(`/users/work-item/${id}/employees`);
 
   const assignedEmployees = response.data || [];

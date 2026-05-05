@@ -15,7 +15,6 @@ export const getContractors = async (page = 1, limit = 500) => {
     const response = await apiClient.get<Contractor[]>(`/users/contractors`);
     return response.data || [];
   } catch (error: any) {
-    console.log(error.response);
     throw new Error(
       error.response?.data?.message || "Failed to fetch contractors",
     );
