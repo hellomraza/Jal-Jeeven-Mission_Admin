@@ -246,8 +246,8 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
                 label="Payment Amount"
                 value={workItem.payment_amount}
               />
-              <DetailItem label="Latitude" value={workItem.latitude} />
-              <DetailItem label="Longitude" value={workItem.longitude} />
+              {/* <DetailItem label="Latitude" value={workItem.latitude} />
+              <DetailItem label="Longitude" value={workItem.longitude} /> */}
               <DetailItem label="Serial No." value={workItem.serial_no} />
               <DetailItem
                 label="Sub-division"
