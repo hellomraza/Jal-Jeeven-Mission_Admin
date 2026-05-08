@@ -20,6 +20,18 @@ export const createUserSchema = z.object({
   password: passwordValidation,
 });
 
+export const createEmployeeSchema = z.object({
+  name: nameValidation,
+  email: emailValidation,
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
+  district_name: z.string().min(1, "District is required"),
+  address: z.string().trim().min(5, "Address is required"),
+  password: passwordValidation,
+});
+
 export const panValidation = z
   .string()
   .trim()

@@ -21,7 +21,7 @@ export const createServerApiClient = async (
   const token = options.token || tokenFromCookie;
 
   const client = axios.create({
-    baseURL: SERVER_API_BASE_URL,
+    baseURL: "http://localhost:3000",
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
@@ -35,6 +35,13 @@ export const createServerApiClient = async (
       if (error.response?.status === 401) {
         console.warn("Unauthorized request - token may be invalid or expired");
       }
+
+      console.log("API request error:", {
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response?.status,
+        responseData: error.response?.data,
+      });
 
       // if error message is "User #some-uuid not found" and status is 404, it means the token is valid but the user does not exist
       if (

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "https://jjm-backend.vercel.app", // Update with your API base URL
+  baseURL: "http://localhost:3000", // Update with your API base URL
   headers: {
     "Content-Type": "application/json",
   },
@@ -19,6 +19,12 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.log("API request error:", {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      responseData: error.response?.data,
+    });
     return Promise.reject(error);
   },
 );

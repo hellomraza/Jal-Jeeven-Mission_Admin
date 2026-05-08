@@ -4,6 +4,7 @@ import { ActionState, validatedAction } from "@/utils/action-helper";
 import {
   assignEmployeesSchema,
   createContractorSchema,
+  createEmployeeSchema,
   createUserSchema,
 } from "@/utils/validation";
 import { AxiosError } from "axios";
@@ -52,9 +53,17 @@ export const assignEmployees = async (
 };
 
 export const createEmployee = validatedAction(
-  createUserSchema,
-  async (data: { name: string; email: string; password: string }) => {
+  createEmployeeSchema,
+  async (data: {
+    name: string;
+    email: string;
+    mobile: string;
+    district_name: string;
+    address: string;
+    password: string;
+  }) => {
     try {
+      console.log("Creating employee with data:", data);
       const apiClient = await createServerApiClient();
       const response = await apiClient.post("/users/employee", data);
       if (response.data) {

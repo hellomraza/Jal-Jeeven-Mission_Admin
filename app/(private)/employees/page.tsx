@@ -80,6 +80,12 @@ export default async function EmployeesPage() {
                       <th className="px-6 py-4 text-[12px] font-bold text-[#1a2b3c]">
                         Code
                       </th>
+                      <th className="px-6 py-4 text-[12px] font-bold text-[#1a2b3c]">
+                        District
+                      </th>
+                      <th className="px-6 py-4 text-[12px] font-bold text-[#1a2b3c]">
+                        Mobile
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -96,6 +102,12 @@ export default async function EmployeesPage() {
                         </td>
                         <td className="px-6 py-4 text-[13px] text-gray-600">
                           {employee.code || "-"}
+                        </td>
+                        <td className="px-6 py-4 text-[13px] text-gray-600">
+                          {employee.district_name || "-"}
+                        </td>
+                        <td className="px-6 py-4 text-[13px] text-gray-600">
+                          {employee.mobile || "-"}
                         </td>
                       </tr>
                     ))}
