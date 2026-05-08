@@ -40,7 +40,7 @@ export default function ApprovedPhotoViewer({
       </div>
 
       <DialogContent
-        showCloseButton
+        showCloseButton={false}
         className="max-w-[96vw] max-h-[92vh] bg-black/95 border-0 p-0 flex items-center justify-center"
       >
         <img

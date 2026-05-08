@@ -1,4 +1,13 @@
 import CreateEmployeeButton from "@/components/CreateEmployeeButton";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
 import { cookies } from "next/headers";
@@ -68,51 +77,61 @@ export default async function EmployeesPage() {
                   </p>
                 </div>
               ) : (
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50/60 text-left">
-                      <th className="px-6 py-4 text-[12px] font-bold text-[#1a2b3c]">
-                        Name
-                      </th>
-                      <th className="px-6 py-4 text-[12px] font-bold text-[#1a2b3c]">
-                        Email
-                      </th>
-                      <th className="px-6 py-4 text-[12px] font-bold text-[#1a2b3c]">
-                        Code
-                      </th>
-                      <th className="px-6 py-4 text-[12px] font-bold text-[#1a2b3c]">
-                        District
-                      </th>
-                      <th className="px-6 py-4 text-[12px] font-bold text-[#1a2b3c]">
-                        Mobile
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {employees.map((employee) => (
-                      <tr
-                        key={employee.id}
-                        className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
-                      >
-                        <td className="px-6 py-4 text-[13px] font-medium text-[#1a2b3c]">
-                          {employee.name}
-                        </td>
-                        <td className="px-6 py-4 text-[13px] text-gray-600">
-                          {employee.email}
-                        </td>
-                        <td className="px-6 py-4 text-[13px] text-gray-600">
-                          {employee.code || "-"}
-                        </td>
-                        <td className="px-6 py-4 text-[13px] text-gray-600">
-                          {employee.district_name || "-"}
-                        </td>
-                        <td className="px-6 py-4 text-[13px] text-gray-600">
-                          {employee.mobile || "-"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <Card className="border-none shadow-none bg-transparent rounded-none py-0">
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-[#DFEEF9] hover:bg-[#DFEEF9] border-none">
+                          <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                            S No.
+                          </TableHead>
+                          <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                            Name
+                          </TableHead>
+                          <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                            Email
+                          </TableHead>
+                          <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                            Code
+                          </TableHead>
+                          <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                            District
+                          </TableHead>
+                          <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                            Mobile
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {employees.map((employee, index) => (
+                          <TableRow
+                            key={employee.id}
+                            className="border-b border-gray-50 hover:bg-gray-50/50"
+                          >
+                            <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
+                              {index + 1}
+                            </TableCell>
+                            <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
+                              {employee.name || "---"}
+                            </TableCell>
+                            <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                              {employee.email || "---"}
+                            </TableCell>
+                            <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                              {employee.code || "---"}
+                            </TableCell>
+                            <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                              {employee.district_name || "---"}
+                            </TableCell>
+                            <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                              {employee.mobile || "---"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
               )}
             </div>
           </div>
