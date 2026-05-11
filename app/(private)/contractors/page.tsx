@@ -1,13 +1,4 @@
-import CreateContractorButton from "@/components/CreateContractorButton";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import ContractorManagementTable from "@/components/ContractorManagementTable";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
 import { cookies } from "next/headers";
@@ -28,10 +19,9 @@ export default async function ContractorsPage() {
     let url = "";
     if (role === UserRole.DistrictOfficer) {
       url = "";
-      const res = await apiClient.get<PaginatedResponse<Contractor>>(
-        "/users/my-created-users",
-      );
-      contractors = res.data?.data || [];
+      const res = await apiClient.get<Contractor[]>("/users/contractors");
+
+      contractors = res.data || [];
     } else if (role === UserRole.HeadOfficer) {
       url = "";
       const res = await apiClient.get<Contractor[]>("/users/contractors");
@@ -56,7 +46,16 @@ export default async function ContractorsPage() {
             )}
           </div>
 
-          {role === UserRole.DistrictOfficer && <CreateContractorButton />}
+          {/* {role === UserRole.DistrictOfficer && <CreateContractorButton />} */}
+          {role === UserRole.DistrictOfficer && (
+            <div className="ml-4">
+              <a href="/contractors/upload">
+                <button className="h-10 px-4 rounded-lg bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px]">
+                  Upload Contractors
+                </button>
+              </a>
+            </div>
+          )}
         </div>
 
         {error ? (
@@ -76,74 +75,10 @@ export default async function ContractorsPage() {
               </div>
             </div>
 
-            <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] py-0 overflow-hidden bg-white rounded-2xl">
-              <CardContent className="p-0">
-                {contractors.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <p className="text-[14px] text-gray-500 font-medium">
-                      No contractors listed yet
-                    </p>
-                    {role === UserRole.DistrictOfficer && (
-                      <p className="text-[12px] text-gray-400 mt-1">
-                        Click "Create Contractor" to add a new contractor
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-[#DFEEF9] hover:bg-[#DFEEF9] border-none">
-                        <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                          S No.
-                        </TableHead>
-                        <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                          Name
-                        </TableHead>
-                        <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                          Email
-                        </TableHead>
-                        <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                          Code
-                        </TableHead>
-                        <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                          District
-                        </TableHead>
-                        <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                          Mobile
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {contractors.map((contractor, index) => (
-                        <TableRow
-                          key={contractor.id}
-                          className="border-b border-gray-50 hover:bg-gray-50/50"
-                        >
-                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
-                            {index + 1}
-                          </TableCell>
-                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
-                            {contractor.name || "---"}
-                          </TableCell>
-                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                            {contractor.email || "---"}
-                          </TableCell>
-                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                            {contractor.code || "---"}
-                          </TableCell>
-                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                            {contractor.district_name || "---"}
-                          </TableCell>
-                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                            {contractor.mobile || "---"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
+            <ContractorManagementTable
+              contractors={contractors}
+              canEdit={role === UserRole.DistrictOfficer}
+            />
           </div>
         )}
       </div>
