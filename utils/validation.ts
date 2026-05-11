@@ -9,6 +9,7 @@ export const passwordValidation = z
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]/,
     "Password must contain uppercase, lowercase, and number",
   );
+export const loginPasswordValidation = z.string();
 
 export const nameValidation = z
   .string()
@@ -32,6 +33,12 @@ export const createEmployeeSchema = z.object({
   password: passwordValidation,
 });
 
+export const updateEmployeeSchema = createEmployeeSchema
+  .omit({ password: true })
+  .extend({
+    id: z.string().min(1, "Employee ID is required"),
+  });
+
 export const panValidation = z
   .string()
   .trim()
@@ -51,9 +58,15 @@ export const createContractorSchema = z.object({
   address: z.string().trim().min(5, "Address is required"),
 });
 
+export const updateContractorSchema = createContractorSchema
+  .omit({ password: true })
+  .extend({
+    id: z.string().min(1, "Contractor ID is required"),
+  });
+
 export const loginSchema = z.object({
   email: emailValidation,
-  password: passwordValidation,
+  password: loginPasswordValidation,
 });
 
 export const assignEmployeesSchema = z.object({

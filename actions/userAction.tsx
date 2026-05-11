@@ -6,6 +6,8 @@ import {
   createContractorSchema,
   createEmployeeSchema,
   createUserSchema,
+  updateContractorSchema,
+  updateEmployeeSchema,
 } from "@/utils/validation";
 import { AxiosError } from "axios";
 import { revalidatePath } from "next/cache";
@@ -63,7 +65,6 @@ export const createEmployee = validatedAction(
     password: string;
   }) => {
     try {
-      console.log("Creating employee with data:", data);
       const apiClient = await createServerApiClient();
       const response = await apiClient.post("/users/employee", data);
       if (response.data) {
@@ -120,6 +121,88 @@ export const createContractor = validatedAction(
       return {
         success: "",
         error: "Failed to create contractor",
+      };
+    } finally {
+      revalidatePath("/contractors");
+    }
+  },
+);
+
+export const updateEmployee = validatedAction(
+  updateEmployeeSchema,
+  async (data: {
+    id: string;
+    name: string;
+    email: string;
+    mobile: string;
+    district_name: string;
+    address: string;
+  }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const { id, ...updateData } = data;
+      const response = await apiClient.patch(
+        `/users/employee/${id}`,
+        updateData,
+      );
+      if (response.data) {
+        return { success: "Employee updated successfully", error: "" };
+      }
+      return { success: "", error: "Failed to update employee" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to update employee. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to update employee",
+      };
+    } finally {
+      revalidatePath("/employees");
+      revalidatePath("/work-order/update/[id]/employees");
+    }
+  },
+);
+
+export const updateContractor = validatedAction(
+  updateContractorSchema,
+  async (data: {
+    id: string;
+    name: string;
+    email: string;
+    mobile: string;
+    pan_number: string;
+    district_name: string;
+    address: string;
+  }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const { id, ...updateData } = data;
+      const response = await apiClient.patch(
+        `/users/contractor/${id}`,
+        updateData,
+      );
+      if (response.data) {
+        return { success: "Contractor updated successfully", error: "" };
+      }
+      return { success: "", error: "Failed to update contractor" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to update contractor. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to update contractor",
       };
     } finally {
       revalidatePath("/contractors");
