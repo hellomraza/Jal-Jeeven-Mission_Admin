@@ -9,7 +9,7 @@ import { ActionState } from "@/utils/action-helper";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(
@@ -30,6 +30,9 @@ export default function LoginPage() {
     },
     { error: "", success: "", data: null },
   );
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
     <div className="min-h-screen relative bg-white overflow-hidden flex w-full">
@@ -110,12 +113,21 @@ export default function LoginPage() {
                     required
                     name="email"
                     placeholder="Enter email or mobile no."
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </Field>
               </div>
 
               <div>
-                <InputWithPassword required name="password" />
+                <InputWithPassword
+                  required
+                  name="password"
+                  value={password}
+                  onChange={(e) =>
+                    setPassword((e.target as HTMLInputElement).value)
+                  }
+                />
                 {/* <div className="flex justify-end mt-1.5">
                   <a
                     href="#"
