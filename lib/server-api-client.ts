@@ -21,7 +21,7 @@ export const createServerApiClient = async (
   const token = options.token || tokenFromCookie;
 
   const client = axios.create({
-    baseURL: SERVER_API_BASE_URL,
+    baseURL: "http://localhost:3000", // Update with your API base URL
     headers: {
       "Content-Type": "application/json",
       ...options.headers,

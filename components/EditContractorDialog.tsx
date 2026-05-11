@@ -15,6 +15,7 @@ import { getLocationsByType } from "@/services/locationService";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
+import InputWithPassword from "./InputWithPassword";
 import { Field, FieldLabel } from "./ui/field";
 import {
   Select,
@@ -46,6 +47,7 @@ export default function EditContractorDialog({
     pan_number: "",
     district_name: "",
     address: "",
+    password: "",
   });
 
   const [state, formAction, isPending] = useActionState(updateContractor, {
@@ -81,6 +83,7 @@ export default function EditContractorDialog({
         pan_number: contractor.pan_number || "",
         district_name: contractor.district_name || "",
         address: contractor.address || "",
+        password: "",
       });
       setHasSubmitted(false);
     }
@@ -124,6 +127,7 @@ export default function EditContractorDialog({
         pan_number: "",
         district_name: "",
         address: "",
+        password: "",
       });
       setHasSubmitted(false);
     }
@@ -171,7 +175,12 @@ export default function EditContractorDialog({
               disabled={isPending}
             />
           </Field>
-
+          <InputWithPassword
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            disabled={isPending}
+          />
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
               Mobile Number

@@ -1,4 +1,5 @@
 import ContractorManagementTable from "@/components/ContractorManagementTable";
+import CreateContractorButton from "@/components/CreateContractorButton";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
 import { cookies } from "next/headers";
@@ -45,17 +46,18 @@ export default async function ContractorsPage() {
               </p>
             )}
           </div>
-
-          {/* {role === UserRole.DistrictOfficer && <CreateContractorButton />} */}
-          {role === UserRole.DistrictOfficer && (
-            <div className="ml-4">
-              <a href="/contractors/upload">
-                <button className="h-10 px-4 rounded-lg bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px]">
-                  Upload Contractors
-                </button>
-              </a>
-            </div>
-          )}
+          <div className="flex gap-2 items-center">
+            {role === UserRole.DistrictOfficer && <CreateContractorButton />}
+            {role === UserRole.DistrictOfficer && (
+              <div className="ml-4">
+                <a href="/contractors/upload">
+                  <button className="h-10 px-4 rounded-lg bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px]">
+                    Upload Contractors
+                  </button>
+                </a>
+              </div>
+            )}
+          </div>
         </div>
 
         {error ? (

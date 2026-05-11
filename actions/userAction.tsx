@@ -60,7 +60,6 @@ export const createEmployee = validatedAction(
     name: string;
     email: string;
     mobile: string;
-    district_name: string;
     address: string;
     password: string;
   }) => {
@@ -134,8 +133,8 @@ export const updateEmployee = validatedAction(
     id: string;
     name: string;
     email: string;
+    password?: string;
     mobile: string;
-    district_name: string;
     address: string;
   }) => {
     try {
@@ -175,6 +174,7 @@ export const updateContractor = validatedAction(
     id: string;
     name: string;
     email: string;
+    password?: string;
     mobile: string;
     pan_number: string;
     district_name: string;

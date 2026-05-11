@@ -28,15 +28,16 @@ export const createEmployeeSchema = z.object({
     .string()
     .trim()
     .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
-  district_name: z.string().min(1, "District is required"),
+  district_name: z.string().min(1, "District is required").optional(),
   address: z.string().trim().min(5, "Address is required"),
-  password: passwordValidation,
+  password: z.string().trim().nonempty("Password is required"),
 });
 
 export const updateEmployeeSchema = createEmployeeSchema
   .omit({ password: true })
   .extend({
     id: z.string().min(1, "Employee ID is required"),
+    password: z.string().optional().default(""),
   });
 
 export const panValidation = z
@@ -62,6 +63,7 @@ export const updateContractorSchema = createContractorSchema
   .omit({ password: true })
   .extend({
     id: z.string().min(1, "Contractor ID is required"),
+    password: z.string().optional().default(""),
   });
 
 export const loginSchema = z.object({
