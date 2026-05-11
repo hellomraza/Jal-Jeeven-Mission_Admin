@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import * as XLSX from "xlsx";
 
 import { Button } from "@/components/ui/button";
@@ -12,10 +13,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getAgreements } from "@/services/agreementService";
-import { Upload } from "lucide-react";
+import { UserRole } from "@/types/usertypes";
+import { FileUp, Upload } from "lucide-react";
 import React from "react";
 
 export default function AgreementPage() {
+  const router = useRouter();
   const [agreements, setAgreements] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [userRole, setUserRole] = React.useState<string | null>(null);
@@ -61,7 +64,7 @@ export default function AgreementPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+      <div className="flex flex-col md:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
         <h2 className="text-[16px] font-bold text-[#1a2b3c] whitespace-nowrap px-2">
           Agreement Details {userRole === "CO" ? "(My Agreements)" : ""}
         </h2>
@@ -90,9 +93,19 @@ export default function AgreementPage() {
             </>
           </div>
         )} */}
+        {userRole === UserRole.HeadOfficer && (
+          <Button
+            type="button"
+            onClick={() => router.push("/agreement/upload")}
+            className="bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px] h-10 px-6 rounded-lg flex items-center gap-2 shadow-sm"
+          >
+            <FileUp size={14} className="stroke-[2.5]" />
+            Upload Agreement
+          </Button>
+        )}
       </div>
 
-      <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden bg-white rounded-[16px] py-0">
+      <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden bg-white rounded-2xl py-0">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -159,7 +172,13 @@ export default function AgreementPage() {
                         {row.work?.work_code || "N/A"}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.contractor?.name || "N/A"}
+                        {row.contractor?.name
+                          ? row.contractor?.name
+                              ?.toLowerCase()
+                              .includes("temporary")
+                            ? "---"
+                            : row.contractor?.name
+                          : "N/A"}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.contractor?.code || "N/A"}
@@ -167,7 +186,7 @@ export default function AgreementPage() {
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.agreementno}
                       </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium max-w-[120px]">
+                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium max-w-30">
                         {row.created_at
                           ? new Date(row.created_at).toLocaleDateString()
                           : "N/A"}
