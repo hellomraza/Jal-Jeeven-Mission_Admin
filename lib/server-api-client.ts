@@ -36,6 +36,13 @@ export const createServerApiClient = async (
         console.warn("Unauthorized request - token may be invalid or expired");
       }
 
+      console.log("API request error:", {
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response?.status,
+        responseData: error.response?.data,
+      });
+
       // if error message is "User #some-uuid not found" and status is 404, it means the token is valid but the user does not exist
       if (
         error.response?.status === 404 &&

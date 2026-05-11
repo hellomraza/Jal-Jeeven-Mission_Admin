@@ -1,6 +1,6 @@
 "use client";
 
-import { createEmployee } from "@/actions/userAction";
+import { updateContractor } from "@/actions/userAction";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,7 +15,6 @@ import { getLocationsByType } from "@/services/locationService";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
-import InputWithPassword from "./InputWithPassword";
 import { Field, FieldLabel } from "./ui/field";
 import {
   Select,
@@ -26,27 +25,30 @@ import {
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 
-interface CreateEmployeeDialogProps {
+interface EditContractorDialogProps {
+  contractor: Contractor | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function CreateEmployeeDialog({
+export default function EditContractorDialog({
+  contractor,
   isOpen,
   onOpenChange,
-}: CreateEmployeeDialogProps) {
+}: EditContractorDialogProps) {
   const { toast } = useToast();
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [formData, setFormData] = useState({
+    id: "",
     name: "",
     email: "",
     mobile: "",
+    pan_number: "",
     district_name: "",
     address: "",
-    password: "",
   });
 
-  const [state, formAction, isPending] = useActionState(createEmployee, {
+  const [state, formAction, isPending] = useActionState(updateContractor, {
     success: "",
     error: "",
   });
@@ -70,10 +72,25 @@ export default function CreateEmployeeDialog({
     : "";
 
   useEffect(() => {
+    if (isOpen && contractor) {
+      setFormData({
+        id: contractor.id,
+        name: contractor.name || "",
+        email: contractor.email || "",
+        mobile: contractor.mobile || "",
+        pan_number: contractor.pan_number || "",
+        district_name: contractor.district_name || "",
+        address: contractor.address || "",
+      });
+      setHasSubmitted(false);
+    }
+  }, [contractor, isOpen]);
+
+  useEffect(() => {
     if (state.success && hasSubmitted) {
       toast({
         title: "Success",
-        description: "Employee created successfully.",
+        description: "Contractor updated successfully.",
       });
       setHasSubmitted(false);
       onOpenChange(false);
@@ -86,7 +103,7 @@ export default function CreateEmployeeDialog({
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "pan_number" ? value.toUpperCase() : value,
     }));
   };
 
@@ -100,12 +117,13 @@ export default function CreateEmployeeDialog({
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setFormData({
+        id: "",
         name: "",
         email: "",
         mobile: "",
+        pan_number: "",
         district_name: "",
         address: "",
-        password: "",
       });
       setHasSubmitted(false);
     }
@@ -116,7 +134,7 @@ export default function CreateEmployeeDialog({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Create New Employee</DialogTitle>
+          <DialogTitle>Edit Contractor</DialogTitle>
         </DialogHeader>
 
         <form
@@ -124,6 +142,8 @@ export default function CreateEmployeeDialog({
           className="mt-4 space-y-4"
           onSubmit={() => setHasSubmitted(true)}
         >
+          <input type="hidden" name="id" value={formData.id} />
+
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
               Name
@@ -132,7 +152,6 @@ export default function CreateEmployeeDialog({
               type="text"
               name="name"
               required
-              placeholder="John Doe"
               value={formData.name}
               onChange={handleInputChange}
               disabled={isPending}
@@ -147,7 +166,6 @@ export default function CreateEmployeeDialog({
               type="email"
               name="email"
               required
-              placeholder="employee@jjm.local"
               value={formData.email}
               onChange={handleInputChange}
               disabled={isPending}
@@ -163,11 +181,29 @@ export default function CreateEmployeeDialog({
               name="mobile"
               required
               maxLength={10}
-              placeholder="9876543210"
               value={formData.mobile}
               onChange={handleInputChange}
               disabled={isPending}
             />
+          </Field>
+
+          <Field>
+            <FieldLabel className="text-xs font-semibold text-gray-500">
+              PAN Number
+            </FieldLabel>
+            <Input
+              type="text"
+              name="pan_number"
+              required
+              maxLength={10}
+              value={formData.pan_number}
+              onChange={handleInputChange}
+              disabled={isPending}
+              pattern="[A-Z]{5}[0-9]{4}[A-Z]"
+              title="PAN must follow the format AAAAA9999A"
+              autoComplete="off"
+            />
+            <p className="text-xs text-gray-500">Format: AAAAA9999A</p>
           </Field>
 
           <Field>
@@ -217,53 +253,27 @@ export default function CreateEmployeeDialog({
             <Textarea
               name="address"
               required
-              placeholder="Full postal address"
               value={formData.address}
               onChange={handleInputChange}
+              placeholder="Full postal address"
               disabled={isPending}
               rows={3}
             />
           </Field>
 
-          <div className="space-y-2">
-            <InputWithPassword
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              disabled={isPending}
-            />
-            <p className="text-xs text-gray-500">
-              Min 8 chars, uppercase, lowercase, number
-            </p>
-          </div>
-
-          {state.error && hasSubmitted && (
-            <div className="rounded-md bg-red-50 p-3">
-              <p className="text-sm text-red-700">{state.error}</p>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              disabled={isPending}
-            >
-              Cancel
-            </Button>
+          <DialogFooter className="pt-2">
             <Button
               type="submit"
-              disabled={isPending}
-              className="bg-[#136FB6] hover:bg-[#0d5a8f]"
+              className="bg-[#136FB6] hover:bg-[#0d5a8f] text-white"
+              disabled={isPending || !formData.id}
             >
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  Saving...
                 </>
               ) : (
-                "Create"
+                "Save Changes"
               )}
             </Button>
           </DialogFooter>

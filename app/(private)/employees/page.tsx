@@ -1,4 +1,5 @@
 import CreateEmployeeButton from "@/components/CreateEmployeeButton";
+import EmployeeManagementTable from "@/components/EmployeeManagementTable";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
 import { cookies } from "next/headers";
@@ -57,52 +58,7 @@ export default async function EmployeesPage() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
-              {employees.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <p className="text-[14px] text-gray-500 font-medium">
-                    No employees created yet
-                  </p>
-                  <p className="text-[12px] text-gray-400 mt-1">
-                    Click "Create Employee" to add a new employee
-                  </p>
-                </div>
-              ) : (
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50/60 text-left">
-                      <th className="px-6 py-4 text-[12px] font-bold text-[#1a2b3c]">
-                        Name
-                      </th>
-                      <th className="px-6 py-4 text-[12px] font-bold text-[#1a2b3c]">
-                        Email
-                      </th>
-                      <th className="px-6 py-4 text-[12px] font-bold text-[#1a2b3c]">
-                        Code
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {employees.map((employee) => (
-                      <tr
-                        key={employee.id}
-                        className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
-                      >
-                        <td className="px-6 py-4 text-[13px] font-medium text-[#1a2b3c]">
-                          {employee.name}
-                        </td>
-                        <td className="px-6 py-4 text-[13px] text-gray-600">
-                          {employee.email}
-                        </td>
-                        <td className="px-6 py-4 text-[13px] text-gray-600">
-                          {employee.code || "-"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
+            <EmployeeManagementTable employees={employees} canEdit />
           </div>
         )}
       </div>

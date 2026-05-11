@@ -1,5 +1,4 @@
 import ContractorManagementTable from "@/components/ContractorManagementTable";
-import CreateContractorButton from "@/components/CreateContractorButton";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
 import { cookies } from "next/headers";
@@ -17,10 +16,17 @@ export default async function ContractorsPage() {
 
   try {
     const apiClient = await createServerApiClient();
-    const res = await apiClient.get<PaginatedResponse<Contractor>>(
-      `/users/my-created-users`,
-    );
-    contractors = res.data?.data || [];
+    let url = "";
+    if (role === UserRole.DistrictOfficer) {
+      url = "";
+      const res = await apiClient.get<Contractor[]>("/users/contractors");
+
+      contractors = res.data || [];
+    } else if (role === UserRole.HeadOfficer) {
+      url = "";
+      const res = await apiClient.get<Contractor[]>("/users/contractors");
+      contractors = res.data || [];
+    }
   } catch (err: any) {
     error = err.message;
   }
@@ -40,7 +46,16 @@ export default async function ContractorsPage() {
             )}
           </div>
 
-          {role === UserRole.DistrictOfficer && <CreateContractorButton />}
+          {/* {role === UserRole.DistrictOfficer && <CreateContractorButton />} */}
+          {role === UserRole.DistrictOfficer && (
+            <div className="ml-4">
+              <a href="/contractors/upload">
+                <button className="h-10 px-4 rounded-lg bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px]">
+                  Upload Contractors
+                </button>
+              </a>
+            </div>
+          )}
         </div>
 
         {error ? (
@@ -48,7 +63,23 @@ export default async function ContractorsPage() {
             <p className="text-sm font-medium">{error}</p>
           </div>
         ) : (
-          <ContractorManagementTable contractors={contractors} />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-[18px] font-bold text-[#1a2b3c]">
+                  Contractors
+                </h2>
+                <p className="text-[12px] text-gray-500 font-medium">
+                  Manage all contractors in the system
+                </p>
+              </div>
+            </div>
+
+            <ContractorManagementTable
+              contractors={contractors}
+              canEdit={role === UserRole.DistrictOfficer}
+            />
+          </div>
         )}
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { createEmployee } from "@/actions/userAction";
+import { updateEmployee } from "@/actions/userAction";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,7 +15,6 @@ import { getLocationsByType } from "@/services/locationService";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
-import InputWithPassword from "./InputWithPassword";
 import { Field, FieldLabel } from "./ui/field";
 import {
   Select,
@@ -26,27 +25,29 @@ import {
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 
-interface CreateEmployeeDialogProps {
+interface EditEmployeeDialogProps {
+  employee: Employee | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function CreateEmployeeDialog({
+export default function EditEmployeeDialog({
+  employee,
   isOpen,
   onOpenChange,
-}: CreateEmployeeDialogProps) {
+}: EditEmployeeDialogProps) {
   const { toast } = useToast();
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [formData, setFormData] = useState({
+    id: "",
     name: "",
     email: "",
     mobile: "",
     district_name: "",
     address: "",
-    password: "",
   });
 
-  const [state, formAction, isPending] = useActionState(createEmployee, {
+  const [state, formAction, isPending] = useActionState(updateEmployee, {
     success: "",
     error: "",
   });
@@ -70,10 +71,24 @@ export default function CreateEmployeeDialog({
     : "";
 
   useEffect(() => {
+    if (isOpen && employee) {
+      setFormData({
+        id: employee.id,
+        name: employee.name || "",
+        email: employee.email || "",
+        mobile: employee.mobile || "",
+        district_name: employee.district_name || "",
+        address: employee.address || "",
+      });
+      setHasSubmitted(false);
+    }
+  }, [employee, isOpen]);
+
+  useEffect(() => {
     if (state.success && hasSubmitted) {
       toast({
         title: "Success",
-        description: "Employee created successfully.",
+        description: "Employee updated successfully.",
       });
       setHasSubmitted(false);
       onOpenChange(false);
@@ -100,12 +115,12 @@ export default function CreateEmployeeDialog({
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setFormData({
+        id: "",
         name: "",
         email: "",
         mobile: "",
         district_name: "",
         address: "",
-        password: "",
       });
       setHasSubmitted(false);
     }
@@ -116,7 +131,7 @@ export default function CreateEmployeeDialog({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Create New Employee</DialogTitle>
+          <DialogTitle>Edit Employee</DialogTitle>
         </DialogHeader>
 
         <form
@@ -124,6 +139,8 @@ export default function CreateEmployeeDialog({
           className="mt-4 space-y-4"
           onSubmit={() => setHasSubmitted(true)}
         >
+          <input type="hidden" name="id" value={formData.id} />
+
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
               Name
@@ -132,7 +149,6 @@ export default function CreateEmployeeDialog({
               type="text"
               name="name"
               required
-              placeholder="John Doe"
               value={formData.name}
               onChange={handleInputChange}
               disabled={isPending}
@@ -147,7 +163,6 @@ export default function CreateEmployeeDialog({
               type="email"
               name="email"
               required
-              placeholder="employee@jjm.local"
               value={formData.email}
               onChange={handleInputChange}
               disabled={isPending}
@@ -163,7 +178,6 @@ export default function CreateEmployeeDialog({
               name="mobile"
               required
               maxLength={10}
-              placeholder="9876543210"
               value={formData.mobile}
               onChange={handleInputChange}
               disabled={isPending}
@@ -217,53 +231,27 @@ export default function CreateEmployeeDialog({
             <Textarea
               name="address"
               required
-              placeholder="Full postal address"
               value={formData.address}
               onChange={handleInputChange}
+              placeholder="Full postal address"
               disabled={isPending}
               rows={3}
             />
           </Field>
 
-          <div className="space-y-2">
-            <InputWithPassword
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              disabled={isPending}
-            />
-            <p className="text-xs text-gray-500">
-              Min 8 chars, uppercase, lowercase, number
-            </p>
-          </div>
-
-          {state.error && hasSubmitted && (
-            <div className="rounded-md bg-red-50 p-3">
-              <p className="text-sm text-red-700">{state.error}</p>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              disabled={isPending}
-            >
-              Cancel
-            </Button>
+          <DialogFooter className="pt-2">
             <Button
               type="submit"
-              disabled={isPending}
-              className="bg-[#136FB6] hover:bg-[#0d5a8f]"
+              className="bg-[#136FB6] hover:bg-[#0d5a8f] text-white"
+              disabled={isPending || !formData.id}
             >
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  Saving...
                 </>
               ) : (
-                "Create"
+                "Save Changes"
               )}
             </Button>
           </DialogFooter>

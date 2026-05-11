@@ -279,7 +279,11 @@ const WorkOrderComponentsTableRow = ({
         {(userRole === UserRole.HeadOfficer ||
           userRole === UserRole.DistrictOfficer) && (
           <TableCell className="py-4.5 text-center">
-            {row.status === WorkItemComponentStatus.APPROVED ? (
+            {(userRole === UserRole.HeadOfficer &&
+              row.status === WorkItemComponentStatus.APPROVED) ||
+            (userRole === UserRole.DistrictOfficer &&
+              (row.status === WorkItemComponentStatus.APPROVED ||
+                row.status === WorkItemComponentStatus.SUBMITTED)) ? (
               <Link href={`/work-order/review-photos/${row.id}/approved-photo`}>
                 <Button
                   variant="outline"

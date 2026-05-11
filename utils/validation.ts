@@ -9,6 +9,7 @@ export const passwordValidation = z
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]/,
     "Password must contain uppercase, lowercase, and number",
   );
+export const loginPasswordValidation = z.string();
 
 export const nameValidation = z
   .string()
@@ -20,9 +21,52 @@ export const createUserSchema = z.object({
   password: passwordValidation,
 });
 
-export const loginSchema = z.object({
+export const createEmployeeSchema = z.object({
+  name: nameValidation,
+  email: emailValidation,
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
+  district_name: z.string().min(1, "District is required"),
+  address: z.string().trim().min(5, "Address is required"),
+  password: passwordValidation,
+});
+
+export const updateEmployeeSchema = createEmployeeSchema
+  .omit({ password: true })
+  .extend({
+    id: z.string().min(1, "Employee ID is required"),
+  });
+
+export const panValidation = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .regex(/^[A-Z]{5}[0-9]{4}[A-Z]$/, "PAN must follow the format AAAAA9999A");
+
+export const createContractorSchema = z.object({
+  name: nameValidation,
   email: emailValidation,
   password: passwordValidation,
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
+  pan_number: panValidation,
+  district_name: z.string().min(1, "District is required"),
+  address: z.string().trim().min(5, "Address is required"),
+});
+
+export const updateContractorSchema = createContractorSchema
+  .omit({ password: true })
+  .extend({
+    id: z.string().min(1, "Contractor ID is required"),
+  });
+
+export const loginSchema = z.object({
+  email: emailValidation,
+  password: loginPasswordValidation,
 });
 
 export const assignEmployeesSchema = z.object({

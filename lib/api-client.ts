@@ -19,6 +19,12 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.log("API request error:", {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      responseData: error.response?.data,
+    });
     return Promise.reject(error);
   },
 );

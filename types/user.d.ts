@@ -6,6 +6,9 @@ type Employee = {
   name: string;
   role: "EM";
   updated_at: string;
+  address: string;
+  district_name: string;
+  mobile: string;
 };
 
 type Contractor = {
@@ -17,4 +20,8 @@ type Contractor = {
   name: string;
   role: "CO";
   updated_at: string;
+  address: string;
+  district_name: string;
+  mobile: string;
+  pan_number: string;
 };
