@@ -199,6 +199,11 @@ const ReviewPhotosComponent = ({
               APPROVED
             </div>
           )}
+          {isRejected && (
+            <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg">
+              REJECTED
+            </div>
+          )}
         </button>
 
         <CardContent className="px-5 pb-5 flex-1">

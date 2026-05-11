@@ -1,4 +1,5 @@
 import { createServerApiClient } from "@/lib/server-api-client";
+import { UserRole } from "@/types/usertypes";
 import Image from "next/image";
 import HeaderMenu from "../HeaderMenu";
 import MobileNav from "./mobile-nav";
@@ -12,6 +13,7 @@ export default async function Header() {
   } catch (error) {
     console.error("Failed to fetch user profile:", error);
   }
+
   const userName = user?.name || "User";
   const userRole = user?.role || "Role";
 
@@ -36,6 +38,9 @@ export default async function Header() {
         </div>
         <h2 className="hidden md:block text-[14px] font-bold text-[#1a2b3c] tracking-wide">
           Welcome {userName.toUpperCase()} ({userRole})
+          {userRole === UserRole.DistrictOfficer
+            ? ` (${user?.district?.districtname})`
+            : ""}
         </h2>
       </div>
 
