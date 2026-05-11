@@ -1,19 +1,20 @@
 import apiClient from "@/lib/api-client";
 
-export const getWorkItems = async (page = 1, limit = 20) => {
-  try {
-    const response = await apiClient.get<PaginatedResponse<WorkItem>>(
-      `/work-items/my-work-items?page=${page}&limit=${limit}`,
-    );
-    return response.data;
-  } catch (error: any) {
-    if (error.response?.status === 401) {
-      throw new Error("Unauthorized");
-    }
-    throw new Error(
-      error.response?.data?.message || "Failed to fetch work items",
-    );
-  }
+export type WorkItemImport = {
+  workcodeid: number | null;
+  workcode: string | null;
+  excel: string | null;
+  district_code: string | null;
+  block_code: string | null;
+  panchayat_code: string | null;
+  schemetype: string | null;
+  schemecategory: string | null;
+  nofhtc: number | null;
+  aa_amount: number | null;
+  payment_rs: number | null;
+  sr: string | null;
+  systemdate: Date | null;
+  contractor_code: string | null;
 };
 
 export const getWorkItem = async (id: string) => {
@@ -126,6 +127,43 @@ export const getWorkItemEmployees = async (workItemId: string) => {
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message || "Failed to fetch work item employees",
+    );
+  }
+};
+
+export const uploadWorkItemFile = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await apiClient.post(
+      "/import/upload?type=workitem",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to upload workitem file",
+    );
+  }
+};
+
+export const bulkImportWorkItems = async (workItems: WorkItemImport[]) => {
+  try {
+    const response = await apiClient.post("/import/work-items/bulk", {
+      workItems,
+    });
+
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to import work items",
     );
   }
 };
