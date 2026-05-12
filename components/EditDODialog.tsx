@@ -1,6 +1,6 @@
 "use client";
 
-import { updateContractor } from "@/actions/userAction";
+import { updateDistrictOfficer } from "@/actions/userAction";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,19 +24,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Textarea } from "./ui/textarea";
 
-interface EditContractorDialogProps {
-  contractor: Contractor | null;
+interface EditDODialogProps {
+  officer: any | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function EditContractorDialog({
-  contractor,
+export default function EditDODialog({
+  officer,
   isOpen,
   onOpenChange,
-}: EditContractorDialogProps) {
+}: EditDODialogProps) {
   const { toast } = useToast();
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -44,13 +43,11 @@ export default function EditContractorDialog({
     name: "",
     email: "",
     mobile: "",
-    pan_number: "",
-    district_name: "",
-    address: "",
+    district_id: "",
     password: "",
   });
 
-  const [state, formAction, isPending] = useActionState(updateContractor, {
+  const [state, formAction, isPending] = useActionState(updateDistrictOfficer, {
     success: "",
     error: "",
   });
@@ -60,40 +57,34 @@ export default function EditContractorDialog({
     queryFn: async () => {
       const response = await getLocationsByType("districts");
       const districtList = response?.data || response || [];
-      return Array.isArray(districtList) ? (districtList as District[]) : [];
+      return Array.isArray(districtList) ? (districtList as any[]) : [];
     },
     enabled: isOpen,
   });
 
   const districts = districtsQuery.data || [];
   const districtsLoading = districtsQuery.isLoading;
-  const districtsError = districtsQuery.error
-    ? districtsQuery.error instanceof Error
-      ? districtsQuery.error.message
-      : "Failed to load districts from location api"
-    : "";
 
   useEffect(() => {
-    if (isOpen && contractor) {
+    if (isOpen && officer) {
       setFormData({
-        id: contractor.id,
-        name: contractor.name || "",
-        email: contractor.email || "",
-        mobile: contractor.mobile || "",
-        pan_number: contractor.pan_number || "",
-        district_name: contractor.district_name || "",
-        address: contractor.address || "",
+        id: officer.id,
+        name: officer.name || "",
+        email: officer.email || "",
+        mobile: officer.mobile || "",
+        district_id:
+          officer.district_id || officer.district_id?.toString() || "",
         password: "",
       });
       setHasSubmitted(false);
     }
-  }, [contractor, isOpen]);
+  }, [officer, isOpen]);
 
   useEffect(() => {
     if (state.success && hasSubmitted) {
       toast({
         title: "Success",
-        description: "Contractor updated successfully.",
+        description: "District Officer updated successfully.",
       });
       setHasSubmitted(false);
       onOpenChange(false);
@@ -104,16 +95,13 @@ export default function EditContractorDialog({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "pan_number" ? value.toUpperCase() : value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDistrictChange = (value: string) => {
     setFormData((prev) => ({
       ...prev,
-      district_name: value,
+      district_id: value,
     }));
   };
 
@@ -124,9 +112,7 @@ export default function EditContractorDialog({
         name: "",
         email: "",
         mobile: "",
-        pan_number: "",
-        district_name: "",
-        address: "",
+        district_id: "",
         password: "",
       });
       setHasSubmitted(false);
@@ -138,7 +124,7 @@ export default function EditContractorDialog({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Contractor</DialogTitle>
+          <DialogTitle>Edit District Officer</DialogTitle>
         </DialogHeader>
 
         <form
@@ -147,6 +133,11 @@ export default function EditContractorDialog({
           onSubmit={() => setHasSubmitted(true)}
         >
           <input type="hidden" name="id" value={formData.id} />
+          <input
+            type="hidden"
+            name="district_id"
+            value={formData.district_id}
+          />
 
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
@@ -175,12 +166,7 @@ export default function EditContractorDialog({
               disabled={isPending}
             />
           </Field>
-          <InputWithPassword
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            disabled={isPending}
-          />
+
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
               Mobile Number
@@ -198,30 +184,11 @@ export default function EditContractorDialog({
 
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
-              PAN Number
-            </FieldLabel>
-            <Input
-              type="text"
-              name="pan_number"
-              required
-              maxLength={10}
-              value={formData.pan_number}
-              onChange={handleInputChange}
-              disabled={isPending}
-              pattern="[A-Z]{5}[0-9]{4}[A-Z]"
-              title="PAN must follow the format AAAAA9999A"
-              autoComplete="off"
-            />
-            <p className="text-xs text-gray-500">Format: AAAAA9999A</p>
-          </Field>
-
-          <Field>
-            <FieldLabel className="text-xs font-semibold text-gray-500">
               District
             </FieldLabel>
             <Select
-              name="district_name"
-              value={formData.district_name}
+              name="district"
+              value={formData.district_id}
               onValueChange={handleDistrictChange}
               disabled={isPending || districtsLoading}
             >
@@ -235,40 +202,30 @@ export default function EditContractorDialog({
                 />
               </SelectTrigger>
               <SelectContent>
-                {districts.map((district) => (
+                {districts.map((district: any) => (
                   <SelectItem
-                    key={district.districtid}
-                    value={district.districtname}
+                    key={district.district_code}
+                    value={String(district.district_code)}
                   >
                     {district.districtname}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <input
-              type="hidden"
-              name="district_name"
-              value={formData.district_name}
-            />
-            {districtsError && (
-              <p className="mt-1 text-xs text-red-600">{districtsError}</p>
-            )}
           </Field>
 
-          <Field>
-            <FieldLabel className="text-xs font-semibold text-gray-500">
-              Address
-            </FieldLabel>
-            <Textarea
-              name="address"
-              required
-              value={formData.address}
-              onChange={handleInputChange}
-              placeholder="Full postal address"
-              disabled={isPending}
-              rows={3}
-            />
-          </Field>
+          <InputWithPassword
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            disabled={isPending}
+          />
+
+          {state.error && (
+            <div className="rounded-md bg-red-50 p-3">
+              <p className="text-sm text-red-700">{state.error}</p>
+            </div>
+          )}
 
           <DialogFooter className="pt-2">
             <Button

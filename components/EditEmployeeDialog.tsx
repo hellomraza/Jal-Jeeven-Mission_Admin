@@ -15,14 +15,8 @@ import { getLocationsByType } from "@/services/locationService";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
+import InputWithPassword from "./InputWithPassword";
 import { Field, FieldLabel } from "./ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 import { Textarea } from "./ui/textarea";
 
 interface EditEmployeeDialogProps {
@@ -45,6 +39,7 @@ export default function EditEmployeeDialog({
     mobile: "",
     district_name: "",
     address: "",
+    password: "",
   });
 
   const [state, formAction, isPending] = useActionState(updateEmployee, {
@@ -79,6 +74,7 @@ export default function EditEmployeeDialog({
         mobile: employee.mobile || "",
         district_name: employee.district_name || "",
         address: employee.address || "",
+        password: "",
       });
       setHasSubmitted(false);
     }
@@ -121,6 +117,7 @@ export default function EditEmployeeDialog({
         mobile: "",
         district_name: "",
         address: "",
+        password: "",
       });
       setHasSubmitted(false);
     }
@@ -171,6 +168,18 @@ export default function EditEmployeeDialog({
 
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
+              Password
+            </FieldLabel>
+            <InputWithPassword
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              disabled={isPending}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel className="text-xs font-semibold text-gray-500">
               Mobile Number
             </FieldLabel>
             <Input
@@ -184,7 +193,7 @@ export default function EditEmployeeDialog({
             />
           </Field>
 
-          <Field>
+          {/* <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
               District
             </FieldLabel>
@@ -222,7 +231,7 @@ export default function EditEmployeeDialog({
             {districtsError && (
               <p className="mt-1 text-xs text-red-600">{districtsError}</p>
             )}
-          </Field>
+          </Field> */}
 
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">

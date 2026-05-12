@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -9,6 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useState } from "react";
+import EditDODialog from "./EditDODialog";
 
 interface DOManagementTableProps {
   districtOfficers: any[];
@@ -17,6 +20,9 @@ interface DOManagementTableProps {
 export default function DOManagementTable({
   districtOfficers,
 }: DOManagementTableProps) {
+  const [selectedDO, setSelectedDO] = useState<any | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
   return (
     <>
       <div className="space-y-4">
@@ -52,6 +58,15 @@ export default function DOManagementTable({
                     <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
                       Email
                     </TableHead>
+                    <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
+                      Mobile
+                    </TableHead>
+                    <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
+                      District
+                    </TableHead>
+                    <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -66,6 +81,27 @@ export default function DOManagementTable({
                       <TableCell className="text-[13px] text-gray-600">
                         {do_.email}
                       </TableCell>
+                      <TableCell className="text-[13px] text-gray-600">
+                        {do_.mobile || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-[13px] text-gray-600">
+                        {do_.district_name ||
+                          do_.district?.districtname ||
+                          "N/A"}
+                      </TableCell>
+                      <TableCell className="text-[13px] text-gray-600">
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setSelectedDO(do_);
+                              setIsEditOpen(true);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -74,6 +110,13 @@ export default function DOManagementTable({
           </CardContent>
         </Card>
       </div>
+
+      <EditDODialog
+        key={isEditOpen ? "open" : "close"}
+        officer={selectedDO}
+        isOpen={isEditOpen}
+        onOpenChange={(v) => setIsEditOpen(v)}
+      />
     </>
   );
 }

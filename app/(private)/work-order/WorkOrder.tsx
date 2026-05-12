@@ -26,14 +26,36 @@ import React from "react";
 export default function WorkOrder({
   workItems,
   role: userRole,
+  currentPage,
+  totalPages,
+  totalWorkItems,
 }: {
   workItems: WorkItem[];
   role: string | null;
+  currentPage: number;
+  totalPages: number;
+  totalWorkItems: number;
 }) {
   const router = useRouter();
   const [selectedDistrict, setSelectedDistrict] = React.useState<string | null>(
     null,
   );
+
+  const updatePageParam = (page: number) => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (page <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(page));
+    }
+
+    const nextUrl = params.toString()
+      ? `${window.location.pathname}?${params.toString()}`
+      : window.location.pathname;
+
+    router.replace(nextUrl, { scroll: false });
+  };
 
   const resetFilters = () => {
     setSelectedDistrict(null);
@@ -133,9 +155,9 @@ export default function WorkOrder({
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     S No.
                   </TableHead>
-                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                  {/* <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Title
-                  </TableHead>
+                  </TableHead> */}
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Work Code
                   </TableHead>
@@ -166,9 +188,9 @@ export default function WorkOrder({
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Status
                   </TableHead>
-                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                  {/* <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Description
-                  </TableHead>
+                  </TableHead> */}
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Contractor Name
                   </TableHead>
@@ -204,9 +226,9 @@ export default function WorkOrder({
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
                         {index + 1}
                       </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
+                      {/* <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
                         {row.title || "---"}
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
                         {row.work_code || "---"}
                       </TableCell>
@@ -250,11 +272,17 @@ export default function WorkOrder({
                           {row.status || "PENDING"}
                         </span>
                       </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium min-w-37.5 max-w-sm truncate">
+                      {/* <TableCell className="text-[12px] text-gray-900 py-4 font-medium min-w-37.5 max-w-sm truncate">
                         {row.description || "---"}
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.contractor?.name || "---"}
+                        {row.contractor?.name
+                          ? row.contractor.name
+                              ?.toLowerCase()
+                              ?.includes("temporary")
+                            ? "---"
+                            : row.contractor.name
+                          : "---"}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.contractor?.code || "---"}
@@ -273,6 +301,35 @@ export default function WorkOrder({
           </div>
         </CardContent>
       </Card>
+
+      <div className="flex flex-col gap-3 rounded-2xl bg-white px-4 py-3 shadow-[0_4px_24px_rgba(0,0,0,0.02)] md:flex-row md:items-center md:justify-between">
+        <p className="text-[12px] font-medium text-gray-600">
+          Showing page {currentPage} of {totalPages} · {totalWorkItems} total
+          work item{totalWorkItems === 1 ? "" : "s"}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 px-4 text-[12px]"
+            onClick={() => updatePageParam(Math.max(currentPage - 1, 1))}
+            disabled={currentPage <= 1}
+          >
+            Previous
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 px-4 text-[12px]"
+            onClick={() =>
+              updatePageParam(Math.min(currentPage + 1, totalPages))
+            }
+            disabled={currentPage >= totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
 
       <div className="flex justify-end pt-2">
         <Button

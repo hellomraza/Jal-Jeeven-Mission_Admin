@@ -17,13 +17,6 @@ import { Loader2 } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import InputWithPassword from "./InputWithPassword";
 import { Field, FieldLabel } from "./ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 import { Textarea } from "./ui/textarea";
 
 interface CreateEmployeeDialogProps {
@@ -170,7 +163,7 @@ export default function CreateEmployeeDialog({
             />
           </Field>
 
-          <Field>
+          {/* <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
               District
             </FieldLabel>
@@ -208,7 +201,7 @@ export default function CreateEmployeeDialog({
             {districtsError && (
               <p className="mt-1 text-xs text-red-600">{districtsError}</p>
             )}
-          </Field>
+          </Field> */}
 
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">

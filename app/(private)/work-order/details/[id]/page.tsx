@@ -125,6 +125,8 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
       : 0;
   const workProgress =
     Number(workItem.progress_percentage) || componentCompletion;
+  const contractorName = workItem.contractor?.name?.toLowerCase() || "";
+  const isTemporaryContractor = contractorName.includes("temporary");
 
   return (
     <div className="space-y-6 pb-10">
@@ -146,7 +148,7 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
           href={`/work-order/update/${id}`}
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#136FB6] px-4 py-2.5 text-[12px] font-bold text-white shadow-md shadow-[#136FB6]/20 transition-colors hover:bg-[#105E9A]"
         >
-          Open Update Page
+          View Updates
           <ArrowRight size={14} />
         </Link>
       </div>
@@ -161,18 +163,18 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
                 >
                   {workItem.status.replaceAll("_", " ")}
                 </Badge>
-                <span className="text-[12px] font-semibold text-gray-500">
+                {/* <span className="text-[12px] font-semibold text-gray-500">
                   Work Code: {formatValue(workItem.work_code)}
-                </span>
+                </span> */}
               </div>
 
               <div>
                 <h2 className="text-[28px] font-black tracking-tight text-[#1a2b3c]">
-                  {formatValue(workItem.title)}
+                  {formatValue(workItem.work_code)}
                 </h2>
-                <p className="mt-2 max-w-3xl text-[13px] leading-6 text-gray-600">
+                {/* <p className="mt-2 max-w-3xl text-[13px] leading-6 text-gray-600">
                   {formatValue(workItem.description)}
-                </p>
+                </p> */}
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -276,15 +278,26 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
               </div>
             </div>
 
-            <div className="mt-5 grid gap-3 md:grid-cols-2">
-              <DetailItem label="Name" value={workItem.contractor?.name} />
-              <DetailItem label="Code" value={workItem.contractor?.code} />
-              <DetailItem label="Email" value={workItem.contractor?.email} />
-              <DetailItem
-                label="District ID"
-                value={workItem.contractor?.district_id}
-              />
-            </div>
+            {isTemporaryContractor ? (
+              <div className="mt-5 rounded-3xl border border-dashed border-gray-200 bg-gray-50/70 p-6 text-center">
+                <p className="text-[14px] font-extrabold text-gray-700">
+                  Contractor does not exist
+                </p>
+                <p className="mt-1 text-[12px] font-medium text-gray-500">
+                  This work order is linked to a temporary contractor.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                <DetailItem label="Name" value={workItem.contractor?.name} />
+                <DetailItem label="Code" value={workItem.contractor?.code} />
+                <DetailItem label="Email" value={workItem.contractor?.email} />
+                <DetailItem
+                  label="District ID"
+                  value={workItem.contractor?.district_id}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
