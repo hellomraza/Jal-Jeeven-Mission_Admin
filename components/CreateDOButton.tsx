@@ -18,7 +18,11 @@ export default function CreateDOButton() {
         Create District Officer
       </Button>
 
-      <CreateDODialog isOpen={isOpen} onOpenChange={setIsOpen} />
+      <CreateDODialog
+        key={isOpen ? "open" : "close"}
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+      />
     </>
   );
 }
