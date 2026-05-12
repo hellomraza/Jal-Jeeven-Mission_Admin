@@ -44,8 +44,6 @@ export default function CreateEmployeeDialog({
     error: "",
   });
 
-  console.log("CreateEmployeeDialog state:", state);
-
   const districtsQuery = useQuery({
     queryKey: ["districts"],
     queryFn: async () => {
