@@ -2,6 +2,8 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as XLSX from "xlsx";
 
+import AgreementFileDialog from "@/components/AgreementFileDialog";
+import AgreementFileViewer from "@/components/AgreementFileViewer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -172,6 +174,9 @@ export default function AgreementPage() {
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Agreement Year
                   </TableHead>
+                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                    Files
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -233,6 +238,62 @@ export default function AgreementPage() {
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.agreementyear}
+                      </TableCell>
+                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                        {/* determine file url from common possible shapes */}
+                        {(() => {
+                          const fileUrl =
+                            row.fileUrl ||
+                            row.file_url ||
+                            row.attachment?.url ||
+                            row.attachment?.fileUrl ||
+                            row.file?.url ||
+                            null;
+
+                          if (userRole === UserRole.HeadOfficer) {
+                            return (
+                              <div className="flex items-center gap-2">
+                                <AgreementFileViewer
+                                  fileUrl={fileUrl}
+                                  fileName={row.agreementno}
+                                >
+                                  <Button size="sm" variant="outline">
+                                    View
+                                  </Button>
+                                </AgreementFileViewer>
+                                <AgreementFileDialog
+                                  agreementId={row.id}
+                                  onAttached={() =>
+                                    fetchAgreements(currentPage)
+                                  }
+                                >
+                                  <Button size="sm">
+                                    {fileUrl ? "Replace" : "Attach"}
+                                  </Button>
+                                </AgreementFileDialog>
+                              </div>
+                            );
+                          }
+
+                          if (fileUrl) {
+                            return (
+                              <AgreementFileViewer
+                                fileUrl={fileUrl}
+                                fileName={row.agreementno}
+                              >
+                                <Button size="sm" variant="outline">
+                                  View
+                                </Button>
+                              </AgreementFileViewer>
+                            );
+                          }
+
+                          return (
+                            <span className="text-sm text-muted-foreground">
+                              —
+                            </span>
+                          );
+                        })()}
                       </TableCell>
                     </TableRow>
                   ))
