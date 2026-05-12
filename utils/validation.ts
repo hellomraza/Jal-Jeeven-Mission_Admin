@@ -18,7 +18,36 @@ export const nameValidation = z
 export const createUserSchema = z.object({
   name: nameValidation,
   email: emailValidation,
-  password: passwordValidation,
+  password: z.string().trim().nonempty("Password is required"),
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
+  district_id: z.string().min(1, "District is required"),
+  district_name: z.string().min(1, "District is required"),
+});
+
+export const updateDistrictOfficerSchema = z.object({
+  id: z.string().min(1, "District Officer ID is required"),
+  name: nameValidation,
+  email: emailValidation,
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
+  district_id: z.string().min(1, "District is required"),
+  password: z.string().optional().default(""),
+});
+
+export const createDOSchema = z.object({
+  name: nameValidation,
+  email: emailValidation,
+  password: z.string().trim().nonempty("Password is required"),
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
+  district_id: z.string().min(1, "District is required"),
 });
 
 export const createEmployeeSchema = z.object({
@@ -49,7 +78,7 @@ export const panValidation = z
 export const createContractorSchema = z.object({
   name: nameValidation,
   email: emailValidation,
-  password: passwordValidation,
+  password: z.string().trim().nonempty("Password is required"),
   mobile: z
     .string()
     .trim()

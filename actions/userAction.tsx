@@ -4,9 +4,10 @@ import { ActionState, validatedAction } from "@/utils/action-helper";
 import {
   assignEmployeesSchema,
   createContractorSchema,
+  createDOSchema,
   createEmployeeSchema,
-  createUserSchema,
   updateContractorSchema,
+  updateDistrictOfficerSchema,
   updateEmployeeSchema,
 } from "@/utils/validation";
 import { AxiosError } from "axios";
@@ -211,8 +212,14 @@ export const updateContractor = validatedAction(
 );
 
 export const createDistrictOfficer = validatedAction(
-  createUserSchema,
-  async (data: { name: string; email: string; password: string }) => {
+  createDOSchema,
+  async (data: {
+    name: string;
+    email: string;
+    password: string;
+    mobile: string;
+    district_id: string;
+  }) => {
     try {
       const apiClient = await createServerApiClient();
       const response = await apiClient.post("/users/do", data);
@@ -232,6 +239,43 @@ export const createDistrictOfficer = validatedAction(
       return {
         success: "",
         error: "Failed to create District Officer",
+      };
+    } finally {
+      revalidatePath("/district-officers");
+    }
+  },
+);
+
+export const updateDistrictOfficer = validatedAction(
+  updateDistrictOfficerSchema,
+  async (data: {
+    id: string;
+    name: string;
+    email: string;
+    mobile: string;
+    district_id: string;
+    password?: string;
+  }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const { id, ...updateData } = data;
+      const response = await apiClient.patch(`/users/do/${id}`, updateData);
+      if (response.data) {
+        return { success: "District Officer updated successfully", error: "" };
+      }
+      return { success: "", error: "Failed to update District Officer" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to update District Officer. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to update District Officer",
       };
     } finally {
       revalidatePath("/district-officers");
