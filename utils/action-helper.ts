@@ -18,7 +18,6 @@ export function validatedAction<S extends z.ZodType<any, any>, T>(
   return async (prevState: ActionState, formData: FormData) => {
     const result = schema.safeParse(Object.fromEntries(formData));
     if (!result.success) {
-      console.log("Validation failed:", result.error);
       return { error: result.error.errors[0].message, success: "" };
     }
 
