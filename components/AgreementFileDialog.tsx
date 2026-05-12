@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  attachAgreementFile,
+  uploadAgreementPdfAction,
+} from "@/actions/agreementAction";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,82 +15,77 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { attachAgreementFile } from "@/services/agreementService";
+import { useToast } from "@/hooks/use-toast";
 import * as React from "react";
+import { useActionState } from "react";
+
+type AgreementFile = {
+  fileUrl?: string | null;
+  fileName?: string | null;
+  mimeType?: string | null;
+  fileSize?: number | null;
+  uploadedAt?: string | null;
+};
 
 type Props = {
   agreementId: string;
+  mode?: "add" | "edit";
+  currentFile?: AgreementFile | null;
   children?: React.ReactNode;
   onAttached?: (data: any) => void;
 };
 
 export default function AgreementFileDialog({
   agreementId,
+  mode = "add",
+  currentFile = null,
   children,
   onAttached,
 }: Props) {
+  const { toast } = useToast();
   const [file, setFile] = React.useState<File | null>(null);
-  const [uploading, setUploading] = React.useState(false);
-  const [uploadResult, setUploadResult] = React.useState<any | null>(null);
+  const [uploadState, uploadAction, uploadPending] = useActionState(
+    uploadAgreementPdfAction,
+    { success: "", error: "", uploadedFile: null },
+  );
   const [error, setError] = React.useState<string | null>(null);
   const [attaching, setAttaching] = React.useState(false);
+  const [attached, setAttached] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
 
-  const cloudName =
-    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
-    process.env.CLOUDINARY_CLOUD_NAME;
-  const uploadPreset =
-    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ||
-    process.env.CLOUDINARY_UPLOAD_PRESET;
+  const uploadResult = uploadState.uploadedFile;
 
-  async function handleUpload() {
-    if (!file) return;
-    setError(null);
-    setUploading(true);
-    try {
-      // try signed upload: ask server for signature
-      const signRes = await fetch("/api/cloudinary/sign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folder: `agreements/${agreementId}` }),
+  React.useEffect(() => {
+    if (uploadState.error) {
+      setError(uploadState.error);
+      toast({
+        title: "Upload failed",
+        description: uploadState.error,
+        variant: "destructive",
       });
-
-      let url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
-      const fd = new FormData();
-      fd.append("file", file);
-
-      if (signRes.ok) {
-        const signJson = await signRes.json();
-        if (signJson.signature && signJson.timestamp && signJson.apiKey) {
-          // signed upload
-          fd.append("api_key", signJson.apiKey);
-          fd.append("timestamp", String(signJson.timestamp));
-          fd.append("signature", signJson.signature);
-          fd.append("folder", `agreements/${agreementId}`);
-        } else if (uploadPreset) {
-          // fallback to unsigned
-          fd.append("upload_preset", uploadPreset);
-        } else {
-          throw new Error("No Cloudinary upload configuration available");
-        }
-      } else {
-        // fallback to unsigned if preset available
-        if (!uploadPreset) throw new Error("Cloudinary not configured");
-        fd.append("upload_preset", uploadPreset);
-      }
-
-      const res = await fetch(url, { method: "POST", body: fd });
-      if (!res.ok) throw new Error("Upload failed");
-      const data = await res.json();
-      setUploadResult(data);
-    } catch (err: any) {
-      setError(err.message || "Upload failed");
-    } finally {
-      setUploading(false);
     }
-  }
+  }, [toast, uploadState.error]);
+
+  React.useEffect(() => {
+    if (uploadState.success) {
+      setError(null);
+      setAttached(false);
+    }
+  }, [uploadState.success]);
+
+  React.useEffect(() => {
+    if (uploadState.success) {
+      setError(null);
+      setAttached(false);
+      toast({
+        title: uploadState.success,
+        description: "The PDF is ready to attach.",
+      });
+    }
+  }, [toast, uploadState.success]);
 
   async function handleAttach() {
-    if (!uploadResult?.secure_url) {
+    if (!uploadResult?.fileUrl) {
       setError("No uploaded file to attach");
       return;
     }
@@ -95,86 +94,222 @@ export default function AgreementFileDialog({
     setAttaching(true);
     try {
       const payload = {
-        fileUrl: uploadResult.secure_url,
-        fileName: uploadResult.original_filename || file?.name,
-        mimeType:
-          uploadResult.resource_type === "raw"
-            ? "application/pdf"
-            : uploadResult.format,
-        fileSize: uploadResult.bytes,
+        fileUrl: uploadResult.fileUrl,
+        fileName: uploadResult.fileName || file?.name,
+        mimeType: uploadResult.mimeType || "application/pdf",
+        fileSize: uploadResult.fileSize || file?.size,
       };
 
-      const attached = await attachAgreementFile(agreementId, payload);
-      if (onAttached) onAttached(attached);
-      // keep dialog open so user sees success; consumer may close.
+      const attachedResponse = await attachAgreementFile(agreementId, payload);
+      if (onAttached) onAttached(attachedResponse);
+      setAttached(true);
+      toast({
+        title: "File attached successfully",
+        description: "The agreement row will refresh with the new file.",
+      });
     } catch (err: any) {
-      setError(err.message || "Failed to attach file");
+      const message = err?.message || "Failed to attach file";
+      setError(message);
+      toast({
+        title: "Attach failed",
+        description: message,
+        variant: "destructive",
+      });
     } finally {
       setAttaching(false);
     }
   }
 
+  const resetDialogState = () => {
+    setFile(null);
+    setError(null);
+    setAttaching(false);
+    setAttached(false);
+  };
+
   return (
-    <Dialog>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
+        if (!nextOpen) {
+          resetDialogState();
+        }
+      }}
+    >
       {children ? (
         <DialogTrigger asChild>{children}</DialogTrigger>
       ) : (
         <DialogTrigger asChild>
-          <Button size="sm">Attach File</Button>
+          <Button size="sm">
+            {mode === "edit" ? "Edit File" : "Add File"}
+          </Button>
         </DialogTrigger>
       )}
 
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Attach Agreement File</DialogTitle>
+          <DialogTitle>
+            {mode === "edit" ? "Edit Agreement File" : "Add Agreement File"}
+          </DialogTitle>
           <DialogDescription>
             Upload a single PDF and attach it to this agreement.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-4 flex flex-col gap-3">
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          />
+        <form
+          id="agreement-upload-form"
+          action={uploadAction}
+          className="contents"
+        >
+          <input type="hidden" name="agreementId" value={agreementId} />
 
-          {file && (
-            <div className="text-sm text-muted-foreground">
-              Selected: {file.name} — {(file.size / 1024).toFixed(1)} KB
-            </div>
-          )}
+          <div className="mt-4 flex flex-col gap-5">
+            {currentFile?.fileUrl && (
+              <section className="rounded-lg border bg-muted/30 p-4">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold">Current File</p>
+                    <p className="text-xs text-muted-foreground">
+                      Existing attached PDF
+                    </p>
+                  </div>
+                  <Button asChild variant="outline" size="sm">
+                    <a
+                      href={currentFile.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      View File
+                    </a>
+                  </Button>
+                </div>
+                <object
+                  data={currentFile.fileUrl}
+                  type="application/pdf"
+                  width="100%"
+                  height={220}
+                >
+                  <p className="text-sm text-muted-foreground">
+                    Preview not available, use Download
+                  </p>
+                </object>
+                <div className="mt-3 text-sm text-muted-foreground">
+                  {currentFile.fileName || "Unnamed file"}
+                  {currentFile.fileSize
+                    ? ` · ${(currentFile.fileSize / 1024).toFixed(1)} KB`
+                    : ""}
+                </div>
+              </section>
+            )}
 
-          {uploadResult && (
-            <div className="text-sm text-muted-foreground">
-              Uploaded:{" "}
-              <a
-                href={uploadResult.secure_url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open
-              </a>
-            </div>
-          )}
+            <section className="rounded-lg border p-4">
+              <div className="mb-3">
+                <p className="text-sm font-semibold">New Upload</p>
+                <p className="text-xs text-muted-foreground">
+                  Select a PDF to upload to Cloudinary
+                </p>
+              </div>
 
-          {error && <div className="text-sm text-destructive">{error}</div>}
-        </div>
+              <input
+                name="file"
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => {
+                  const selectedFile = e.target.files?.[0] ?? null;
+                  setError(null);
+                  setAttached(false);
+                  if (selectedFile && selectedFile.type !== "application/pdf") {
+                    const message = "Only PDF files are allowed";
+                    setFile(null);
+                    setError(message);
+                    toast({
+                      title: "Invalid file",
+                      description: message,
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  if (selectedFile && selectedFile.size > 15 * 1024 * 1024) {
+                    const message = "PDF must be 15 MB or smaller";
+                    setFile(null);
+                    setError(message);
+                    toast({
+                      title: "File too large",
+                      description: message,
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+
+                  setFile(selectedFile);
+                }}
+              />
+
+              {file && (
+                <div className="mt-3 text-sm text-muted-foreground">
+                  Selected: {file.name} — {(file.size / 1024).toFixed(1)} KB
+                </div>
+              )}
+
+              {uploadPending && (
+                <div className="mt-3 text-sm text-muted-foreground">
+                  Uploading to Cloudinary...
+                </div>
+              )}
+
+              {uploadResult?.fileUrl && (
+                <div className="mt-4 space-y-3">
+                  <p className="text-sm font-medium text-emerald-700">
+                    Uploaded to Cloudinary
+                  </p>
+                  <object
+                    data={uploadResult.fileUrl}
+                    type="application/pdf"
+                    width="100%"
+                    height={260}
+                  >
+                    <p className="text-sm text-muted-foreground">
+                      Preview not available, use Download
+                    </p>
+                  </object>
+                  <div className="text-sm text-muted-foreground">
+                    {uploadResult.fileName || file?.name || "PDF"}
+                    {uploadResult.fileSize
+                      ? ` · ${(uploadResult.fileSize / 1024).toFixed(1)} KB`
+                      : ""}
+                  </div>
+                </div>
+              )}
+
+              {error && (
+                <div className="mt-3 text-sm text-destructive">{error}</div>
+              )}
+            </section>
+
+            {attached && (
+              <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
+                File attached successfully
+              </div>
+            )}
+          </div>
+        </form>
 
         <DialogFooter>
           <div className="flex gap-2">
             <Button
+              form="agreement-upload-form"
               variant="outline"
               size="sm"
-              onClick={handleUpload}
-              disabled={!file || uploading}
+              type="submit"
+              disabled={!file || uploadPending}
             >
-              {uploading ? "Uploading..." : "Upload to Cloudinary"}
+              {uploadPending ? "Uploading..." : "Upload PDF"}
             </Button>
             <Button
               size="sm"
               onClick={handleAttach}
-              disabled={!uploadResult || attaching}
+              disabled={!uploadResult?.fileUrl || attaching}
             >
               {attaching ? "Attaching..." : "Attach File"}
             </Button>

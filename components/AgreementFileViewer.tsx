@@ -19,7 +19,7 @@ type Props = {
   children?: React.ReactNode;
 };
 
-export default function AgreementFileViewer({
+export default function AgreementFileViewerModal({
   fileUrl,
   fileName,
   children,
@@ -53,7 +53,7 @@ export default function AgreementFileViewer({
             </object>
           ) : (
             <div className="min-h-48 flex items-center justify-center text-sm text-muted-foreground">
-              No file attached for this agreement.
+              Preview not available, use Download
             </div>
           )}
         </div>
