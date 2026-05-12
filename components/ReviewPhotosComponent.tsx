@@ -191,7 +191,7 @@ const ReviewPhotosComponent = ({
           </div>
           {isSelected && (
             <div className="absolute top-3 left-3 bg-green-500 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg">
-              SELECTED
+              Waiting for Approval
             </div>
           )}
           {isApproved && (
@@ -432,7 +432,7 @@ const ReviewPhotosComponent = ({
                     {selectMutation.isPending ? (
                       <Loader2 size={16} className="animate-spin" />
                     ) : (
-                      "Select"
+                      "Send for Approval"
                     )}
                   </Button>
                 )
