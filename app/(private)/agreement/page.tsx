@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as XLSX from "xlsx";
 
 import { Button } from "@/components/ui/button";
@@ -19,21 +19,55 @@ import React from "react";
 
 export default function AgreementPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [agreements, setAgreements] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [userRole, setUserRole] = React.useState<string | null>(null);
+  const [totalPages, setTotalPages] = React.useState(1);
+  const [totalAgreements, setTotalAgreements] = React.useState(0);
+
+  const currentPage = React.useMemo(() => {
+    const pageValue = Number(searchParams.get("page") || "1");
+    return Number.isFinite(pageValue) && pageValue > 0 ? pageValue : 1;
+  }, [searchParams]);
 
   React.useEffect(() => {
     const role = localStorage.getItem("admin_role");
     setUserRole(role);
-    fetchAgreements();
   }, []);
 
-  const fetchAgreements = async () => {
+  React.useEffect(() => {
+    fetchAgreements(currentPage);
+  }, [currentPage]);
+
+  const updatePageParam = (page: number) => {
+    const nextParams = new URLSearchParams(searchParams.toString());
+
+    if (page <= 1) {
+      nextParams.delete("page");
+    } else {
+      nextParams.set("page", String(page));
+    }
+
+    const nextUrl = nextParams.toString()
+      ? `${pathname}?${nextParams.toString()}`
+      : pathname;
+
+    router.replace(nextUrl, { scroll: false });
+  };
+
+  const fetchAgreements = async (page: number) => {
     try {
       setLoading(true);
-      const data = await getAgreements();
+      const data = await getAgreements(page, 10);
       setAgreements(data.data || []);
+      setTotalPages(data.totalPages || 1);
+      setTotalAgreements(data.total || 0);
+
+      if (data.page && data.page !== currentPage) {
+        updatePageParam(data.page);
+      }
     } catch (error) {
       console.error("Error fetching agreements:", error);
     } finally {
@@ -208,6 +242,35 @@ export default function AgreementPage() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="flex flex-col gap-3 rounded-2xl bg-white px-4 py-3 shadow-[0_4px_24px_rgba(0,0,0,0.02)] md:flex-row md:items-center md:justify-between">
+        <p className="text-[12px] font-medium text-gray-600">
+          Showing page {currentPage} of {totalPages} · {totalAgreements} total
+          agreement{totalAgreements === 1 ? "" : "s"}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 px-4 text-[12px]"
+            onClick={() => updatePageParam(Math.max(currentPage - 1, 1))}
+            disabled={loading || currentPage <= 1}
+          >
+            Previous
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 px-4 text-[12px]"
+            onClick={() =>
+              updatePageParam(Math.min(currentPage + 1, totalPages))
+            }
+            disabled={loading || currentPage >= totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
 
       <div className="flex justify-end pt-2">
         <Button

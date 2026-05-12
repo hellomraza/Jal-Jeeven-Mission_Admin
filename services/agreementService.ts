@@ -15,6 +15,11 @@ export type AgreementImport = {
   sr: string | null;
 };
 
+export type AgreementBulkImportResult = {
+  inserted: AgreementImport[];
+  errors: { index: number; reason: string; item: AgreementImport }[];
+};
+
 export const getAgreements = async (page = 1, limit = 20) => {
   try {
     const response = await apiClient.get(
@@ -51,7 +56,9 @@ export const uploadAgreementFile = async (file: File) => {
   }
 };
 
-export const bulkImportAgreements = async (agreements: AgreementImport[]) => {
+export const bulkImportAgreements = async (
+  agreements: AgreementImport[],
+): Promise<AgreementBulkImportResult> => {
   try {
     const response = await apiClient.post("/import/agreements/bulk", {
       agreements,
