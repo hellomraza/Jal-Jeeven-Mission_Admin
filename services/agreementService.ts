@@ -71,3 +71,25 @@ export const bulkImportAgreements = async (
     );
   }
 };
+
+export const attachAgreementFile = async (
+  agreementId: string,
+  payload: {
+    fileUrl: string;
+    fileName?: string;
+    mimeType?: string;
+    fileSize?: number;
+  },
+) => {
+  try {
+    const response = await apiClient.post(
+      `/agreements/${agreementId}/attach-file`,
+      payload,
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to attach agreement file",
+    );
+  }
+};
