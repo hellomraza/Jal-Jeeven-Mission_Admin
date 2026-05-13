@@ -284,7 +284,7 @@ const ReviewPhotosComponent = ({
                               photo.approved_by ||
                               "N/A"}
                             <span className="block font-light">
-                              ({photo?.approvedByUser?.code})
+                              ({photo?.approvedByUser?.district?.districtname})
                             </span>
                           </p>
                           <p className="text-gray-400 font-bold uppercase tracking-wider mt-2">
