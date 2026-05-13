@@ -115,6 +115,12 @@ export default function AgreementPage() {
                     S No.
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                    Agreement No.
+                  </TableHead>
+                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                    Agreement Year
+                  </TableHead>
+                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Work Code
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
@@ -131,12 +137,6 @@ export default function AgreementPage() {
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Division
-                  </TableHead>
-                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Agreement No.
-                  </TableHead>
-                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Agreement Year
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -169,6 +169,12 @@ export default function AgreementPage() {
                         {index + 1}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                        {row.agreementyear}
+                      </TableCell>
+                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                        {row.agreementno}
+                      </TableCell>
+                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.work?.work_code || "N/A"}
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
@@ -193,12 +199,6 @@ export default function AgreementPage() {
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.work?.district_id || "N/A"}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.agreementno}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.agreementyear}
                       </TableCell>
                     </TableRow>
                   ))
