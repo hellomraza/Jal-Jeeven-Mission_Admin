@@ -32,7 +32,6 @@ type Props = {
   mode?: "add" | "edit";
   currentFile?: AgreementFile | null;
   children?: React.ReactNode;
-  onAttached?: (data: any) => void;
 };
 
 export default function AgreementFileDialog({
@@ -40,10 +39,10 @@ export default function AgreementFileDialog({
   mode = "add",
   currentFile = null,
   children,
-  onAttached,
 }: Props) {
   const { toast } = useToast();
   const [file, setFile] = React.useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const [uploadState, uploadAction, uploadPending] = useActionState(
     uploadAgreementPdfAction,
     { success: "", error: "", uploadedFile: null },
@@ -101,12 +100,13 @@ export default function AgreementFileDialog({
       };
 
       const attachedResponse = await attachAgreementFile(agreementId, payload);
-      if (onAttached) onAttached(attachedResponse);
       setAttached(true);
       toast({
         title: "File attached successfully",
         description: "The agreement row will refresh with the new file.",
       });
+      // close dialog after successful attach
+      setOpen(false);
     } catch (err: any) {
       const message = err?.message || "Failed to attach file";
       setError(message);
@@ -125,6 +125,14 @@ export default function AgreementFileDialog({
     setError(null);
     setAttaching(false);
     setAttached(false);
+    if (previewUrl) {
+      try {
+        URL.revokeObjectURL(previewUrl);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    setPreviewUrl(null);
   };
 
   return (
@@ -222,6 +230,12 @@ export default function AgreementFileDialog({
                   if (selectedFile && selectedFile.type !== "application/pdf") {
                     const message = "Only PDF files are allowed";
                     setFile(null);
+                    setPreviewUrl((prev) => {
+                      try {
+                        if (prev) URL.revokeObjectURL(prev);
+                      } catch (err) {}
+                      return null;
+                    });
                     setError(message);
                     toast({
                       title: "Invalid file",
@@ -233,6 +247,12 @@ export default function AgreementFileDialog({
                   if (selectedFile && selectedFile.size > 15 * 1024 * 1024) {
                     const message = "PDF must be 15 MB or smaller";
                     setFile(null);
+                    setPreviewUrl((prev) => {
+                      try {
+                        if (prev) URL.revokeObjectURL(prev);
+                      } catch (err) {}
+                      return null;
+                    });
                     setError(message);
                     toast({
                       title: "File too large",
@@ -242,13 +262,36 @@ export default function AgreementFileDialog({
                     return;
                   }
 
+                  // revoke previous preview if any and create new preview
+                  setPreviewUrl((prev) => {
+                    try {
+                      if (prev) URL.revokeObjectURL(prev);
+                    } catch (err) {}
+                    return selectedFile
+                      ? URL.createObjectURL(selectedFile)
+                      : null;
+                  });
                   setFile(selectedFile);
                 }}
               />
 
-              {file && (
-                <div className="mt-3 text-sm text-muted-foreground">
-                  Selected: {file.name} — {(file.size / 1024).toFixed(1)} KB
+              {previewUrl && !uploadResult?.fileUrl && (
+                <div className="mt-4 space-y-3">
+                  <p className="text-sm font-medium">Selected File Preview</p>
+                  <object
+                    data={previewUrl}
+                    type="application/pdf"
+                    width="100%"
+                    height={260}
+                  >
+                    <p className="text-sm text-muted-foreground">
+                      Preview not available, use Download
+                    </p>
+                  </object>
+                  <div className="text-sm text-muted-foreground">
+                    {file?.name}
+                    {file?.size ? ` · ${(file.size / 1024).toFixed(1)} KB` : ""}
+                  </div>
                 </div>
               )}
 
@@ -297,22 +340,22 @@ export default function AgreementFileDialog({
 
         <DialogFooter>
           <div className="flex gap-2">
-            <Button
-              form="agreement-upload-form"
-              variant="outline"
-              size="sm"
-              type="submit"
-              disabled={!file || uploadPending}
-            >
-              {uploadPending ? "Uploading..." : "Upload PDF"}
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleAttach}
-              disabled={!uploadResult?.fileUrl || attaching}
-            >
-              {attaching ? "Attaching..." : "Attach File"}
-            </Button>
+            {!uploadResult?.fileUrl && (
+              <Button
+                form="agreement-upload-form"
+                variant="outline"
+                size="sm"
+                type="submit"
+                disabled={!file || uploadPending}
+              >
+                {uploadPending ? "Uploading..." : "Upload PDF"}
+              </Button>
+            )}
+            {uploadResult?.fileUrl && (
+              <Button size="sm" onClick={handleAttach} disabled={attaching}>
+                {attaching ? "Attaching..." : "Attach File"}
+              </Button>
+            )}
             <DialogClose asChild>
               <Button variant="secondary" size="sm">
                 Close

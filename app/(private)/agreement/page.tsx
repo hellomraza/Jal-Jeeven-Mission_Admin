@@ -1,7 +1,5 @@
-"use client";
-import { useRouter } from "next/navigation";
-import * as XLSX from "xlsx";
-
+import AgreementFileDialog from "@/components/AgreementFileDialog";
+import AgreementFileViewerModal from "@/components/AgreementFileViewer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -12,55 +10,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getAgreements } from "@/services/agreementService";
+import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
-import { FileUp, Upload } from "lucide-react";
-import React from "react";
+import { FileUp } from "lucide-react";
+import { cookies } from "next/headers";
+import Link from "next/link";
+import ExportAgreement from "./ExportAgreement";
 
-export default function AgreementPage() {
-  const router = useRouter();
-  const [agreements, setAgreements] = React.useState<any[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [userRole, setUserRole] = React.useState<string | null>(null);
+const AgreementPage = async () => {
+  const cookieStore = await cookies();
+  const userRole = cookieStore.get("admin_role")?.value || null;
+  const apiClient = await createServerApiClient();
+  const response = await apiClient.get<PaginatedResponse<AgreementResponse>>(
+    `/agreements?page=${1}&limit=${20}`,
+  );
 
-  React.useEffect(() => {
-    const role = localStorage.getItem("admin_role");
-    setUserRole(role);
-    fetchAgreements();
-  }, []);
-
-  const fetchAgreements = async () => {
-    try {
-      setLoading(true);
-      const data = await getAgreements();
-      setAgreements(data.data || []);
-    } catch (error) {
-      console.error("Error fetching agreements:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleExport = () => {
-    const exportData = agreements.map((row, index) => ({
-      "S No.": index + 1,
-      "Work Code": row.work?.work_code || "N/A",
-      "Name Of Contractor": row.contractor?.name || "N/A",
-      "Contractor Code": row.contractor?.code || "N/A",
-      "Work Order No.": row.agreementno || "N/A",
-      "Work Order Date": row.created_at
-        ? new Date(row.created_at).toLocaleDateString()
-        : "N/A",
-      Division: row.work?.district_id || "N/A",
-      "Agreement No.": row.agreementno || "N/A",
-      "Agreement Year": row.agreementyear || "N/A",
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Agreements");
-    XLSX.writeFile(wb, "Agreements.xlsx");
-  };
+  const agreements = response.data?.data;
 
   return (
     <div className="space-y-6">
@@ -69,39 +34,16 @@ export default function AgreementPage() {
           Agreement Details {userRole === "CO" ? "(My Agreements)" : ""}
         </h2>
 
-        {/* {userRole !== "CO" && (
-          <div className="flex flex-wrap items-center gap-3">
-            <>
-              <Select defaultValue="2022-2023">
-                <SelectTrigger className="w-[140px] bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
-                  <SelectValue placeholder="Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2022-2023">2022-2023</SelectItem>
-                  <SelectItem value="2023-2024">2023-2024</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select defaultValue="all">
-                <SelectTrigger className="w-[160px] bg-[#F9FAFB] border-gray-100 text-[12px] h-9">
-                  <SelectValue placeholder="Contractor Name" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Contractor Name</SelectItem>
-                </SelectContent>
-              </Select>
-            </>
-          </div>
-        )} */}
         {userRole === UserRole.HeadOfficer && (
-          <Button
-            type="button"
-            onClick={() => router.push("/agreement/upload")}
-            className="bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px] h-10 px-6 rounded-lg flex items-center gap-2 shadow-sm"
-          >
-            <FileUp size={14} className="stroke-[2.5]" />
-            Upload Agreement
-          </Button>
+          <Link href="/agreement/upload">
+            <Button
+              type="button"
+              className="bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px] h-10 px-6 rounded-lg flex items-center gap-2 shadow-sm"
+            >
+              <FileUp size={14} className="stroke-[2.5]" />
+              Upload Agreement
+            </Button>
+          </Link>
         )}
       </div>
 
@@ -138,71 +80,135 @@ export default function AgreementPage() {
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Division
                   </TableHead>
+                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                    Agreement File
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={10}
-                      className="text-center py-10 text-gray-500"
-                    >
-                      Loading agreements...
-                    </TableCell>
-                  </TableRow>
-                ) : agreements.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={10}
-                      className="text-center py-10 text-gray-500"
-                    >
-                      No agreements found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  agreements.map((row, index) => (
-                    <TableRow
-                      key={row.id}
-                      className="border-b border-gray-50 hover:bg-gray-50/50"
-                    >
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {index + 1}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.agreementyear}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.agreementno}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.work?.work_code || "N/A"}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.contractor?.name
-                          ? row.contractor?.name
-                              ?.toLowerCase()
-                              .includes("temporary")
-                            ? "---"
-                            : row.contractor?.name
-                          : "N/A"}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.contractor?.code || "N/A"}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.agreementno}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium max-w-30">
-                        {row.created_at
-                          ? new Date(row.created_at).toLocaleDateString()
-                          : "N/A"}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.work?.district_id || "N/A"}
+                {
+                  // loading ? (
+                  //   <TableRow>
+                  //     <TableCell
+                  //       colSpan={10}
+                  //       className="text-center py-10 text-gray-500"
+                  //     >
+                  //       Loading agreements...
+                  //     </TableCell>
+                  //   </TableRow>
+                  // ) :
+                  agreements.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={10}
+                        className="text-center py-10 text-gray-500"
+                      >
+                        No agreements found.
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
+                  ) : (
+                    agreements.map((row, index) => (
+                      <TableRow
+                        key={row.id}
+                        className="border-b border-gray-50 hover:bg-gray-50/50"
+                      >
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {index + 1}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {row.agreementyear}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {row.agreementno}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {row.workItem?.work_code || "N/A"}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {row.contractor?.name
+                            ? row.contractor?.name
+                                ?.toLowerCase()
+                                .includes("temporary")
+                              ? "---"
+                              : row.contractor?.name
+                            : "N/A"}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {row.contractor?.code || "N/A"}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {row.agreementno}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium max-w-30">
+                          {row.created_at
+                            ? new Date(row.created_at).toLocaleDateString()
+                            : "N/A"}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {row.workItem?.district_id || "N/A"}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {(() => {
+                            const file = row?.files?.[0];
+                            const fileUrl = file?.file_url ?? null;
+
+                            if (userRole === UserRole.HeadOfficer) {
+                              if (!fileUrl) {
+                                return (
+                                  <AgreementFileDialog
+                                    agreementId={row.id}
+                                    mode="add"
+                                  >
+                                    <Button size="sm">Add File</Button>
+                                  </AgreementFileDialog>
+                                );
+                              }
+
+                              return (
+                                <div className="flex items-center gap-2">
+                                  <AgreementFileViewerModal
+                                    fileUrl={fileUrl}
+                                    fileName={file?.fileName || row.agreementno}
+                                  >
+                                    <Button size="sm" variant="outline">
+                                      View File
+                                    </Button>
+                                  </AgreementFileViewerModal>
+                                  <AgreementFileDialog
+                                    agreementId={row.id}
+                                    mode="edit"
+                                    currentFile={file}
+                                  >
+                                    <Button size="sm">Edit File</Button>
+                                  </AgreementFileDialog>
+                                </div>
+                              );
+                            }
+
+                            if (fileUrl) {
+                              return (
+                                <AgreementFileViewerModal
+                                  fileUrl={fileUrl}
+                                  fileName={file?.fileName || row.agreementno}
+                                >
+                                  <Button size="sm" variant="outline">
+                                    View File
+                                  </Button>
+                                </AgreementFileViewerModal>
+                              );
+                            }
+
+                            return (
+                              <span className="text-sm text-muted-foreground">
+                                —
+                              </span>
+                            );
+                          })()}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )
+                }
               </TableBody>
             </Table>
           </div>
@@ -210,15 +216,10 @@ export default function AgreementPage() {
       </Card>
 
       <div className="flex justify-end pt-2">
-        <Button
-          onClick={handleExport}
-          disabled={agreements.length === 0}
-          className="bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px] h-10 px-6 rounded-lg flex items-center gap-2 shadow-sm disabled:opacity-50"
-        >
-          <Upload size={14} className="stroke-[2.5]" />
-          Export
-        </Button>
+        <ExportAgreement agreements={agreements} />
       </div>
     </div>
   );
-}
+};
+
+export default AgreementPage;
