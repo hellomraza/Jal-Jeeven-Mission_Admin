@@ -2,6 +2,7 @@
 
 import { createServerApiClient } from "@/lib/server-api-client";
 import crypto from "crypto";
+import { revalidatePath } from "next/cache";
 
 type AgreementUploadFile = {
   fileUrl: string;
@@ -143,6 +144,7 @@ export const attachAgreementFile = async (
       `/agreements/${agreementId}/files`,
       payload,
     );
+    revalidatePath("/(private)/agreement");
     return response.data;
   } catch (error: any) {
     throw new Error(
