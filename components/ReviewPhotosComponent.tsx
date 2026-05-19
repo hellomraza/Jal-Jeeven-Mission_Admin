@@ -10,7 +10,8 @@ import {
 } from "@/services/photoStatusService";
 import { UserRole } from "@/types/usertypes";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Expand, Loader2, X } from "lucide-react";
+import { Expand, Loader2, MapPinned, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -326,6 +327,18 @@ const ReviewPhotosComponent = ({
             </div>
 
             <div className="pt-2 flex gap-2 w-full">
+              <Link
+                href={`/work-order/review-photos/${componentId}/location/${photo.id}`}
+                className="flex-1"
+              >
+                <Button
+                  variant="outline"
+                  className="w-full h-10 rounded-lg text-[12px] font-bold border-[#136FB6]/20 text-[#136FB6] hover:bg-[#DFEEF9] hover:text-[#105E9A]"
+                >
+                  <MapPinned size={16} className="mr-1.5" />
+                  View Location
+                </Button>
+              </Link>
               {userRole === UserRole.DistrictOfficer || userRole === "DO" ? (
                 isApproved ? (
                   <Button
@@ -436,14 +449,7 @@ const ReviewPhotosComponent = ({
                     )}
                   </Button>
                 )
-              ) : (
-                <Button
-                  disabled
-                  className="flex-1 bg-gray-100 text-gray-400 h-10 rounded-lg text-[12px] font-bold"
-                >
-                  View Only
-                </Button>
-              )}
+              ) : null}
             </div>
           </div>
         </CardContent>

@@ -39,7 +39,6 @@ type WorkItem = {
 };
 
 type WorkItemComponent = {
-  approved_photo_id: string | null;
   component_id: string;
   component: Component | null;
   created_at: string;
