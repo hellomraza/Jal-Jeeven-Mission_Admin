@@ -106,13 +106,13 @@ export default function LoginPage() {
                     htmlFor="email"
                     className="text-xs text-gray-500 font-semibold"
                   >
-                    Email
+                    Email or User Code
                   </FieldLabel>
                   <Input
-                    type="email"
+                    type="text"
                     required
                     name="email"
-                    placeholder="Enter email or mobile no."
+                    placeholder="Enter email or user code"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />

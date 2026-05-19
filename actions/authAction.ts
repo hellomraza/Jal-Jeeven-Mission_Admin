@@ -18,20 +18,40 @@ type LoginResponse = {
 
 export const loginUserAction = async (formData: FormData) => {
   try {
-    const data = {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-    };
+    const identifier = (formData.get("email") as string) || "";
+    const password = (formData.get("password") as string) || "";
 
-    const credentials = loginSchema.safeParse(data);
-    if (!credentials.success) {
-      return { error: "Invalid input. Please check your email and password." };
-    }
     const apiClient = await createServerApiClient();
-    const response = await apiClient.post<LoginResponse>(
-      "/auth/dashboard/login",
-      credentials.data,
-    );
+
+    let response;
+
+    // If identifier contains '@' treat it as email and use existing dashboard login
+    if (identifier.includes("@")) {
+      const data = { email: identifier, password };
+      const credentials = loginSchema.safeParse(data);
+      if (!credentials.success) {
+        return {
+          error: "Invalid input. Please check your email and password.",
+        };
+      }
+      response = await apiClient.post<LoginResponse>(
+        "/auth/dashboard/login",
+        credentials.data,
+      );
+    } else {
+      // Treat identifier as user code and call code login endpoint
+      const codeLoginSchema = {
+        code: String(identifier),
+        password: String(password),
+      };
+      if (!codeLoginSchema.code) {
+        return { error: "Invalid input. Please enter a valid user code." };
+      }
+      response = await apiClient.post<LoginResponse>(
+        "/auth/login/code",
+        codeLoginSchema,
+      );
+    }
 
     const cookieStore = await cookies();
 
