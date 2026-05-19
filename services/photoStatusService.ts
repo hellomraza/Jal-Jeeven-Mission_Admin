@@ -52,6 +52,8 @@ export type PhotoStatusRecord = {
   } | null;
   rejected_at?: string | null;
   photo: PhotoStatusPhoto;
+  workItem: WorkItem;
+  workItemComponent: WorkItemComponent;
 };
 
 export const selectPhotoStatus = async (photoId: string) => {
