@@ -3,14 +3,16 @@
 import ApprovedPhotoViewer from "@/components/ApprovedPhotoViewer";
 import BackButton from "@/components/BackButton";
 import PhotoMapClient from "@/components/PhotoMapClient";
+import { Button } from "@/components/ui/button";
 import { createServerApiClient } from "@/lib/server-api-client";
 import {
   PhotoStatusRecord,
   PhotoStatusState,
 } from "@/services/photoStatusService";
 import { UserRole } from "@/types/usertypes";
-import { Clock3, ShieldCheck, User } from "lucide-react";
+import { Clock3, MapPinned, ShieldCheck, User } from "lucide-react";
 import { cookies } from "next/headers";
+import Link from "next/link";
 
 type ApprovedPhotoPageStatus = {
   id: string;
@@ -203,6 +205,18 @@ export default async function ApprovedPhotoPage({
                             </div>
                           )}
                         </div>
+                        <Link
+                          href={`/work-order/review-photos/${componentId}/location/${approvedPhoto.id}`}
+                          className="block"
+                        >
+                          <Button
+                            variant="outline"
+                            className="w-full h-10 rounded-lg border-[#136FB6]/20 text-[#136FB6] hover:bg-[#DFEEF9] hover:text-[#105E9A]"
+                          >
+                            <MapPinned size={16} className="mr-1.5" />
+                            View Location
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   );
