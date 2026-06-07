@@ -100,6 +100,7 @@ export const createContractor = validatedAction(
     mobile: string;
     pan_number: string;
     district_name: string;
+    district_id: string;
     address: string;
   }) => {
     try {
@@ -179,6 +180,7 @@ export const updateContractor = validatedAction(
     mobile: string;
     pan_number: string;
     district_name: string;
+    district_id: string;
     address: string;
   }) => {
     try {

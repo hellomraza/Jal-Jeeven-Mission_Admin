@@ -11,6 +11,7 @@ type District = {
   districtid: number;
   districtname: string;
   districtcode: string;
+  district_code: string;
 };
 
 type Block = {

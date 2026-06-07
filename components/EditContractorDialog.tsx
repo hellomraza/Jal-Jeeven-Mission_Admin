@@ -46,6 +46,7 @@ export default function EditContractorDialog({
     mobile: "",
     pan_number: "",
     district_name: "",
+    district_id: "",
     address: "",
     password: "",
   });
@@ -82,6 +83,7 @@ export default function EditContractorDialog({
         mobile: contractor.mobile || "",
         pan_number: contractor.pan_number || "",
         district_name: contractor.district_name || "",
+        district_id: contractor.district_id?.toString() || "",
         address: contractor.address || "",
         password: "",
       });
@@ -110,10 +112,16 @@ export default function EditContractorDialog({
     }));
   };
 
+  console.log(districts)
+
   const handleDistrictChange = (value: string) => {
     setFormData((prev) => ({
       ...prev,
       district_name: value,
+      district_id:
+        districts
+          .find((d) => d.districtname === value)
+          ?.district_code || "",
     }));
   };
 
@@ -126,6 +134,7 @@ export default function EditContractorDialog({
         mobile: "",
         pan_number: "",
         district_name: "",
+        district_id: "",
         address: "",
         password: "",
       });
@@ -245,10 +254,15 @@ export default function EditContractorDialog({
                 ))}
               </SelectContent>
             </Select>
-            <input
+            {/* <input
               type="hidden"
               name="district_name"
               value={formData.district_name}
+            /> */}
+            <input
+              type="hidden"
+              name="district_id"
+              value={formData.district_id}
             />
             {districtsError && (
               <p className="mt-1 text-xs text-red-600">{districtsError}</p>
