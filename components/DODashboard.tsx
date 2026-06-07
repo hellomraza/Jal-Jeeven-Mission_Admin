@@ -54,6 +54,10 @@ export default function DODashboard({ stats }: DODashboardProps) {
       title: "Completed",
       value: stats.workItems.completed,
     },
+    {
+      title: "Total Agreements",
+      value: stats.totalAgreements,
+    },
   ];
 
   return (
