@@ -84,3 +84,73 @@ export const logoutUserAction = async () => {
   cookieStore.delete("admin_token");
   redirect("/login");
 };
+
+export const forgotPasswordAction = async (formData: FormData) => {
+  try {
+    const email = (formData.get("email") as string) || "";
+    if (!email) {
+      return { error: "Email or User Code is required." };
+    }
+    const apiClient = await createServerApiClient();
+    
+    let response;
+    if (email.includes("@")) {
+      response = await apiClient.post("/auth/forgot-password", { email });
+    } else {
+      response = await apiClient.post("/auth/forgot-password/code", { code: email });
+    }
+    
+    return { success: response.data?.message || "Password reset OTP has been sent.", error: "" };
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      const msg = Array.isArray(error.response?.data?.message)
+        ? error.response.data.message[0]
+        : error.response?.data?.message;
+      return {
+        error: msg || "Failed to request password reset. Please try again.",
+      };
+    }
+    return { error: "An unexpected error occurred. Please try again." };
+  }
+};
+
+export const resetPasswordAction = async (formData: FormData) => {
+  try {
+    const email = (formData.get("email") as string) || "";
+    const otp = (formData.get("otp") as string) || "";
+    const newPassword = (formData.get("newPassword") as string) || "";
+
+    if (!email || !otp || !newPassword) {
+      return { error: "All fields are required." };
+    }
+
+    const apiClient = await createServerApiClient();
+    
+    let response;
+    if (email.includes("@")) {
+      response = await apiClient.post("/auth/reset-password", {
+        email,
+        otp,
+        newPassword,
+      });
+    } else {
+      response = await apiClient.post("/auth/reset-password/code", {
+        code: email,
+        otp,
+        newPassword,
+      });
+    }
+    
+    return { success: response.data?.message || "Password reset successful.", error: "" };
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      const msg = Array.isArray(error.response?.data?.message)
+        ? error.response.data.message[0]
+        : error.response?.data?.message;
+      return {
+        error: msg || "Failed to reset password. Please try again.",
+      };
+    }
+    return { error: "An unexpected error occurred. Please try again." };
+  }
+};
