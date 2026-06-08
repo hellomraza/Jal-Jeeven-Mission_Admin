@@ -3,6 +3,7 @@ import * as XLSX from "xlsx";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -20,8 +21,8 @@ import {
 } from "@/components/ui/table";
 import { UserRole } from "@/types/usertypes";
 import { Upload } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 export default function WorkOrder({
   workItems,
@@ -37,9 +38,38 @@ export default function WorkOrder({
   totalWorkItems: number;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  
+  const currentSearch = searchParams.get("search") || "";
+  const [search, setSearch] = useState(currentSearch);
+
   const [selectedDistrict, setSelectedDistrict] = React.useState<string | null>(
     null,
   );
+
+  // Sync state with URL if URL changes
+  useEffect(() => {
+    setSearch(currentSearch);
+  }, [currentSearch]);
+
+  // Debounced search input
+  useEffect(() => {
+    if (search === currentSearch) return;
+
+    const handler = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (search) {
+        params.set("search", search);
+      } else {
+        params.delete("search");
+      }
+      params.set("page", "1"); // reset to page 1 on search
+      router.push(`${pathname}?${params.toString()}`);
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [search, currentSearch, router, pathname, searchParams]);
 
   const updatePageParam = (page: number) => {
     const params = new URLSearchParams(window.location.search);
@@ -101,6 +131,13 @@ export default function WorkOrder({
           <h2 className="text-[16px] font-bold text-[#1a2b3c] whitespace-nowrap px-2">
             Work Code Details
           </h2>
+          <Input
+            type="text"
+            placeholder="Search Work Code..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-[220px] h-9 text-[12px] bg-[#F9FAFB] border-gray-100 rounded-lg outline-none focus:ring-1 focus:ring-[#136FB6]/30 focus:border-[#136FB6]/30 transition-colors"
+          />
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -224,7 +261,7 @@ export default function WorkOrder({
                       }
                     >
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
-                        {index + 1}
+                        {(currentPage - 1) * 10 + index + 1}
                       </TableCell>
                       {/* <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
                         {row.title || "---"}
