@@ -22,6 +22,7 @@ interface PageProps {
   searchParams: Promise<{
     search?: string;
     agreementyear?: string;
+    page?: string;
   }>;
 }
 
@@ -29,13 +30,14 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
   const resolvedSearchParams = await searchParams;
   const search = resolvedSearchParams.search || "";
   const agreementyear = resolvedSearchParams.agreementyear || "";
+  const page = resolvedSearchParams.page || "1";
 
   const cookieStore = await cookies();
   const userRole = cookieStore.get("admin_role")?.value || null;
   
   const queryParams = new URLSearchParams({
-    page: "1",
-    limit: "20",
+    page,
+    limit: "10",
   });
   if (search) queryParams.set("search", search);
   if (agreementyear) queryParams.set("agreementyear", agreementyear);
@@ -46,6 +48,20 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
   );
 
   const agreements = response.data?.data || [];
+  const totalAgreements = response.data?.total || 0;
+  const currentPage = response.data?.page || 1;
+  const totalPages = response.data?.totalPages || 1;
+
+  const getPageUrl = (pageNumber: number) => {
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (agreementyear) params.set("agreementyear", agreementyear);
+    if (pageNumber > 1) {
+      params.set("page", pageNumber.toString());
+    }
+    const qs = params.toString();
+    return `/agreement${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -137,7 +153,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                         className="border-b border-gray-50 hover:bg-gray-50/50"
                       >
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {index + 1}
+                          {(currentPage - 1) * 10 + index + 1}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {row.agreementno}
@@ -238,6 +254,57 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Pagination Controls */}
+      <div className="flex flex-col gap-3 rounded-2xl bg-white px-4 py-3 shadow-[0_4px_24px_rgba(0,0,0,0.02)] md:flex-row md:items-center md:justify-between">
+        <p className="text-[12px] font-medium text-gray-600">
+          Showing page {currentPage} of {totalPages} · {totalAgreements} total
+          agreement{totalAgreements === 1 ? "" : "s"}
+        </p>
+        <div className="flex items-center gap-2">
+          {currentPage <= 1 ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 px-4 text-[12px]"
+              disabled
+            >
+              Previous
+            </Button>
+          ) : (
+            <Link href={getPageUrl(currentPage - 1)}>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 px-4 text-[12px]"
+              >
+                Previous
+              </Button>
+            </Link>
+          )}
+
+          {currentPage >= totalPages ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 px-4 text-[12px]"
+              disabled
+            >
+              Next
+            </Button>
+          ) : (
+            <Link href={getPageUrl(currentPage + 1)}>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 px-4 text-[12px]"
+              >
+                Next
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
 
       <div className="flex justify-end pt-2">
         <ExportAgreement agreements={agreements} />
