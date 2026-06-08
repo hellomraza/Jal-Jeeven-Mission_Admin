@@ -85,7 +85,13 @@ export const createContractorSchema = z.object({
     .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
   pan_number: panValidation,
   district_name: z.string().min(1, "District is required"),
+  district_id: z.string().min(1, "District is required"),
   address: z.string().trim().min(5, "Address is required"),
+  code: z
+    .string()
+    .trim()
+    .length(9, "User code must be exactly 9 characters")
+    .regex(/^[a-zA-Z0-9]+$/, "User code must be alphanumeric"),
 });
 
 export const updateContractorSchema = createContractorSchema
@@ -93,6 +99,7 @@ export const updateContractorSchema = createContractorSchema
   .extend({
     id: z.string().min(1, "Contractor ID is required"),
     password: z.string().optional().default(""),
+    district_id: z.string().min(1, "District is required"),
   });
 
 export const loginSchema = z.object({

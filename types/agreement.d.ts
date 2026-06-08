@@ -4,6 +4,7 @@ type Agreement = {
   agreementyear: string;
   contractor_id: string;
   work_id: string;
+  created_at: string;
 };
 
 type AgreementFile = {

@@ -99,7 +99,7 @@ export default function HODashboard({ stats }: HODashboardProps) {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Work Items Pie Chart */}
         <Card className="border border-gray-200 shadow-none bg-white">
           <CardHeader className="border-b border-gray-200 pb-2 pt-3 px-3">
@@ -136,8 +136,14 @@ export default function HODashboard({ stats }: HODashboardProps) {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={80}
-                  label={({ name, value }) => `${name}: ${value}`}
+                  outerRadius={70}
+                  innerRadius={40}
+                  labelLine={false}
+                  label={({ name, value }) => {
+                    // Hide the label if the value is 0
+                    if (value === 0) return null;
+                    return `${name}: ${value}`;
+                  }}
                 ></Pie>
               </PieChart>
             </ChartContainer>
@@ -185,8 +191,14 @@ export default function HODashboard({ stats }: HODashboardProps) {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={80}
-                  label={({ name, value }) => `${name}: ${value}`}
+                  innerRadius={40}
+                  outerRadius={70}
+                  labelLine={false}
+                  label={({ name, value }) => {
+                    // Hide the label if the value is 0
+                    if (value === 0) return null;
+                    return `${name}: ${value}`;
+                  }}
                 ></Pie>
               </PieChart>
             </ChartContainer>

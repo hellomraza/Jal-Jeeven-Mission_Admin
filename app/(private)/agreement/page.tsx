@@ -1,5 +1,6 @@
 import AgreementFileDialog from "@/components/AgreementFileDialog";
 import AgreementFileViewerModal from "@/components/AgreementFileViewer";
+import AgreementFilters from "@/components/AgreementFilters";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,15 +18,50 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import ExportAgreement from "./ExportAgreement";
 
-const AgreementPage = async () => {
+interface PageProps {
+  searchParams: Promise<{
+    search?: string;
+    agreementyear?: string;
+    page?: string;
+  }>;
+}
+
+const AgreementPage = async ({ searchParams }: PageProps) => {
+  const resolvedSearchParams = await searchParams;
+  const search = resolvedSearchParams.search || "";
+  const agreementyear = resolvedSearchParams.agreementyear || "";
+  const page = resolvedSearchParams.page || "1";
+
   const cookieStore = await cookies();
   const userRole = cookieStore.get("admin_role")?.value || null;
+  
+  const queryParams = new URLSearchParams({
+    page,
+    limit: "10",
+  });
+  if (search) queryParams.set("search", search);
+  if (agreementyear) queryParams.set("agreementyear", agreementyear);
+
   const apiClient = await createServerApiClient();
   const response = await apiClient.get<PaginatedResponse<AgreementResponse>>(
-    `/agreements?page=${1}&limit=${20}`,
+    `/agreements?${queryParams.toString()}`,
   );
 
-  const agreements = response.data?.data;
+  const agreements = response.data?.data || [];
+  const totalAgreements = response.data?.total || 0;
+  const currentPage = response.data?.page || 1;
+  const totalPages = response.data?.totalPages || 1;
+
+  const getPageUrl = (pageNumber: number) => {
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (agreementyear) params.set("agreementyear", agreementyear);
+    if (pageNumber > 1) {
+      params.set("page", pageNumber.toString());
+    }
+    const qs = params.toString();
+    return `/agreement${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -34,17 +70,21 @@ const AgreementPage = async () => {
           Agreement Details {userRole === "CO" ? "(My Agreements)" : ""}
         </h2>
 
-        {userRole === UserRole.HeadOfficer && (
-          <Link href="/agreement/upload">
-            <Button
-              type="button"
-              className="bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px] h-10 px-6 rounded-lg flex items-center gap-2 shadow-sm"
-            >
-              <FileUp size={14} className="stroke-[2.5]" />
-              Upload Agreement
-            </Button>
-          </Link>
-        )}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
+          <AgreementFilters />
+
+          {userRole === UserRole.HeadOfficer && (
+            <Link href="/agreement/upload" className="w-full sm:w-auto">
+              <Button
+                type="button"
+                className="w-full sm:w-auto bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px] h-10 px-6 rounded-lg flex items-center justify-center gap-2 shadow-sm"
+              >
+                <FileUp size={14} className="stroke-[2.5]" />
+                Upload Agreement
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
 
       <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden bg-white rounded-2xl py-0">
@@ -113,13 +153,13 @@ const AgreementPage = async () => {
                         className="border-b border-gray-50 hover:bg-gray-50/50"
                       >
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {index + 1}
-                        </TableCell>
-                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {row.agreementyear}
+                          {(currentPage - 1) * 10 + index + 1}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {row.agreementno}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {row.agreementyear}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {row.workItem?.work_code || "N/A"}
@@ -214,6 +254,57 @@ const AgreementPage = async () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Pagination Controls */}
+      <div className="flex flex-col gap-3 rounded-2xl bg-white px-4 py-3 shadow-[0_4px_24px_rgba(0,0,0,0.02)] md:flex-row md:items-center md:justify-between">
+        <p className="text-[12px] font-medium text-gray-600">
+          Showing page {currentPage} of {totalPages} · {totalAgreements} total
+          agreement{totalAgreements === 1 ? "" : "s"}
+        </p>
+        <div className="flex items-center gap-2">
+          {currentPage <= 1 ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 px-4 text-[12px]"
+              disabled
+            >
+              Previous
+            </Button>
+          ) : (
+            <Link href={getPageUrl(currentPage - 1)}>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 px-4 text-[12px]"
+              >
+                Previous
+              </Button>
+            </Link>
+          )}
+
+          {currentPage >= totalPages ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 px-4 text-[12px]"
+              disabled
+            >
+              Next
+            </Button>
+          ) : (
+            <Link href={getPageUrl(currentPage + 1)}>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 px-4 text-[12px]"
+              >
+                Next
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
 
       <div className="flex justify-end pt-2">
         <ExportAgreement agreements={agreements} />

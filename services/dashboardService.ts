@@ -36,6 +36,7 @@ export interface DistrictDashboardDto {
     completed: number;
   };
   workItemsList: WorkItemWithProgressDto[];
+  totalAgreements: number;
   generatedAt: string;
 }
 

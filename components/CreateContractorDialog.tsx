@@ -43,7 +43,9 @@ export default function CreateContractorDialog({
     mobile: "",
     pan_number: "",
     district_name: "",
+    district_id: "",
     address: "",
+    code: "",
   });
 
   const [state, formAction, isPending] = useActionState(createContractor, {
@@ -91,6 +93,10 @@ export default function CreateContractorDialog({
     setFormData((prev) => ({
       ...prev,
       district_name: value,
+      district_id:
+        districts
+          .find((d) => d.districtname === value)
+          ?.district_code || "",
     }));
   };
 
@@ -103,7 +109,9 @@ export default function CreateContractorDialog({
         mobile: "",
         pan_number: "",
         district_name: "",
+        district_id: "",
         address: "",
+        code: "",
       });
     }
     onOpenChange(open);
@@ -112,139 +120,170 @@ export default function CreateContractorDialog({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Create New Contractor</DialogTitle>
           </DialogHeader>
 
           <form action={formAction} ref={fromRef} className="space-y-4 mt-4">
-            <Field>
-              <FieldLabel className="text-xs font-semibold text-gray-500">
-                Name
-              </FieldLabel>
-              <Input
-                type="text"
-                name="name"
-                required
-                placeholder="Jane Smith"
-                value={formData.name}
-                onChange={handleInputChange}
-                disabled={isPending}
-              />
-            </Field>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field>
+                <FieldLabel className="text-xs font-semibold text-gray-500">
+                  Name
+                </FieldLabel>
+                <Input
+                  type="text"
+                  name="name"
+                  required
+                  placeholder="Jane Smith"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  disabled={isPending}
+                />
+              </Field>
 
-            <Field>
-              <FieldLabel className="text-xs font-semibold text-gray-500">
-                Email
-              </FieldLabel>
-              <Input
-                type="email"
-                name="email"
-                required
-                placeholder="contractor@jjm.local"
-                value={formData.email}
-                onChange={handleInputChange}
-                disabled={isPending}
-              />
-            </Field>
+              <Field>
+                <FieldLabel className="text-xs font-semibold text-gray-500">
+                  Email
+                </FieldLabel>
+                <Input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="contractor@jjm.local"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  disabled={isPending}
+                />
+              </Field>
 
-            <Field>
-              <FieldLabel className="text-xs font-semibold text-gray-500">
-                Mobile Number
-              </FieldLabel>
-              <Input
-                type="tel"
-                name="mobile"
-                required
-                maxLength={10}
-                placeholder="9876543210"
-                value={formData.mobile}
-                onChange={handleInputChange}
-                disabled={isPending}
-              />
-            </Field>
+              <Field>
+                <FieldLabel className="text-xs font-semibold text-gray-500">
+                  Mobile Number
+                </FieldLabel>
+                <Input
+                  type="tel"
+                  name="mobile"
+                  required
+                  maxLength={10}
+                  placeholder="9876543210"
+                  value={formData.mobile}
+                  onChange={handleInputChange}
+                  disabled={isPending}
+                />
+              </Field>
 
-            <Field>
-              <FieldLabel className="text-xs font-semibold text-gray-500">
-                PAN Number
-              </FieldLabel>
-              <Input
-                type="text"
-                name="pan_number"
-                required
-                maxLength={10}
-                placeholder="ABCDE1234F"
-                value={formData.pan_number}
-                onChange={handleInputChange}
-                disabled={isPending}
-                pattern="[A-Z]{5}[0-9]{4}[A-Z]"
-                title="PAN must follow the format AAAAA9999A"
-                autoComplete="off"
-              />
-              <p className="text-xs text-gray-500">Format: AAAAA9999A</p>
-            </Field>
+              <Field>
+                <FieldLabel className="text-xs font-semibold text-gray-500">
+                  PAN Number
+                </FieldLabel>
+                <Input
+                  type="text"
+                  name="pan_number"
+                  required
+                  maxLength={10}
+                  placeholder="ABCDE1234F"
+                  value={formData.pan_number}
+                  onChange={handleInputChange}
+                  disabled={isPending}
+                  pattern="[A-Z]{5}[0-9]{4}[A-Z]"
+                  title="PAN must follow the format AAAAA9999A"
+                  autoComplete="off"
+                />
+                <p className="text-xs text-gray-500">Format: AAAAA9999A</p>
+              </Field>
 
-            <Field>
-              <FieldLabel className="text-xs font-semibold text-gray-500">
-                District
-              </FieldLabel>
-              <Select
-                name="district_name"
-                value={formData.district_name}
-                onValueChange={handleDistrictChange}
-                disabled={isPending || districtsLoading}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue
-                    placeholder={
-                      districtsLoading
-                        ? "Loading districts..."
-                        : "Select district"
-                    }
+              <Field>
+                <FieldLabel className="text-xs font-semibold text-gray-500">
+                  User Code
+                </FieldLabel>
+                <Input
+                  type="text"
+                  name="code"
+                  required
+                  maxLength={9}
+                  placeholder="ABC123XYZ"
+                  value={formData.code}
+                  onChange={handleInputChange}
+                  disabled={isPending}
+                  pattern="[a-zA-Z0-9]{9}"
+                  title="User Code must be a 9-character alphanumeric string"
+                  autoComplete="off"
+                />
+                <p className="text-xs text-gray-500">Exactly 9 alphanumeric characters</p>
+              </Field>
+
+              <div className="space-y-2">
+                <InputWithPassword
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  disabled={isPending}
+                />
+                <p className="text-xs text-gray-500">
+                  Min 8 chars, uppercase, lowercase, number
+                </p>
+              </div>
+
+              <Field>
+                <FieldLabel className="text-xs font-semibold text-gray-500">
+                  District
+                </FieldLabel>
+                <Select
+                  name="district_name"
+                  value={formData.district_name}
+                  onValueChange={handleDistrictChange}
+                  disabled={isPending || districtsLoading}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        districtsLoading
+                          ? "Loading districts..."
+                          : "Select district"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {districts.map((district) => (
+                      <SelectItem
+                        key={district.districtid}
+                        value={district.districtname}
+                      >
+                        {district.districtname}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {districtsError && (
+                  <p className="text-xs text-red-600 mt-1">{districtsError}</p>
+                )}
+              </Field>
+
+              <div className="md:col-span-2">
+                <Field>
+                  <FieldLabel className="text-xs font-semibold text-gray-500">
+                    Address
+                  </FieldLabel>
+                  <Input
+                    type="text"
+                    name="address"
+                    required
+                    placeholder="Full postal address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    disabled={isPending}
                   />
-                </SelectTrigger>
-                <SelectContent>
-                  {districts.map((district) => (
-                    <SelectItem
-                      key={district.districtid}
-                      value={district.districtname}
-                    >
-                      {district.districtname}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {districtsError && (
-                <p className="text-xs text-red-600 mt-1">{districtsError}</p>
-              )}
-            </Field>
-
-            <Field>
-              <FieldLabel className="text-xs font-semibold text-gray-500">
-                Address
-              </FieldLabel>
-              <Input
-                type="text"
-                name="address"
-                required
-                placeholder="Full postal address"
-                value={formData.address}
-                onChange={handleInputChange}
-                disabled={isPending}
-              />
-            </Field>
-
-            <div className="space-y-2">
-              <InputWithPassword
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                disabled={isPending}
-              />
-              <p className="text-xs text-gray-500">
-                Min 8 chars, uppercase, lowercase, number
-              </p>
+                </Field>
+              </div>
             </div>
+
+            <Input
+              hidden
+              name="district_id"
+              value={formData.district_id}
+            />
+
             {state.error && (
               <div className="rounded-md bg-red-50 p-3">
                 <p className="text-sm text-red-700">{state.error}</p>

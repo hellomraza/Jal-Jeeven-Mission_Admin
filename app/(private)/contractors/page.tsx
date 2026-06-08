@@ -18,16 +18,10 @@ export default async function ContractorsPage() {
   try {
     const apiClient = await createServerApiClient();
     let url = "";
-    if (role === UserRole.DistrictOfficer) {
-      url = "";
-      const res = await apiClient.get<Contractor[]>("/users/contractors");
+    url = "";
+    const res = await apiClient.get<Contractor[]>("/users/contractors");
 
-      contractors = res.data || [];
-    } else if (role === UserRole.HeadOfficer) {
-      url = "";
-      const res = await apiClient.get<Contractor[]>("/users/contractors");
-      contractors = res.data || [];
-    }
+    contractors = res.data || [];
   } catch (err: any) {
     error = err.message;
   }

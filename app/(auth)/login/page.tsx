@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { ActionState } from "@/utils/action-helper";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useActionState, useState } from "react";
 
@@ -128,14 +129,14 @@ export default function LoginPage() {
                     setPassword((e.target as HTMLInputElement).value)
                   }
                 />
-                {/* <div className="flex justify-end mt-1.5">
-                  <a
-                    href="#"
+                <div className="flex justify-end mt-1.5">
+                  <Link
+                    href="/forgot-password"
                     className="text-[10px] text-slate-700 font-bold hover:text-[#136FB6] transition decoration-[1.5px] border-b border-transparent hover:border-[#136FB6]"
                   >
                     Forgot Password?
-                  </a>
-                </div> */}
+                  </Link>
+                </div>
               </div>
 
               <div className="pt-1">

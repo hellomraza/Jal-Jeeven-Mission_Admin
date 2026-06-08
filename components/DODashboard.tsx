@@ -54,6 +54,10 @@ export default function DODashboard({ stats }: DODashboardProps) {
       title: "Completed",
       value: stats.workItems.completed,
     },
+    {
+      title: "Total Agreements",
+      value: stats.totalAgreements,
+    },
   ];
 
   return (
@@ -66,9 +70,9 @@ export default function DODashboard({ stats }: DODashboardProps) {
       </div>
 
       {/* Stats Cards and Pie Chart */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Stats Cards */}
-        <div className="md:col-span-2 grid grid-cols-2 gap-3">
+        <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-3">
           {statsCards.map((card, index) => (
             <Card
               key={index}
@@ -122,8 +126,14 @@ export default function DODashboard({ stats }: DODashboardProps) {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
+                  innerRadius={40}
                   outerRadius={70}
-                  label={({ name, value }) => `${name}: ${value}`}
+                  labelLine={false}
+                  label={({ name, value }) => {
+                    // Hide the label if the value is 0
+                    if (value === 0) return null;
+                    return `${name}: ${value}`;
+                  }}
                 ></Pie>
               </PieChart>
             </ChartContainer>
