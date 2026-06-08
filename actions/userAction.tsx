@@ -102,6 +102,7 @@ export const createContractor = validatedAction(
     district_name: string;
     district_id: string;
     address: string;
+    code: string;
   }) => {
     try {
       const apiClient = await createServerApiClient();
@@ -182,6 +183,7 @@ export const updateContractor = validatedAction(
     district_name: string;
     district_id: string;
     address: string;
+    code: string;
   }) => {
     try {
       const apiClient = await createServerApiClient();
