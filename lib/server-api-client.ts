@@ -3,10 +3,7 @@ import "server-only";
 import axios, { AxiosRequestConfig } from "axios";
 import { cookies } from "next/headers";
 
-const SERVER_API_BASE_URL =
-  process.env.API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://jjm-backend.vercel.app";
+const SERVER_API_BASE_URL = process.env.SERVER_API_BASE_URL
 
 type ServerApiClientOptions = {
   token?: string;
@@ -21,7 +18,7 @@ export const createServerApiClient = async (
   const token = options.token || tokenFromCookie;
 
   const client = axios.create({
-    baseURL: "https://jjm-backend.vercel.app", // Update with your API base URL
+    baseURL: SERVER_API_BASE_URL, // Update with your API base URL
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
