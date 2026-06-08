@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:3000", // Update with your API base URL
+  baseURL: "https://jjm-backend.vercel.app", // Update with your API base URL
   headers: {
     "Content-Type": "application/json",
   },
