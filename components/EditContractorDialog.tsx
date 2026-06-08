@@ -49,6 +49,7 @@ export default function EditContractorDialog({
     district_id: "",
     address: "",
     password: "",
+    code: "",
   });
 
   const [state, formAction, isPending] = useActionState(updateContractor, {
@@ -86,6 +87,7 @@ export default function EditContractorDialog({
         district_id: contractor.district_id?.toString() || "",
         address: contractor.address || "",
         password: "",
+        code: contractor.code || "",
       });
       setHasSubmitted(false);
     }
@@ -112,8 +114,6 @@ export default function EditContractorDialog({
     }));
   };
 
-  console.log(districts)
-
   const handleDistrictChange = (value: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -137,6 +137,7 @@ export default function EditContractorDialog({
         district_id: "",
         address: "",
         password: "",
+        code: "",
       });
       setHasSubmitted(false);
     }
@@ -145,7 +146,7 @@ export default function EditContractorDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit Contractor</DialogTitle>
         </DialogHeader>
@@ -157,103 +158,125 @@ export default function EditContractorDialog({
         >
           <input type="hidden" name="id" value={formData.id} />
 
-          <Field>
-            <FieldLabel className="text-xs font-semibold text-gray-500">
-              Name
-            </FieldLabel>
-            <Input
-              type="text"
-              name="name"
-              required
-              value={formData.name}
-              onChange={handleInputChange}
-              disabled={isPending}
-            />
-          </Field>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field>
+              <FieldLabel className="text-xs font-semibold text-gray-500">
+                Name
+              </FieldLabel>
+              <Input
+                type="text"
+                name="name"
+                required
+                value={formData.name}
+                onChange={handleInputChange}
+                disabled={isPending}
+              />
+            </Field>
 
-          <Field>
-            <FieldLabel className="text-xs font-semibold text-gray-500">
-              Email
-            </FieldLabel>
-            <Input
-              type="email"
-              name="email"
-              required
-              value={formData.email}
-              onChange={handleInputChange}
-              disabled={isPending}
-            />
-          </Field>
-          <InputWithPassword
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            disabled={isPending}
-          />
-          <Field>
-            <FieldLabel className="text-xs font-semibold text-gray-500">
-              Mobile Number
-            </FieldLabel>
-            <Input
-              type="tel"
-              name="mobile"
-              required
-              maxLength={10}
-              value={formData.mobile}
-              onChange={handleInputChange}
-              disabled={isPending}
-            />
-          </Field>
+            <Field>
+              <FieldLabel className="text-xs font-semibold text-gray-500">
+                Email
+              </FieldLabel>
+              <Input
+                type="email"
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleInputChange}
+                disabled={isPending}
+              />
+            </Field>
 
-          <Field>
-            <FieldLabel className="text-xs font-semibold text-gray-500">
-              PAN Number
-            </FieldLabel>
-            <Input
-              type="text"
-              name="pan_number"
-              required
-              maxLength={10}
-              value={formData.pan_number}
+            <Field>
+              <FieldLabel className="text-xs font-semibold text-gray-500">
+                Mobile Number
+              </FieldLabel>
+              <Input
+                type="tel"
+                name="mobile"
+                required
+                maxLength={10}
+                value={formData.mobile}
+                onChange={handleInputChange}
+                disabled={isPending}
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel className="text-xs font-semibold text-gray-500">
+                PAN Number
+              </FieldLabel>
+              <Input
+                type="text"
+                name="pan_number"
+                required
+                maxLength={10}
+                value={formData.pan_number}
+                onChange={handleInputChange}
+                disabled={isPending}
+                pattern="[A-Z]{5}[0-9]{4}[A-Z]"
+                title="PAN must follow the format AAAAA9999A"
+                autoComplete="off"
+              />
+              <p className="text-xs text-gray-500">Format: AAAAA9999A</p>
+            </Field>
+
+            <Field>
+              <FieldLabel className="text-xs font-semibold text-gray-500">
+                User Code
+              </FieldLabel>
+              <Input
+                type="text"
+                name="code"
+                required
+                maxLength={9}
+                value={formData.code}
+                onChange={handleInputChange}
+                disabled={isPending}
+                pattern="[a-zA-Z0-9]{9}"
+                title="User Code must be a 9-character alphanumeric string"
+                autoComplete="off"
+              />
+              <p className="text-xs text-gray-500">Exactly 9 alphanumeric characters</p>
+            </Field>
+
+            <InputWithPassword
+              name="password"
+              value={formData.password}
               onChange={handleInputChange}
               disabled={isPending}
-              pattern="[A-Z]{5}[0-9]{4}[A-Z]"
-              title="PAN must follow the format AAAAA9999A"
-              autoComplete="off"
             />
-            <p className="text-xs text-gray-500">Format: AAAAA9999A</p>
-          </Field>
 
-          <Field>
-            <FieldLabel className="text-xs font-semibold text-gray-500">
-              District
-            </FieldLabel>
-            <Select
-              name="district_name"
-              value={formData.district_name}
-              onValueChange={handleDistrictChange}
-              disabled={isPending || districtsLoading}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue
-                  placeholder={
-                    districtsLoading
-                      ? "Loading districts..."
-                      : "Select district"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {districts.map((district) => (
-                  <SelectItem
-                    key={district.districtid}
-                    value={district.districtname}
-                  >
-                    {district.districtname}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Field>
+              <FieldLabel className="text-xs font-semibold text-gray-500">
+                District
+              </FieldLabel>
+              <Select
+                name="district_name"
+                value={formData.district_name}
+                onValueChange={handleDistrictChange}
+                disabled={isPending || districtsLoading}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue
+                    placeholder={
+                      districtsLoading
+                        ? "Loading districts..."
+                        : "Select district"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {districts.map((district) => (
+                    <SelectItem
+                      key={district.districtid}
+                      value={district.districtname}
+                    >
+                      {district.districtname}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             {/* <input
               type="hidden"
               name="district_name"
@@ -264,25 +287,39 @@ export default function EditContractorDialog({
               name="district_id"
               value={formData.district_id}
             />
-            {districtsError && (
-              <p className="mt-1 text-xs text-red-600">{districtsError}</p>
-            )}
-          </Field>
+              {districtsError && (
+                <p className="mt-1 text-xs text-red-600">{districtsError}</p>
+              )}
+            </Field>
 
-          <Field>
-            <FieldLabel className="text-xs font-semibold text-gray-500">
-              Address
-            </FieldLabel>
-            <Textarea
-              name="address"
-              required
-              value={formData.address}
-              onChange={handleInputChange}
-              placeholder="Full postal address"
-              disabled={isPending}
-              rows={3}
-            />
-          </Field>
+            <div className="md:col-span-2">
+              <Field>
+                <FieldLabel className="text-xs font-semibold text-gray-500">
+                  Address
+                </FieldLabel>
+                <Textarea
+                  name="address"
+                  required
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  placeholder="Full postal address"
+                  disabled={isPending}
+                  rows={3}
+                />
+              </Field>
+            </div>
+          </div>
+
+          {/* <input
+            type="hidden"
+            name="district_name"
+            value={formData.district_name}
+          /> */}
+          <input
+            type="hidden"
+            name="district_id"
+            value={formData.district_id}
+          />
 
           <DialogFooter className="pt-2">
             <Button
