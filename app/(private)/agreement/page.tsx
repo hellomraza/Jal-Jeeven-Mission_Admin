@@ -133,6 +133,11 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Agreement File
                   </TableHead>
+                  {(userRole === UserRole.HeadOfficer || userRole === UserRole.DistrictOfficer) && (
+                    <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12 text-center">
+                      Action
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -150,7 +155,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                   agreements.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={10}
+                        colSpan={11}
                         className="text-center py-10 text-gray-500"
                       >
                         No agreements found.
@@ -257,6 +262,19 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                             );
                           })()}
                         </TableCell>
+                        {(userRole === UserRole.HeadOfficer || userRole === UserRole.DistrictOfficer) && (
+                          <TableCell className="text-center py-4">
+                            <Link href={`/agreement/edit/${row.id}`}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 px-3 bg-white text-[#136FB6] border-[#136FB6]/20 hover:bg-[#DFEEF9] text-[11px] font-bold"
+                              >
+                                Edit
+                              </Button>
+                            </Link>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))
                   )

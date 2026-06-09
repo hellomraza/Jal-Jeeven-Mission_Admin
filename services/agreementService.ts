@@ -96,4 +96,27 @@ export const createAgreement = async (payload: CreateAgreementPayload) => {
   }
 };
 
+export const getAgreement = async (id: string) => {
+  try {
+    const response = await apiClient.get(`/agreements/${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch agreement details",
+    );
+  }
+};
+
+export const updateAgreement = async (id: string, payload: Partial<CreateAgreementPayload>) => {
+  try {
+    const response = await apiClient.patch(`/agreements/${id}`, payload);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to update agreement",
+    );
+  }
+};
+
+
 

@@ -179,3 +179,15 @@ export const getWorkItemsWithoutAgreement = async () => {
   }
 };
 
+export const updateWorkItem = async (id: string, payload: any) => {
+  try {
+    const response = await apiClient.patch(`/work-items/${id}`, payload);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to update work item",
+    );
+  }
+};
+
+
