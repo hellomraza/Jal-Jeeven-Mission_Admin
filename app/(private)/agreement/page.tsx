@@ -74,15 +74,25 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
           <AgreementFilters />
 
           {userRole === UserRole.HeadOfficer && (
-            <Link href="/agreement/upload" className="w-full sm:w-auto">
-              <Button
-                type="button"
-                className="w-full sm:w-auto bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px] h-10 px-6 rounded-lg flex items-center justify-center gap-2 shadow-sm"
-              >
-                <FileUp size={14} className="stroke-[2.5]" />
-                Upload Agreement
-              </Button>
-            </Link>
+            <>
+              <Link href="/agreement/create" className="w-full sm:w-auto">
+                <Button
+                  type="button"
+                  className="w-full sm:w-auto bg-[#1a2b3c] hover:bg-[#1a2b3c]/90 text-white font-bold text-[12px] h-10 px-6 rounded-lg flex items-center justify-center gap-2 shadow-sm"
+                >
+                  Create Agreement
+                </Button>
+              </Link>
+              <Link href="/agreement/upload" className="w-full sm:w-auto">
+                <Button
+                  type="button"
+                  className="w-full sm:w-auto bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px] h-10 px-6 rounded-lg flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <FileUp size={14} className="stroke-[2.5]" />
+                  Upload Agreement
+                </Button>
+              </Link>
+            </>
           )}
         </div>
       </div>

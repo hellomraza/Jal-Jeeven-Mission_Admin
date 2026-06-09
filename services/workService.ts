@@ -167,3 +167,15 @@ export const bulkImportWorkItems = async (workItems: WorkItemImport[]) => {
     );
   }
 };
+
+export const getWorkItemsWithoutAgreement = async () => {
+  try {
+    const response = await apiClient.get<PaginatedResponse<WorkItem[]>>("/work-items/without-agreement");
+    return response.data || [];
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch work items without agreement",
+    );
+  }
+};
+
