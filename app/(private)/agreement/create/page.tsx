@@ -91,6 +91,14 @@ export default function CreateAgreementPage() {
   });
 
   const onSubmit = (values: CreateAgreementFormValues) => {
+    let formattedDate: string | undefined = undefined;
+    if (values.workorderdate) {
+      const dateObj = new Date(values.workorderdate);
+      if (!isNaN(dateObj.getTime())) {
+        formattedDate = dateObj.toISOString();
+      }
+    }
+
     const payload = {
       agreementno: values.agreementno,
       agreementyear: values.agreementyear,
@@ -99,7 +107,7 @@ export default function CreateAgreementPage() {
       contractor_id: values.contractor_id || undefined,
       sr: values.sr || undefined,
       workorderno: values.workorderno || undefined,
-      workorderdate: values.workorderdate || undefined,
+      workorderdate: formattedDate,
       work_ids: values.work_ids && values.work_ids.length > 0 ? values.work_ids : undefined,
       unitag: values.unitag || undefined,
     };
