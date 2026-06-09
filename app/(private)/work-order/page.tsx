@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import WorkOrder from "./WorkOrder";
 
 type WorkOrderPageProps = {
-  searchParams?: Promise<{ page?: string }>;
+  searchParams?: Promise<{ page?: string; search?: string }>;
 };
 
 const WORK_ITEMS_PAGE_SIZE = 10;
@@ -15,8 +15,9 @@ const WorkOrderPage = async ({ searchParams }: WorkOrderPageProps) => {
   const pageValue = Number(resolvedSearchParams?.page || "1");
   const currentPage =
     Number.isFinite(pageValue) && pageValue > 0 ? pageValue : 1;
+  const search = resolvedSearchParams?.search || "";
 
-  const response = await getWorkItems(currentPage, WORK_ITEMS_PAGE_SIZE);
+  const response = await getWorkItems(currentPage, WORK_ITEMS_PAGE_SIZE, search);
   const workItems = response.data || [];
 
   return (

@@ -39,17 +39,17 @@ import {
 import { useUser } from "@/hooks/useUser";
 import { getAgreements } from "@/services/agreementService";
 import { getLocationsByType } from "@/services/locationService";
-import { createWorkItem } from "@/services/workService";
+import { getWorkItem, updateWorkItem } from "@/services/workService";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueries } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
-const createWorkOrderSchema = z.object({
+const editWorkOrderSchema = z.object({
   work_code: z.string().trim().min(1, "Work code is required"),
   schemetype: z.string().trim().min(1, "Scheme type is required"),
   workcodeid: z.string().trim().optional(),
@@ -83,7 +83,7 @@ const createWorkOrderSchema = z.object({
   status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED"]).optional().default("PENDING"),
 });
 
-type CreateWorkOrderFormValues = z.infer<typeof createWorkOrderSchema>;
+type EditWorkOrderFormValues = z.infer<typeof editWorkOrderSchema>;
 
 type LocationOption = {
   id: number;
@@ -93,7 +93,7 @@ type LocationOption = {
 };
 
 const LOCATION_META: Record<
-  LocationType,
+  string,
   { idKey: string; nameKey: string; parentDistrictKey?: string }
 > = {
   districts: { idKey: "districtid", nameKey: "districtname" },
@@ -107,35 +107,16 @@ const LOCATION_META: Record<
     nameKey: "panchayatname",
     parentDistrictKey: "district_id",
   },
-  villages: {
-    idKey: "villageid",
-    nameKey: "villagename",
-    parentDistrictKey: "district_id",
-  },
-  subdivisions: {
-    idKey: "subdivisionid",
-    nameKey: "subdivisionname",
-    parentDistrictKey: "district_id",
-  },
-  circles: {
-    idKey: "circleid",
-    nameKey: "circlename",
-    parentDistrictKey: "district_id",
-  },
-  zones: {
-    idKey: "zoneid",
-    nameKey: "zonename",
-    parentDistrictKey: "district_id",
-  },
 };
 
-const LOCATION_TYPES: LocationType[] = ["districts", "blocks", "panchayats"];
+const LOCATION_TYPES = ["districts", "blocks", "panchayats"] as const;
 
 const mapLocationOptions = (
-  type: LocationType,
+  type: string,
   records: any[] = [],
 ): LocationOption[] => {
   const meta = LOCATION_META[type];
+  if (!meta) return [];
 
   return records.reduce<LocationOption[]>((acc, item) => {
     const id = Number(item?.[meta.idKey]);
@@ -180,14 +161,22 @@ const filterByDistrict = (
   });
 };
 
-export default function CreateWorkOrderPage() {
+export default function EditWorkOrderPage() {
+  const params = useParams();
+  const id = params?.id as string;
   const router = useRouter();
+  
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [pendingValues, setPendingValues] =
-    useState<CreateWorkOrderFormValues | null>(null);
+  const [pendingValues, setPendingValues] = useState<EditWorkOrderFormValues | null>(null);
 
-  const form = useForm<CreateWorkOrderFormValues>({
-    resolver: zodResolver(createWorkOrderSchema),
+  const { data: workItem, isLoading: isWorkItemLoading } = useQuery({
+    queryKey: ["work-item", id],
+    queryFn: () => getWorkItem(id),
+    enabled: !!id,
+  });
+
+  const form = useForm<EditWorkOrderFormValues>({
+    resolver: zodResolver(editWorkOrderSchema),
     mode: "onChange",
     defaultValues: {
       work_code: "",
@@ -209,6 +198,7 @@ export default function CreateWorkOrderPage() {
     },
   });
 
+  // Load options
   const { data: userInfo, isLoading: isUserLoading } = useUser();
 
   const locationQueries = useQueries({
@@ -224,7 +214,7 @@ export default function CreateWorkOrderPage() {
   });
 
   const locationDataByType = useMemo(() => {
-    const map = {} as Record<LocationType, LocationOption[]>;
+    const map = {} as Record<string, LocationOption[]>;
 
     LOCATION_TYPES.forEach((type, index) => {
       const queryData = locationQueries[index]?.data;
@@ -250,46 +240,42 @@ export default function CreateWorkOrderPage() {
     districtFilter,
   );
 
-  // Auto-set DO district if available
+  // Sync form values once workItem is loaded
   useEffect(() => {
-    if (!userInfo?.district_id || !locationDataByType.districts?.length) return;
+    if (!workItem) return;
 
-    const userDistrictIdNum = Number(userInfo.district_id);
-    if (isNaN(userDistrictIdNum)) return;
+    form.reset({
+      work_code: workItem.work_code || "",
+      schemetype: workItem.schemetype || "",
+      workcodeid: workItem.workcodeid || "",
+      excel: workItem.excel || "",
+      district_id: workItem.district_id || "",
+      block_id: String(workItem.block_id || ""),
+      panchayat_id: String(workItem.panchayat_id || ""),
+      nofhtc: workItem.nofhtc || "",
+      amount_approved: workItem.amount_approved !== undefined ? Number(workItem.amount_approved) : undefined,
+      sr: workItem.serial_no !== undefined ? Number(workItem.serial_no) : undefined,
+      agreement_id: workItem.agreement_id || "",
+      title: workItem.title || "",
+      latitude: workItem.latitude !== undefined ? Number(workItem.latitude) : undefined,
+      longitude: workItem.longitude !== undefined ? Number(workItem.longitude) : undefined,
+      progress_percentage: workItem.progress_percentage !== undefined ? Number(workItem.progress_percentage) : 0,
+      status: workItem.status || "PENDING",
+    });
+  }, [workItem, form]);
 
-    const matchDistrict = locationDataByType.districts.find(
-      (d) => d.id === userDistrictIdNum
-    );
-
-    if (matchDistrict) {
-      const currentVal = form.getValues("district_id");
-      if (currentVal !== matchDistrict.code) {
-        form.setValue("district_id", matchDistrict.code, {
-          shouldDirty: false,
-          shouldValidate: true,
-        });
-      }
-    }
-  }, [userInfo?.district_id, locationDataByType.districts, form]);
-
-  // Clear sub-locations when district code changes
-  useEffect(() => {
-    form.setValue("block_id", "");
-    form.setValue("panchayat_id", "");
-  }, [selectedDistrictCode, form]);
-
-  const createMutation = useMutation({
-    mutationFn: (payload: Record<string, unknown>) => createWorkItem(payload),
+  const updateMutation = useMutation({
+    mutationFn: (payload: Record<string, unknown>) => updateWorkItem(id, payload),
     onSuccess: () => {
-      toast.success("Work item created successfully");
+      toast.success("Work item updated successfully");
       router.push("/work-order");
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to create work item");
+      toast.error(error.message || "Failed to update work item");
     },
   });
 
-  const onSubmit = (values: CreateWorkOrderFormValues) => {
+  const onSubmit = (values: EditWorkOrderFormValues) => {
     const payload = {
       work_code: values.work_code,
       schemetype: values.schemetype,
@@ -308,16 +294,16 @@ export default function CreateWorkOrderPage() {
       progress_percentage: values.progress_percentage !== undefined ? values.progress_percentage : undefined,
       status: values.status || undefined,
     };
-    createMutation.mutate(payload);
+    updateMutation.mutate(payload);
   };
 
-  const onRequestCreate = form.handleSubmit((values) => {
+  const onRequestUpdate = form.handleSubmit((values) => {
     setPendingValues(values);
     setIsConfirmOpen(true);
   });
 
-  const onConfirmCreate = () => {
-    if (!pendingValues || createMutation.isPending) return;
+  const onConfirmUpdate = () => {
+    if (!pendingValues || updateMutation.isPending) return;
 
     onSubmit(pendingValues);
     setIsConfirmOpen(false);
@@ -327,7 +313,15 @@ export default function CreateWorkOrderPage() {
   const isLocationLoading = locationQueries.some((query) => query.isLoading);
   const isAllowed = userInfo?.role === "HO" || userInfo?.role === "DO" || userInfo?.role === "CO";
 
-  if (isUserLoading) {
+  const isPageLoading = isWorkItemLoading || isUserLoading;
+
+  // Find linked agreement name if already assigned
+  const assignedAgreement = useMemo(() => {
+    if (!workItem?.agreement_id || !agreementsData?.data) return null;
+    return agreementsData.data.find((ag: any) => ag.id === workItem.agreement_id);
+  }, [workItem?.agreement_id, agreementsData?.data]);
+
+  if (isPageLoading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
         <Loader2 className="h-7 w-7 animate-spin text-[#1a2b3c]" />
@@ -342,7 +336,7 @@ export default function CreateWorkOrderPage() {
           Access Restricted
         </h2>
         <p className="text-[13px] text-gray-600 mt-2">
-          Only Head Officers, District Officers, or Contractors can create new work items.
+          Only Head Officers, District Officers, or Contractors can edit work items.
         </p>
         <Button className="mt-4" onClick={() => router.replace("/work-order")}>
           Back
@@ -357,10 +351,10 @@ export default function CreateWorkOrderPage() {
         <BackButton />
         <div>
           <h1 className="text-[22px] font-extrabold text-[#1a2b3c]">
-            Create Work Item
+            Edit Work Item
           </h1>
           <p className="text-[12px] text-gray-500 mt-1">
-            Fill out the details to manually register a new work item.
+            Modify details for work code: <span className="font-semibold">{workItem?.work_code}</span>
           </p>
         </div>
       </div>
@@ -371,12 +365,12 @@ export default function CreateWorkOrderPage() {
             Work Item Information
           </CardTitle>
           <CardDescription>
-            Specify unique identifiers, category, location, and associated agreement.
+            Edit category, location, and associated agreement mappings.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 sm:p-8">
           <Form {...form}>
-            <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+            <form className="space-y-6" onSubmit={onRequestUpdate}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FormField
                   control={form.control}
@@ -413,7 +407,7 @@ export default function CreateWorkOrderPage() {
                     <FormItem>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="Sector C Pipeline Laying" {...field} />
+                        <Input placeholder="Work Title" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -479,7 +473,7 @@ export default function CreateWorkOrderPage() {
                         disabled={Boolean(userInfo?.district_id)}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full bg-white">
                             <SelectValue placeholder="Select district" />
                           </SelectTrigger>
                         </FormControl>
@@ -508,13 +502,13 @@ export default function CreateWorkOrderPage() {
                         disabled={!selectedDistrictCode}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full bg-white">
                             <SelectValue placeholder="Select block" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {blocks.map((item) => (
-                            <SelectItem key={item.id} value={item.code}>
+                            <SelectItem key={item.id} value={String(item.code)}>
                               {item.name}
                             </SelectItem>
                           ))}
@@ -537,13 +531,13 @@ export default function CreateWorkOrderPage() {
                         disabled={!selectedDistrictCode}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full bg-white">
                             <SelectValue placeholder="Select panchayat" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {panchayats.map((item) => (
-                            <SelectItem key={item.id} value={item.code}>
+                            <SelectItem key={item.id} value={String(item.code)}>
                               {item.name}
                             </SelectItem>
                           ))}
@@ -588,35 +582,52 @@ export default function CreateWorkOrderPage() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="agreement_id"
-                  render={({ field }) => {
-                    const agreementsList = (agreementsData?.data || []).map((ag: any) => ({
-                      label: `${ag.agreementno} (${ag.agreementyear})`,
-                      value: ag.id,
-                    }));
+                {/* Agreement Assignment Logic */}
+                {workItem?.agreement_id ? (
+                  <FormItem>
+                    <FormLabel>Linked Agreement (Read-Only)</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={assignedAgreement ? `${assignedAgreement.agreementno} (${assignedAgreement.agreementyear})` : workItem.agreement_id}
+                        disabled
+                        className="bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed"
+                      />
+                    </FormControl>
+                    <p className="text-[11px] text-amber-600 mt-1">
+                      Agreement cannot be modified once assigned.
+                    </p>
+                  </FormItem>
+                ) : (
+                  <FormField
+                    control={form.control}
+                    name="agreement_id"
+                    render={({ field }) => {
+                      const agreementsList = (agreementsData?.data || []).map((ag: any) => ({
+                        label: `${ag.agreementno} (${ag.agreementyear})`,
+                        value: ag.id,
+                      }));
 
-                    return (
-                      <FormItem>
-                        <FormLabel>Linked Agreement</FormLabel>
-                        <FormControl>
-                          <ComboboxPopup
-                            items={agreementsList}
-                            value={field.value}
-                            onValueChange={(item) => {
-                              field.onChange(item?.value || "");
-                            }}
-                            placeholder="Select associated agreement"
-                            isLoading={isAgreementsLoading}
-                            emptyMessage="No agreements found"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
+                      return (
+                        <FormItem>
+                          <FormLabel>Linked Agreement</FormLabel>
+                          <FormControl>
+                            <ComboboxPopup
+                              items={agreementsList}
+                              value={field.value}
+                              onValueChange={(item) => {
+                                field.onChange(item?.value || "");
+                              }}
+                              placeholder="Select associated agreement"
+                              isLoading={isAgreementsLoading}
+                              emptyMessage="No agreements found"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+                )}
 
                 {/* <FormField
                   control={form.control}
@@ -636,9 +647,9 @@ export default function CreateWorkOrderPage() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
 
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="longitude"
                   render={({ field }) => (
@@ -684,13 +695,13 @@ export default function CreateWorkOrderPage() {
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Initial Status</FormLabel>
+                      <FormLabel>Status</FormLabel>
                       <Select
                         value={field.value || "PENDING"}
                         onValueChange={field.onChange}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full bg-white">
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                         </FormControl>
@@ -718,23 +729,22 @@ export default function CreateWorkOrderPage() {
                   type="button"
                   variant="outline"
                   onClick={() => router.back()}
-                  disabled={createMutation.isPending}
+                  disabled={updateMutation.isPending}
                 >
                   Cancel
                 </Button>
                 <Button
-                  type="button"
-                  onClick={onRequestCreate}
-                  disabled={createMutation.isPending}
+                  type="submit"
+                  disabled={updateMutation.isPending}
                   className="bg-[#1a2b3c] hover:bg-[#1a2b3c]/90 text-white"
                 >
-                  {createMutation.isPending ? (
+                  {updateMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
+                      Updating...
                     </>
                   ) : (
-                    "Create Work Item"
+                    "Save Changes"
                   )}
                 </Button>
               </div>
@@ -747,31 +757,31 @@ export default function CreateWorkOrderPage() {
         open={isConfirmOpen}
         onOpenChange={(open) => {
           setIsConfirmOpen(open);
-          if (!open && !createMutation.isPending) {
+          if (!open && !updateMutation.isPending) {
             setPendingValues(null);
           }
         }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Create this work item?</AlertDialogTitle>
+            <AlertDialogTitle>Save changes to this work item?</AlertDialogTitle>
             <AlertDialogDescription>
-              Please confirm you want to create this new work item.
+              Please confirm you want to update the details of this work item.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={createMutation.isPending}>
+            <AlertDialogCancel disabled={updateMutation.isPending}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={(event) => {
                 event.preventDefault();
-                onConfirmCreate();
+                onConfirmUpdate();
               }}
-              disabled={createMutation.isPending}
+              disabled={updateMutation.isPending}
               className="bg-[#1a2b3c] hover:bg-[#1a2b3c]/90 text-white"
             >
-              {createMutation.isPending ? "Creating..." : "Confirm"}
+              {updateMutation.isPending ? "Updating..." : "Confirm"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

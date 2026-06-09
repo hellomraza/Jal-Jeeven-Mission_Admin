@@ -74,15 +74,25 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
           <AgreementFilters />
 
           {userRole === UserRole.HeadOfficer && (
-            <Link href="/agreement/upload" className="w-full sm:w-auto">
-              <Button
-                type="button"
-                className="w-full sm:w-auto bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px] h-10 px-6 rounded-lg flex items-center justify-center gap-2 shadow-sm"
-              >
-                <FileUp size={14} className="stroke-[2.5]" />
-                Upload Agreement
-              </Button>
-            </Link>
+            <>
+              <Link href="/agreement/create" className="w-full sm:w-auto">
+                <Button
+                  type="button"
+                  className="w-full sm:w-auto bg-[#1a2b3c] hover:bg-[#1a2b3c]/90 text-white font-bold text-[12px] h-10 px-6 rounded-lg flex items-center justify-center gap-2 shadow-sm"
+                >
+                  Create Agreement
+                </Button>
+              </Link>
+              <Link href="/agreement/upload" className="w-full sm:w-auto">
+                <Button
+                  type="button"
+                  className="w-full sm:w-auto bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px] h-10 px-6 rounded-lg flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <FileUp size={14} className="stroke-[2.5]" />
+                  Upload Agreement
+                </Button>
+              </Link>
+            </>
           )}
         </div>
       </div>
@@ -123,6 +133,11 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Agreement File
                   </TableHead>
+                  {(userRole === UserRole.HeadOfficer || userRole === UserRole.DistrictOfficer) && (
+                    <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12 text-center">
+                      Action
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -140,7 +155,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                   agreements.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={10}
+                        colSpan={11}
                         className="text-center py-10 text-gray-500"
                       >
                         No agreements found.
@@ -162,7 +177,9 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                           {row.agreementyear}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {row.workItem?.work_code || "N/A"}
+                          {row.workItems && row.workItems.length > 0
+                            ? row.workItems.map((w) => w.work_code).join(", ")
+                            : "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {row.contractor?.name
@@ -185,7 +202,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                             : "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {row.workItem?.district_id || "N/A"}
+                          {row.workItems && row.division_code}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {(() => {
@@ -208,7 +225,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                                 <div className="flex items-center gap-2">
                                   <AgreementFileViewerModal
                                     fileUrl={fileUrl}
-                                    fileName={file?.fileName || row.agreementno}
+                                    fileName={file?.file_name || row.agreementno}
                                   >
                                     <Button size="sm" variant="outline">
                                       View File
@@ -217,7 +234,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                                   <AgreementFileDialog
                                     agreementId={row.id}
                                     mode="edit"
-                                    currentFile={file}
+                                    currentFile={file ? { fileUrl: file.file_url, fileName: file.file_name, mimeType: file.mime_type } : null}
                                   >
                                     <Button size="sm">Edit File</Button>
                                   </AgreementFileDialog>
@@ -229,7 +246,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                               return (
                                 <AgreementFileViewerModal
                                   fileUrl={fileUrl}
-                                  fileName={file?.fileName || row.agreementno}
+                                  fileName={file?.file_name || row.agreementno}
                                 >
                                   <Button size="sm" variant="outline">
                                     View File
@@ -245,6 +262,19 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                             );
                           })()}
                         </TableCell>
+                        {(userRole === UserRole.HeadOfficer || userRole === UserRole.DistrictOfficer) && (
+                          <TableCell className="text-center py-4">
+                            <Link href={`/agreement/edit/${row.id}`}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 px-3 bg-white text-[#136FB6] border-[#136FB6]/20 hover:bg-[#DFEEF9] text-[11px] font-bold"
+                              >
+                                Edit
+                              </Button>
+                            </Link>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))
                   )

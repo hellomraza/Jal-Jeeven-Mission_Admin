@@ -21,12 +21,14 @@ interface ComboboxItem {
 type ComboboxMultipleProps = ComboboxRoot.Props<string, true> & {
   items?: ComboboxItem[];
   onSelect?: (selectedValues: string[]) => void;
+  placeholder?: string;
 };
 
 export function ComboboxMultiple({
   items = [],
   onSelect,
   value,
+  placeholder,
   ...props
 }: ComboboxMultipleProps) {
   const handleValueChange = (newValues: string[]) => {
@@ -52,7 +54,7 @@ export function ComboboxMultiple({
             );
           })}
         </ComboboxValue>
-        <ComboboxChipsInput placeholder="Search employees..." />
+        <ComboboxChipsInput placeholder={placeholder || "Search employees..."} />
       </ComboboxChips>
       <ComboboxContent>
         <ComboboxEmpty>No items found.</ComboboxEmpty>

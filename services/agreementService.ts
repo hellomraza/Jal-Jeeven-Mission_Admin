@@ -72,3 +72,51 @@ export const bulkImportAgreements = async (
   }
 };
 
+export interface CreateAgreementPayload {
+  agreementno: string;
+  agreementyear: string;
+  division_code: string;
+  agrid?: string;
+  contractor_id?: string;
+  sr?: string;
+  workorderno?: string;
+  workorderdate?: string;
+  work_ids?: string[];
+  unitag?: string;
+}
+
+export const createAgreement = async (payload: CreateAgreementPayload) => {
+  try {
+    const response = await apiClient.post("/agreements", payload);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to create agreement",
+    );
+  }
+};
+
+export const getAgreement = async (id: string) => {
+  try {
+    const response = await apiClient.get(`/agreements/${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch agreement details",
+    );
+  }
+};
+
+export const updateAgreement = async (id: string, payload: Partial<CreateAgreementPayload>) => {
+  try {
+    const response = await apiClient.patch(`/agreements/${id}`, payload);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to update agreement",
+    );
+  }
+};
+
+
+

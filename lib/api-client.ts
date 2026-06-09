@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const NEXT_PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 const apiClient = axios.create({
-  baseURL: "https://jjm-backend.vercel.app", // Update with your API base URL
+  baseURL: NEXT_PUBLIC_API_BASE_URL, // Update with your API base URL
   headers: {
     "Content-Type": "application/json",
   },

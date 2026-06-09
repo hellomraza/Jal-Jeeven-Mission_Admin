@@ -3,6 +3,7 @@ import * as XLSX from "xlsx";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -20,8 +21,8 @@ import {
 } from "@/components/ui/table";
 import { UserRole } from "@/types/usertypes";
 import { Upload } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 export default function WorkOrder({
   workItems,
@@ -37,9 +38,38 @@ export default function WorkOrder({
   totalWorkItems: number;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const currentSearch = searchParams.get("search") || "";
+  const [search, setSearch] = useState(currentSearch);
+
   const [selectedDistrict, setSelectedDistrict] = React.useState<string | null>(
     null,
   );
+
+  // Sync state with URL if URL changes
+  useEffect(() => {
+    setSearch(currentSearch);
+  }, [currentSearch]);
+
+  // Debounced search input
+  useEffect(() => {
+    if (search === currentSearch) return;
+
+    const handler = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (search) {
+        params.set("search", search);
+      } else {
+        params.delete("search");
+      }
+      params.set("page", "1"); // reset to page 1 on search
+      router.push(`${pathname}?${params.toString()}`);
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [search, currentSearch, router, pathname, searchParams]);
 
   const updatePageParam = (page: number) => {
     const params = new URLSearchParams(window.location.search);
@@ -62,8 +92,8 @@ export default function WorkOrder({
   };
   const filteredWorkItems = selectedDistrict
     ? workItems?.filter(
-        (item) => item.district_id.toString() === selectedDistrict,
-      )
+      (item) => item.district_id.toString() === selectedDistrict,
+    )
     : workItems;
 
   let availableDistricts: {
@@ -101,6 +131,13 @@ export default function WorkOrder({
           <h2 className="text-[16px] font-bold text-[#1a2b3c] whitespace-nowrap px-2">
             Work Code Details
           </h2>
+          <Input
+            type="text"
+            placeholder="Search Work Code..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-[220px] h-9 text-[12px] bg-[#F9FAFB] border-gray-100 rounded-lg outline-none focus:ring-1 focus:ring-[#136FB6]/30 focus:border-[#136FB6]/30 transition-colors"
+          />
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -134,6 +171,13 @@ export default function WorkOrder({
           )}
           {userRole === UserRole.HeadOfficer && (
             <div className="flex items-center gap-2">
+              <Button
+                onClick={() => router.push("/work-order/create")}
+                type="button"
+                className="w-full sm:w-auto bg-[#1a2b3c] hover:bg-[#1a2b3c]/90 text-white font-bold text-[12px] h-10 px-6 rounded-lg flex items-center justify-center gap-2 shadow-sm"
+              >
+                Create Work Code
+              </Button>
               <Button
                 onClick={() => router.push("/work-order/upload")}
                 className="bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] h-9 px-4 rounded-lg text-[12px] font-medium shadow-sm"
@@ -203,6 +247,13 @@ export default function WorkOrder({
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Longitude
                   </TableHead> */}
+                  {(userRole === UserRole.HeadOfficer ||
+                    userRole === UserRole.DistrictOfficer ||
+                    userRole === UserRole.Contractor) && (
+                    <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12 text-center bg-[#DFEEF9] opacity-80">
+                      Action
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -224,7 +275,7 @@ export default function WorkOrder({
                       }
                     >
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
-                        {index + 1}
+                        {(currentPage - 1) * 10 + index + 1}
                       </TableCell>
                       {/* <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
                         {row.title || "---"}
@@ -261,13 +312,12 @@ export default function WorkOrder({
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         <span
-                          className={`px-2 py-1 rounded-full text-[10px] font-bold ${
-                            row.status === "COMPLETED"
-                              ? "bg-green-50 text-green-700"
-                              : row.status === "IN_PROGRESS"
-                                ? "bg-amber-50 text-amber-700"
-                                : "bg-gray-50 text-gray-600"
-                          }`}
+                          className={`px-2 py-1 rounded-full text-[10px] font-bold ${row.status === "COMPLETED"
+                            ? "bg-green-50 text-green-700"
+                            : row.status === "IN_PROGRESS"
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-gray-50 text-gray-600"
+                            }`}
                         >
                           {row.status || "PENDING"}
                         </span>
@@ -278,8 +328,8 @@ export default function WorkOrder({
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.contractor?.name
                           ? row.contractor.name
-                              ?.toLowerCase()
-                              ?.includes("temporary")
+                            ?.toLowerCase()
+                            ?.includes("temporary")
                             ? "---"
                             : row.contractor.name
                           : "---"}
@@ -293,6 +343,23 @@ export default function WorkOrder({
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.longitude || "---"}
                       </TableCell> */}
+                      {(userRole === UserRole.HeadOfficer ||
+                        userRole === UserRole.DistrictOfficer ||
+                        userRole === UserRole.Contractor) && (
+                        <TableCell
+                          className="text-center py-4"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-3 bg-white text-[#136FB6] border-[#136FB6]/20 hover:bg-[#DFEEF9] text-[11px] font-bold"
+                            onClick={() => router.push(`/work-order/edit/${row.id}`)}
+                          >
+                            Edit
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}
