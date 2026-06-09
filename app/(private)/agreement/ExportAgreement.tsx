@@ -3,18 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import * as XLSX from "xlsx";
 
-const ExportAgreement = ({ agreements }: { agreements: any[] }) => {
+const ExportAgreement = ({ agreements }: { agreements: AgreementResponse[] }) => {
   const handleExport = () => {
     const exportData = agreements.map((row, index) => ({
       "S No.": index + 1,
-      "Work Code": row.workItem?.work_code || "N/A",
+      "Work Code": row.workItems && row.workItems.length > 0
+        ? row.workItems.map((w) => w.work_code).join(", ")
+        : "N/A",
       "Name Of Contractor": row.contractor?.name || "N/A",
       "Contractor Code": row.contractor?.code || "N/A",
       "Work Order No.": row.agreementno || "N/A",
       "Work Order Date": row.created_at
         ? new Date(row.created_at).toLocaleDateString()
         : "N/A",
-      Division: row.workItem?.district_id || "N/A",
+      Division: row.workItems && row.workItems.length > 0
+        ? Array.from(new Set(row.workItems.map((w) => w.district_id).filter(Boolean))).join(", ")
+        : "N/A",
       "Agreement No.": row.agreementno || "N/A",
       "Agreement Year": row.agreementyear || "N/A",
     }));

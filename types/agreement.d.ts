@@ -3,8 +3,9 @@ type Agreement = {
   agreementno: string;
   agreementyear: string;
   contractor_id: string;
-  work_id: string;
+  work_id?: string; // Optional/Deprecated
   created_at: string;
+  division_code: string
 };
 
 type AgreementFile = {
@@ -40,6 +41,6 @@ type AgreementContractor = {
 };
 type AgreementResponse = Agreement & {
   contractor: AgreementContractor;
-  workItem: AgreementWorkItem;
+  workItems: AgreementWorkItem[];
   files: AgreementFile[];
 };

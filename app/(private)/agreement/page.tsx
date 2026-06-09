@@ -162,7 +162,9 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                           {row.agreementyear}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {row.workItem?.work_code || "N/A"}
+                          {row.workItems && row.workItems.length > 0
+                            ? row.workItems.map((w) => w.work_code).join(", ")
+                            : "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {row.contractor?.name
@@ -185,7 +187,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                             : "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {row.workItem?.district_id || "N/A"}
+                          {row.workItems && row.division_code}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {(() => {
@@ -208,7 +210,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                                 <div className="flex items-center gap-2">
                                   <AgreementFileViewerModal
                                     fileUrl={fileUrl}
-                                    fileName={file?.fileName || row.agreementno}
+                                    fileName={file?.file_name || row.agreementno}
                                   >
                                     <Button size="sm" variant="outline">
                                       View File
@@ -217,7 +219,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                                   <AgreementFileDialog
                                     agreementId={row.id}
                                     mode="edit"
-                                    currentFile={file}
+                                    currentFile={file ? { fileUrl: file.file_url, fileName: file.file_name, mimeType: file.mime_type } : null}
                                   >
                                     <Button size="sm">Edit File</Button>
                                   </AgreementFileDialog>
@@ -229,7 +231,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                               return (
                                 <AgreementFileViewerModal
                                   fileUrl={fileUrl}
-                                  fileName={file?.fileName || row.agreementno}
+                                  fileName={file?.file_name || row.agreementno}
                                 >
                                   <Button size="sm" variant="outline">
                                     View File
