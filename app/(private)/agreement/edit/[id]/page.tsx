@@ -26,9 +26,9 @@ import { getContractors } from "@/services/userService";
 import { getWorkItemsWithoutAgreement } from "@/services/workService";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import * as z from "zod";
@@ -52,7 +52,7 @@ export default function EditAgreementPage() {
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
-  
+
   const { data: userInfo, isLoading: isUserLoading } = useUser();
 
   const { data: agreement, isLoading: isAgreementLoading, refetch } = useQuery({
@@ -111,7 +111,7 @@ export default function EditAgreementPage() {
       workorderdate: formattedDate,
       unitag: agreement.unitag || "",
       contractor_id: agreement.contractor_id || "",
-      work_ids: [], // Keep newly selected ones empty initially
+      work_ids: agreement.workItems?.map((w: any) => w.id) || [],
     });
   }, [agreement, form]);
 
@@ -141,21 +141,16 @@ export default function EditAgreementPage() {
       }
     }
 
-    // Combine existing work items and newly added ones
-    const existingIds = existingWorkItems.map((w: any) => w.id);
-    const addedIds = values.work_ids || [];
-    const combinedWorkIds = Array.from(new Set([...existingIds, ...addedIds]));
-
     const payload = {
       agreementno: values.agreementno,
       agreementyear: values.agreementyear,
       division_code: values.division_code,
       agrid: values.agrid || undefined,
-      contractor_id: values.contractor_id || undefined,
+      contractor_id: values.contractor_id || null,
       sr: values.sr || undefined,
       workorderno: values.workorderno || undefined,
       workorderdate: formattedDate,
-      work_ids: combinedWorkIds.length > 0 ? combinedWorkIds : undefined,
+      work_ids: values.work_ids,
       unitag: values.unitag || undefined,
     };
 
@@ -334,89 +329,83 @@ export default function EditAgreementPage() {
                   )}
                 />
 
-                {/* Contractor Assignment Logic */}
-                {agreement?.contractor_id ? (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Contractor (Read-Only)</FormLabel>
-                    <FormControl>
-                      <Input
-                        value={assignedContractor ? `${assignedContractor.name} (${assignedContractor.code || "No Code"})` : agreement.contractor_id}
-                        disabled
-                        className="bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed"
-                      />
-                    </FormControl>
-                    <p className="text-[11px] text-amber-600 mt-1">
-                      Contractor cannot be modified once assigned.
-                    </p>
-                  </FormItem>
-                ) : (
-                  <FormField
-                    control={form.control}
-                    name="contractor_id"
-                    render={({ field }) => {
-                      const contractorItems = contractorsData.map((c: any) => ({
-                        label: `${c.name} (${c.code || "No Code"})`,
-                        value: c.id,
-                      }));
+                <FormField
+                  control={form.control}
+                  name="contractor_id"
+                  render={({ field }) => {
+                    const contractorItems = contractorsData.map((c: any) => ({
+                      label: `${c.name} (${c.code || "No Code"})`,
+                      value: c.id,
+                    }));
 
-                      return (
-                        <FormItem className="md:col-span-2">
-                          <FormLabel>Contractor</FormLabel>
-                          <FormControl>
-                            <ComboboxPopup
-                              items={contractorItems}
-                              value={field.value}
-                              onValueChange={(item) => {
-                                field.onChange(item?.value || "");
-                              }}
-                              placeholder="Search contractor by name"
-                              isLoading={isContractorLoading}
-                              emptyMessage="No contractors found"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      );
-                    }}
-                  />
-                )}
-
-                {/* Work Orders Locked and Additional Selection */}
-                <div className="md:col-span-2 space-y-4">
-                  <div>
-                    <FormLabel className="text-[#1a2b3c] font-bold">Currently Linked Work Orders (Read-Only)</FormLabel>
-                    {existingWorkItems.length === 0 ? (
-                      <p className="text-[12px] text-gray-400 mt-1 italic">No work orders currently linked.</p>
-                    ) : (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {existingWorkItems.map((w: any) => (
-                          <div
-                            key={w.id}
-                            className="flex items-center gap-1.5 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold border border-gray-200 shadow-sm"
-                          >
-                            <Lock size={12} className="text-gray-400" />
-                            <span>{w.work_code} {w.title ? `(${w.title})` : ""}</span>
+                    return (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Contractor</FormLabel>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <div className="flex-1">
+                            <FormControl className="flex-1">
+                              <ComboboxPopup
+                                items={contractorItems}
+                                value={field.value}
+                                onValueChange={(item) => {
+                                  field.onChange(item?.value || "");
+                                }}
+                                placeholder="Search contractor by name"
+                                isLoading={isContractorLoading}
+                                emptyMessage="No contractors found"
+                              />
+                            </FormControl>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                    <p className="text-[11px] text-amber-600 mt-1.5">
-                      Existing linked work orders cannot be deselected or removed.
-                    </p>
-                  </div>
+                          {field.value && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200 shrink-0"
+                              onClick={() => field.onChange("")}
+                            >
+                              Remove Contractor
+                            </Button>
+                          )}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
 
+                {/* Work Orders Selection */}
+                <div className="md:col-span-2 space-y-4">
                   <FormField
                     control={form.control}
                     name="work_ids"
                     render={({ field }) => {
-                      const workItemItems = (unassignedWorkItemsData?.data || []).map((w: any) => ({
-                        label: `${w.work_code} - ${w.title || "No Title"}`,
-                        value: w.id,
-                      }));
+                      const workItemItems = (() => {
+                        const itemsMap = new Map<string, { label: string; value: string }>();
+
+                        if (agreement?.workItems) {
+                          agreement.workItems.forEach((w: any) => {
+                            itemsMap.set(w.id, {
+                              label: `${w.work_code}`,
+                              value: w.id,
+                            });
+                          });
+                        }
+
+                        if (unassignedWorkItemsData?.data) {
+                          unassignedWorkItemsData.data.forEach((w: any) => {
+                            itemsMap.set(w.id, {
+                              label: `${w.work_code}`,
+                              value: w.id,
+                            });
+                          });
+                        }
+
+                        return Array.from(itemsMap.values());
+                      })();
 
                       return (
                         <FormItem>
-                          <FormLabel className="text-[#1a2b3c] font-bold">Add Additional Work Items</FormLabel>
+                          <FormLabel className="text-[#1a2b3c] font-bold">Link Work Items</FormLabel>
                           <FormControl>
                             <ComboboxMultiple
                               items={workItemItems}
@@ -424,7 +413,7 @@ export default function EditAgreementPage() {
                               onSelect={(selectedIds) => {
                                 field.onChange(selectedIds);
                               }}
-                              placeholder="Search and select unassigned work items to add..."
+                              placeholder="Search and select work items..."
                             />
                           </FormControl>
                           <FormMessage />

@@ -108,6 +108,7 @@ export const getAgreement = async (id: string) => {
 };
 
 export const updateAgreement = async (id: string, payload: Partial<CreateAgreementPayload>) => {
+  console.log(payload)
   try {
     const response = await apiClient.patch(`/agreements/${id}`, payload);
     return response.data;
