@@ -49,14 +49,14 @@ export function ComboboxPopup({
   };
 
   const selectedItem = React.useMemo(
-    () => items.find((item) => item.value === currentValue),
+    () => items.find((item) => item.value === currentValue) || null,
     [items, currentValue],
   );
 
   return (
     <Combobox
       items={items}
-      defaultValue={selectedItem}
+      value={selectedItem}
       onValueChange={handleValueChange}
       disabled={isLoading}
     >
