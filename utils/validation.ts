@@ -117,3 +117,38 @@ export const updateComponentSchema = z.object({
   quantity: z.string().regex(/^\d+$/, "Quantity must be a positive integer"),
   workItemId: z.string(),
 });
+
+export const updateWorkOrderSchema = z.object({
+  id: z.string().min(1, "Work Item ID is required"),
+  work_code: z.string().trim().min(1, "Work code is required"),
+  schemetype: z.string().trim().min(1, "Scheme type is required"),
+  workcodeid: z.string().trim().optional(),
+  excel: z.string().trim().optional(),
+  district_id: z.string().trim().optional(),
+  block_id: z.string().trim().optional(),
+  panchayat_id: z.string().trim().optional(),
+  nofhtc: z.string().trim().optional(),
+  amount_approved: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number().optional()
+  ),
+  sr: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number().optional()
+  ),
+  agreement_id: z.string().optional(),
+  title: z.string().trim().optional(),
+  latitude: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number().optional()
+  ),
+  longitude: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number().optional()
+  ),
+  progress_percentage: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number().min(0).max(100).optional()
+  ),
+  status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED"]).optional().default("PENDING"),
+});

@@ -314,7 +314,7 @@ export default function CreateAgreementPage() {
                   name="work_ids"
                   render={({ field }) => {
                     const workItemItems = workItemsData?.data?.map((w: any) => ({
-                      label: `${w.work_code} - ${w.title}`,
+                      label: `${w.work_code}`,
                       value: w.id,
                     }));
 
