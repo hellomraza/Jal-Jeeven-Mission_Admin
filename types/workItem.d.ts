@@ -36,6 +36,9 @@ type WorkItem = {
   village_id: number;
   work_code: string;
   zone_id: number;
+  workcodeid: string;
+  excel: string;
+  agreement_id: string;
 };
 
 type WorkItemComponent = {
