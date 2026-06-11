@@ -152,3 +152,49 @@ export const attachAgreementFile = async (
     );
   }
 };
+
+export type UpdateSecurityDepositState = {
+  success: string;
+  error: string;
+};
+
+export async function updateSecurityDepositAction(
+  _previousState: UpdateSecurityDepositState,
+  formData: FormData,
+): Promise<UpdateSecurityDepositState> {
+  try {
+    const agreementId = String(formData.get("agreementId") || "").trim();
+    const securityDepositVal = String(formData.get("security_deposit") || "").trim();
+
+    if (!agreementId) {
+      return { success: "", error: "Agreement ID is required" };
+    }
+
+    if (!securityDepositVal) {
+      return { success: "", error: "Security deposit is required" };
+    }
+
+    const securityDeposit = Number(securityDepositVal);
+    if (isNaN(securityDeposit)) {
+      return { success: "", error: "Security deposit must be a number" };
+    }
+
+    const apiClient = await createServerApiClient();
+    await apiClient.patch(`/agreements/${agreementId}/security-deposit`, {
+      security_deposit: securityDeposit,
+    });
+
+    revalidatePath("/(private)/agreement");
+
+    return {
+      success: "Security deposit updated successfully",
+      error: "",
+    };
+  } catch (error: any) {
+    return {
+      success: "",
+      error: error.response?.data?.message || error.message || "Failed to update security deposit",
+    };
+  }
+}
+

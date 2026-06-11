@@ -17,6 +17,7 @@ import { FileUp } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import ExportAgreement from "./ExportAgreement";
+import SecurityDepositDialog from "@/components/SecurityDepositDialog";
 
 interface PageProps {
   searchParams: Promise<{
@@ -208,7 +209,22 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                           {row.workItems && row.division_code}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {row.security_deposit !== undefined && row.security_deposit !== null ? `₹${row.security_deposit}` : "—"}
+                          {row.security_deposit !== undefined && row.security_deposit !== null ? (
+                            `₹${row.security_deposit}`
+                          ) : userRole === UserRole.HeadOfficer ? (
+                            <SecurityDepositDialog
+                              agreementId={row.id}
+                              agreementNo={row.agreementno}
+                              contractorName={
+                                row.contractor?.name?.toLowerCase().includes("temporary")
+                                  ? "---"
+                                  : row.contractor?.name || "N/A"
+                              }
+                              contractorCode={row.contractor?.code || "N/A"}
+                            />
+                          ) : (
+                            "—"
+                          )}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {(() => {
