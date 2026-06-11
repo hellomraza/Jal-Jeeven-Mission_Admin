@@ -180,9 +180,20 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {row.agreementyear}
                         </TableCell>
-                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                        <TableCell
+                          className="text-[12px] text-gray-900 py-4 font-medium max-w-[250px] truncate"
+                          title={
+                            row.workItems && row.workItems.length > 0
+                              ? row.workItems.length === 1
+                                ? row.workItems[0].work_code
+                                : `(${row.workItems.length}) ${row.workItems.map((w) => w.work_code).join(", ")}`
+                              : "N/A"
+                          }
+                        >
                           {row.workItems && row.workItems.length > 0
-                            ? row.workItems.map((w) => w.work_code).join(", ")
+                            ? row.workItems.length === 1
+                              ? row.workItems[0].work_code
+                              : `(${row.workItems.length}) ${row.workItems.map((w) => w.work_code).join(", ")}`
                             : "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
