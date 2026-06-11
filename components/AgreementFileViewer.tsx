@@ -13,20 +13,34 @@ import {
 } from "@/components/ui/dialog";
 import * as React from "react";
 
+import AgreementFileDialog from "@/components/AgreementFileDialog";
+
 type Props = {
   fileUrl?: string | null;
   fileName?: string | null;
   children?: React.ReactNode;
+  agreementId?: string;
+  file?: {
+    file_url: string;
+    file_name: string;
+    mime_type: string;
+  } | null;
+  showEdit?: boolean;
 };
 
 export default function AgreementFileViewerModal({
   fileUrl,
   fileName,
   children,
+  agreementId,
+  file,
+  showEdit = false,
 }: Props) {
+  const [open, setOpen] = React.useState(false);
+
   return (
-    <Dialog>
-      {children ? <DialogTrigger asChild>{children}</DialogTrigger> : null}
+    <Dialog open={open} onOpenChange={setOpen}>
+      {children ? <DialogTrigger>{children}</DialogTrigger> : null}
       <DialogContent className="max-w-4xl w-[min(96vw,1200px)]">
         <DialogHeader>
           <DialogTitle>{fileName ?? "Agreement file"}</DialogTitle>
@@ -37,11 +51,11 @@ export default function AgreementFileViewerModal({
 
         <div className="mt-4">
           {fileUrl ? (
-            <object
-              data={fileUrl}
-              type="application/pdf"
+            <iframe
+              src={fileUrl}
               width="100%"
-              height={640}
+              height={340}
+              className="border-none rounded-lg"
             >
               <p>
                 PDF preview not available. You can{" "}
@@ -50,7 +64,7 @@ export default function AgreementFileViewerModal({
                 </a>
                 .
               </p>
-            </object>
+            </iframe>
           ) : (
             <div className="min-h-48 flex items-center justify-center text-sm text-muted-foreground">
               Preview not available, use Download
@@ -60,6 +74,24 @@ export default function AgreementFileViewerModal({
 
         <DialogFooter>
           <div className="flex gap-2">
+            {showEdit && agreementId && (
+              <AgreementFileDialog
+                agreementId={agreementId}
+                mode="edit"
+                currentFile={
+                  file
+                    ? {
+                      fileUrl: file.file_url,
+                      fileName: file.file_name,
+                      mimeType: file.mime_type,
+                    }
+                    : null
+                }
+                onAttachSuccess={() => setOpen(false)}
+              >
+                <Button size="sm">Edit File</Button>
+              </AgreementFileDialog>
+            )}
             {fileUrl && (
               <Button asChild variant="outline" size="sm">
                 <a href={fileUrl} target="_blank" rel="noreferrer" download>

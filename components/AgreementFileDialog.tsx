@@ -32,6 +32,7 @@ type Props = {
   mode?: "add" | "edit";
   currentFile?: AgreementFile | null;
   children?: React.ReactNode;
+  onAttachSuccess?: () => void;
 };
 
 export default function AgreementFileDialog({
@@ -39,6 +40,7 @@ export default function AgreementFileDialog({
   mode = "add",
   currentFile = null,
   children,
+  onAttachSuccess,
 }: Props) {
   const { toast } = useToast();
   const [file, setFile] = React.useState<File | null>(null);
@@ -107,6 +109,7 @@ export default function AgreementFileDialog({
       });
       // close dialog after successful attach
       setOpen(false);
+      onAttachSuccess?.();
     } catch (err: any) {
       const message = err?.message || "Failed to attach file";
       setError(message);
@@ -173,7 +176,7 @@ export default function AgreementFileDialog({
           <input type="hidden" name="agreementId" value={agreementId} />
 
           <div className="mt-4 flex flex-col gap-5">
-            {currentFile?.fileUrl && (
+            {currentFile?.fileUrl && !file && !uploadResult?.fileUrl && (
               <section className="rounded-lg border bg-muted/30 p-4">
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <div>
