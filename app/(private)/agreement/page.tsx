@@ -68,7 +68,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
         <h2 className="text-[16px] font-bold text-[#1a2b3c] whitespace-nowrap px-2">
-          Agreement Details {userRole === "CO" ? "(My Agreements)" : ""}
+          Agreements {userRole === "CO" ? "(My Agreements)" : ""}
         </h2>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
