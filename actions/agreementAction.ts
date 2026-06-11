@@ -66,10 +66,10 @@ export async function uploadAgreementPdfAction(
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
     if (!cloudName || !apiKey || !apiSecret) {
+      console.error("Missing Cloudinary server configuration (CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET)");
       return {
         ...initialState,
-        error:
-          "Missing Cloudinary server configuration (CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET)",
+        error: "Something went wrong!",
       };
     }
 
@@ -104,12 +104,12 @@ export async function uploadAgreementPdfAction(
         error:
           responseData?.error?.message ||
           responseData?.message ||
-          "Failed to upload PDF to Cloudinary",
+          "Failed to upload PDF",
       };
     }
 
     return {
-      success: "Uploaded to Cloudinary",
+      success: "Uploaded successfully",
       error: "",
       uploadedFile: {
         fileUrl: responseData?.secure_url,
@@ -124,7 +124,7 @@ export async function uploadAgreementPdfAction(
   } catch (error: any) {
     return {
       ...initialState,
-      error: error?.message || "Failed to upload PDF to Cloudinary",
+      error: error?.message || "Failed to upload PDF",
     };
   }
 }

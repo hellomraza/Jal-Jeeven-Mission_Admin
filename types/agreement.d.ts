@@ -7,6 +7,11 @@ type Agreement = {
   created_at: string;
   division_code: string;
   security_deposit?: number;
+  agrid?: string;
+  sr?: string;
+  workorderno?: string;
+  workorderdate?: string;
+  unitag?: string;
 };
 
 type AgreementFile = {

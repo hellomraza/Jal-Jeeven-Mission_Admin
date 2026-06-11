@@ -215,7 +215,7 @@ export default function AgreementFileDialog({
               <div className="mb-3">
                 <p className="text-sm font-semibold">New Upload</p>
                 <p className="text-xs text-muted-foreground">
-                  Select a PDF to upload to Cloudinary
+                  Select a PDF to upload
                 </p>
               </div>
 
@@ -297,14 +297,14 @@ export default function AgreementFileDialog({
 
               {uploadPending && (
                 <div className="mt-3 text-sm text-muted-foreground">
-                  Uploading to Cloudinary...
+                  Uploading...
                 </div>
               )}
 
               {uploadResult?.fileUrl && (
                 <div className="mt-4 space-y-3">
                   <p className="text-sm font-medium text-emerald-700">
-                    Uploaded to Cloudinary
+                    Uploaded
                   </p>
                   <object
                     data={uploadResult.fileUrl}

@@ -18,6 +18,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import ExportAgreement from "./ExportAgreement";
 import SecurityDepositDialog from "@/components/SecurityDepositDialog";
+import AgreementRow from "@/components/AgreementRow";
 
 interface PageProps {
   searchParams: Promise<{
@@ -167,9 +168,9 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                     </TableRow>
                   ) : (
                     agreements.map((row, index) => (
-                      <TableRow
+                      <AgreementRow
                         key={row.id}
-                        className="border-b border-gray-50 hover:bg-gray-50/50"
+                        id={row.id}
                       >
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {(currentPage - 1) * 10 + index + 1}
@@ -308,7 +309,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                             </Link>
                           </TableCell>
                         )}
-                      </TableRow>
+                      </AgreementRow>
                     ))
                   )
                 }
