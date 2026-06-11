@@ -83,6 +83,7 @@ export interface CreateAgreementPayload {
   workorderdate?: string;
   work_ids?: string[];
   unitag?: string;
+  security_deposit?: number;
 }
 
 export const createAgreement = async (payload: CreateAgreementPayload) => {
@@ -108,7 +109,6 @@ export const getAgreement = async (id: string) => {
 };
 
 export const updateAgreement = async (id: string, payload: Partial<CreateAgreementPayload>) => {
-  console.log(payload)
   try {
     const response = await apiClient.patch(`/agreements/${id}`, payload);
     return response.data;

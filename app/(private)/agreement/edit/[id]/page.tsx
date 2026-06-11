@@ -44,6 +44,7 @@ const editAgreementSchema = z.object({
   unitag: z.string().trim().optional(),
   contractor_id: z.string().optional().or(z.literal("")),
   work_ids: z.array(z.string()).optional().default([]), // Newly selected ones
+  security_deposit: z.coerce.number().optional().or(z.literal("")),
 });
 
 type EditAgreementFormValues = z.infer<typeof editAgreementSchema>;
@@ -75,6 +76,7 @@ export default function EditAgreementPage() {
       unitag: "",
       contractor_id: "",
       work_ids: [],
+      security_deposit: "",
     },
   });
 
@@ -112,6 +114,7 @@ export default function EditAgreementPage() {
       unitag: agreement.unitag || "",
       contractor_id: agreement.contractor_id || "",
       work_ids: agreement.workItems?.map((w: any) => w.id) || [],
+      security_deposit: agreement.security_deposit !== undefined && agreement.security_deposit !== null ? agreement.security_deposit : "",
     });
   }, [agreement, form]);
 
@@ -152,6 +155,7 @@ export default function EditAgreementPage() {
       workorderdate: formattedDate,
       work_ids: values.work_ids,
       unitag: values.unitag || undefined,
+      security_deposit: typeof values.security_deposit === "number" ? values.security_deposit : null,
     };
 
     updateMutation.mutate(payload);
@@ -323,6 +327,20 @@ export default function EditAgreementPage() {
                       <FormLabel>Uni-Tag Identifier</FormLabel>
                       <FormControl>
                         <Input placeholder="tag-123" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="security_deposit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Security Deposit</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="Enter security deposit amount" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

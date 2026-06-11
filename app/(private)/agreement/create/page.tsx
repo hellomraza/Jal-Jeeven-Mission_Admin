@@ -43,6 +43,7 @@ const createAgreementSchema = z.object({
   unitag: z.string().trim().optional(),
   contractor_id: z.string().optional().or(z.literal("")),
   work_ids: z.array(z.string()).optional().default([]),
+  security_deposit: z.coerce.number().optional().or(z.literal("")),
 });
 
 type CreateAgreementFormValues = z.infer<typeof createAgreementSchema>;
@@ -65,6 +66,7 @@ export default function CreateAgreementPage() {
       unitag: "",
       contractor_id: "",
       work_ids: [],
+      security_deposit: "",
     },
   });
 
@@ -110,6 +112,7 @@ export default function CreateAgreementPage() {
       workorderdate: formattedDate,
       work_ids: values.work_ids && values.work_ids.length > 0 ? values.work_ids : undefined,
       unitag: values.unitag || undefined,
+      security_deposit: typeof values.security_deposit === "number" ? values.security_deposit : undefined,
     };
     createMutation.mutate(payload);
   };
@@ -273,6 +276,20 @@ export default function CreateAgreementPage() {
                       <FormLabel>Uni-Tag Identifier</FormLabel>
                       <FormControl>
                         <Input placeholder="tag-123" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="security_deposit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Security Deposit</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="Enter security deposit amount" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

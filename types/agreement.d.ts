@@ -5,7 +5,8 @@ type Agreement = {
   contractor_id: string;
   work_id?: string; // Optional/Deprecated
   created_at: string;
-  division_code: string
+  division_code: string;
+  security_deposit?: number;
 };
 
 type AgreementFile = {

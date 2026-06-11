@@ -131,6 +131,9 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                     Division
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                    Security Deposit
+                  </TableHead>
+                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Agreement File
                   </TableHead>
                   {(userRole === UserRole.HeadOfficer || userRole === UserRole.DistrictOfficer) && (
@@ -155,7 +158,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                   agreements.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={11}
+                        colSpan={12}
                         className="text-center py-10 text-gray-500"
                       >
                         No agreements found.
@@ -203,6 +206,9 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {row.workItems && row.division_code}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {row.security_deposit !== undefined && row.security_deposit !== null ? `₹${row.security_deposit}` : "—"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {(() => {

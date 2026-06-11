@@ -97,8 +97,6 @@ export default function EditWorkOrder({ workItem, userRole, agreements, assigned
     error: "",
   });
 
-  console.log(state)
-
   const districtObj = (locationDataByType.districts).find(
     (d) => d.code === formData.district_id
   );

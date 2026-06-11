@@ -33,7 +33,6 @@ export const getWorkItems = async (page = 1, limit = 20, search?: string) => {
 export const updateWorkOrderAction = validatedAction(
   updateWorkOrderSchema,
   async (data) => {
-    console.log("sdfklsdflksd");
     try {
       const serverApiClient = await createServerApiClient();
       const { id, ...payload } = data;
