@@ -11,16 +11,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { UserRole } from "@/types/usertypes";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 
 interface ContractorManagementTableProps {
   contractors: Contractor[];
   canEdit?: boolean;
+  role: UserRole;
 }
 
 export default function ContractorManagementTable({
   contractors,
+  role,
   canEdit = false,
 }: ContractorManagementTableProps) {
   const [selectedContractor, setSelectedContractor] =
@@ -50,7 +53,7 @@ export default function ContractorManagementTable({
                   No contractors listed yet
                 </p>
                 <p className="text-[12px] text-gray-400 mt-1">
-                  Click "Create Contractor" to add a new contractor
+                {role === UserRole.HeadOfficer ? "Click 'Upload Contractors' button to add a new contractor" : "No contractors available in your district or under you work"}
                 </p>
               </div>
             ) : (

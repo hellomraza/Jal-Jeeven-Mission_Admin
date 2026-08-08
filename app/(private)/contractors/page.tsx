@@ -34,15 +34,15 @@ export default async function ContractorsPage() {
             <h1 className="text-[28px] font-bold text-[#1a2b3c]">
               Contractors Management
             </h1>
-            {role === UserRole.DistrictOfficer && (
+            {role === UserRole.HeadOfficer && (
               <p className="text-[14px] text-gray-500 font-medium mt-2">
                 Create and manage contractors for your projects
               </p>
             )}
           </div>
           <div className="flex gap-2 items-center">
-            {role === UserRole.DistrictOfficer && <CreateContractorButton />}
-            {role === UserRole.DistrictOfficer && (
+            {/* {role === UserRole.DistrictOfficer && <CreateContractorButton />} */}
+            {role === UserRole.HeadOfficer && (
               <div className="ml-4">
                 <a href="/contractors/upload">
                   <button className="h-10 px-4 rounded-lg bg-[#DFEEF9] hover:bg-[#D0E5F5] text-[#1a2b3c] font-bold text-[12px]">
@@ -73,7 +73,8 @@ export default async function ContractorsPage() {
 
             <ContractorManagementTable
               contractors={contractors}
-              canEdit={role === UserRole.DistrictOfficer}
+              role={role}
+              canEdit={role === UserRole.DistrictOfficer || role === UserRole.HeadOfficer}
             />
           </div>
         )}
