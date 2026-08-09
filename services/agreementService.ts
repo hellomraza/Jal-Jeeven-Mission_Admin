@@ -4,11 +4,14 @@ export type AgreementImport = {
   agrid: number | null;
   agreementno: string | null;
   agreementyear: string | null;
-  division_code: number | null;
+  division_code: string | null;
   contractor_code: string | null;
   workcode: string | null;
   workorderno: string | null;
   workorderdate: Date | null;
+  dispatch_no?: string | null;
+  dispatch_date?: string | null;
+  already_sent?: string | null;
   systemdate: Date | null;
   unitag: string | null;
   excel: string | null;
