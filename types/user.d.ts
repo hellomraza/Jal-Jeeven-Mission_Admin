@@ -24,4 +24,5 @@ type Contractor = {
   district_name: string;
   mobile: string;
   pan_number: string;
+  is_active?: boolean;
 };

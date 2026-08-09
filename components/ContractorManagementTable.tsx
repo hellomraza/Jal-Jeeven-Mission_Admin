@@ -1,5 +1,6 @@
 "use client";
 
+import { toggleContractorStatus } from "@/actions/userAction";
 import EditContractorDialog from "@/components/EditContractorDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,8 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 import { UserRole } from "@/types/usertypes";
-import { Pencil } from "lucide-react";
+import { CheckCircle2, Loader2, Pencil, XCircle } from "lucide-react";
 import { useState } from "react";
 
 interface ContractorManagementTableProps {
@@ -26,9 +28,11 @@ export default function ContractorManagementTable({
   role,
   canEdit = false,
 }: ContractorManagementTableProps) {
+  const { toast } = useToast();
   const [selectedContractor, setSelectedContractor] =
     useState<Contractor | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const handleEditClick = (contractor: Contractor) => {
     setSelectedContractor(contractor);
@@ -39,6 +43,34 @@ export default function ContractorManagementTable({
     setIsEditOpen(open);
     if (!open) {
       setSelectedContractor(null);
+    }
+  };
+
+  const handleToggleStatus = async (contractor: Contractor) => {
+    const nextStatus = !(contractor.is_active === true);
+    setLoadingId(contractor.id);
+    try {
+      const res = await toggleContractorStatus(contractor.id, nextStatus);
+      if (res.success) {
+        toast({
+          title: "Status Updated",
+          description: res.success,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: res.error,
+          variant: "destructive",
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Failed to update status",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingId(null);
     }
   };
 
@@ -81,6 +113,9 @@ export default function ContractorManagementTable({
                     <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
                       Address
                     </TableHead>
+                    <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
+                      Status
+                    </TableHead>
                     {canEdit && (
                       <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
                         Actions
@@ -115,8 +150,19 @@ export default function ContractorManagementTable({
                       <TableCell className="text-[13px] text-gray-600 max-w-30 truncate">
                         {contractor.address}
                       </TableCell>
+                      <TableCell>
+                        {contractor.is_active ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                            Inactive
+                          </span>
+                        )}
+                      </TableCell>
                       {canEdit && (
-                        <TableCell>
+                        <TableCell className="flex items-center gap-2">
                           <Button
                             type="button"
                             variant="outline"
@@ -126,6 +172,32 @@ export default function ContractorManagementTable({
                           >
                             <Pencil className="h-3.5 w-3.5" />
                             Edit
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={loadingId === contractor.id}
+                            className={
+                              contractor.is_active
+                                ? "border-red-200 text-red-700 hover:bg-red-50 text-[12px] font-semibold"
+                                : "border-emerald-200 text-emerald-700 hover:bg-emerald-50 text-[12px] font-semibold"
+                            }
+                            onClick={() => handleToggleStatus(contractor)}
+                          >
+                            {loadingId === contractor.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : contractor.is_active ? (
+                              <>
+                                <XCircle className="h-3.5 w-3.5 mr-1" />
+                                Deactivate
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                                Activate
+                              </>
+                            )}
                           </Button>
                         </TableCell>
                       )}

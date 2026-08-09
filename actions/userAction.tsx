@@ -215,6 +215,44 @@ export const updateContractor = validatedAction(
   },
 );
 
+export const toggleContractorStatus = async (
+  id: string,
+  is_active: boolean,
+) => {
+  try {
+    const apiClient = await createServerApiClient();
+    const response = await apiClient.patch(
+      `/users/contractor/${id}/status`,
+      { is_active },
+    );
+    if (response.data) {
+      return {
+        success: `Contractor ${is_active ? "activated" : "deactivated"} successfully`,
+        error: "",
+      };
+    }
+    return {
+      success: "",
+      error: `Failed to ${is_active ? "activate" : "deactivate"} contractor`,
+    };
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      return {
+        success: "",
+        error:
+          error.response?.data?.message ||
+          `Failed to ${is_active ? "activate" : "deactivate"} contractor.`,
+      };
+    }
+    return {
+      success: "",
+      error: `Failed to ${is_active ? "activate" : "deactivate"} contractor`,
+    };
+  } finally {
+    revalidatePath("/contractors");
+  }
+};
+
 export const createDistrictOfficer = validatedAction(
   createDOSchema,
   async (data: {
