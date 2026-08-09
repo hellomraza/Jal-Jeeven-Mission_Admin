@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import {
   bulkImportContractors,
+  ContractorBulkImportResult,
   ImportedContractor,
   uploadContractorFile,
 } from "@/services/userService";
@@ -36,6 +37,8 @@ export default function UploadContractorPage() {
   const [parsedData, setParsedData] = useState<ImportedContractor[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [importResult, setImportResult] =
+    useState<ContractorBulkImportResult | null>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -46,6 +49,7 @@ export default function UploadContractorPage() {
       }
       setSelectedFile(file);
       setParsedData([]);
+      setImportResult(null);
     }
   };
 
@@ -62,6 +66,7 @@ export default function UploadContractorPage() {
       const data = await uploadContractorFile(selectedFile);
       setParsedData(data.contractorTable || []);
       setShowPreview(true);
+      setImportResult(null);
       toast.success("File parsed successfully. Please verify the data.");
     } catch (error) {
       toast.error(
@@ -77,9 +82,18 @@ export default function UploadContractorPage() {
   const handleConfirm = async () => {
     try {
       setConfirming(true);
-      await bulkImportContractors(parsedData);
-      toast.success("Contractors imported successfully.");
-      router.push("/contractors");
+      const result = await bulkImportContractors(parsedData);
+      setImportResult(result);
+
+      if (result.errors && result.errors.length > 0) {
+        toast.warn(
+          `Import completed with ${result.inserted.length} inserted and ${result.errors.length} error(s).`,
+        );
+      } else {
+        toast.success(
+          `Import completed successfully. Inserted ${result.inserted.length} contractor(s).`,
+        );
+      }
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to import data",
@@ -106,83 +120,174 @@ export default function UploadContractorPage() {
           </AlertDescription>
         </Alert>
 
-        <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden bg-white rounded-2xl py-0">
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-[#DFEEF9] hover:bg-[#DFEEF9] border-none">
-                    <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                      S No.
-                    </TableHead>
-                    {parsedData.length > 0 &&
-                      Object.keys(parsedData[0]).map((key) => (
-                        <TableHead
-                          key={key}
-                          className="font-bold text-[#1a2b3c] text-[12px] h-12"
-                        >
-                          {key}
-                        </TableHead>
-                      ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {parsedData.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={10}
-                        className="text-center py-10 text-gray-500"
-                      >
-                        No data to preview.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    parsedData.map((row, index) => (
-                      <TableRow
-                        key={index}
-                        className="border-b border-gray-50 hover:bg-gray-50/50"
-                      >
-                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {index + 1}
-                        </TableCell>
-                        {Object.values(row).map((value, idx) => (
-                          <TableCell
-                            key={idx}
-                            className="text-[12px] text-gray-900 py-4 font-medium max-w-xs truncate"
-                            title={String(value)}
+        {importResult && (
+          <Alert
+            className={
+              importResult.errors.length > 0
+                ? "border-amber-200 bg-amber-50"
+                : "border-green-200 bg-green-50"
+            }
+          >
+            <AlertDescription
+              className={
+                importResult.errors.length > 0
+                  ? "text-amber-900 font-medium"
+                  : "text-green-900 font-medium"
+              }
+            >
+              Import result: {importResult.inserted.length} contractor(s) inserted,{" "}
+              {importResult.errors.length} error(s). You can review the details
+              below.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {!importResult && (
+          <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden bg-white rounded-2xl py-0">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-[#DFEEF9] hover:bg-[#DFEEF9] border-none">
+                      <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                        S No.
+                      </TableHead>
+                      {parsedData.length > 0 &&
+                        Object.keys(parsedData[0]).map((key) => (
+                          <TableHead
+                            key={key}
+                            className="font-bold text-[#1a2b3c] text-[12px] h-12"
                           >
-                            {String(value)}
-                          </TableCell>
+                            {key}
+                          </TableHead>
                         ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {parsedData.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={10}
+                          className="text-center py-10 text-gray-500"
+                        >
+                          No data to preview.
+                        </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                    ) : (
+                      parsedData.map((row, index) => (
+                        <TableRow
+                          key={index}
+                          className="border-b border-gray-50 hover:bg-gray-50/50"
+                        >
+                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                            {index + 1}
+                          </TableCell>
+                          {Object.values(row).map((value, idx) => (
+                            <TableCell
+                              key={idx}
+                              className="text-[12px] text-gray-900 py-4 font-medium max-w-xs truncate"
+                              title={String(value)}
+                            >
+                              {String(value)}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="flex justify-end gap-3 pt-4">
           <Button
             variant="outline"
             onClick={() => {
-              setShowPreview(false);
-              setParsedData([]);
-              setSelectedFile(null);
+              if (importResult) {
+                router.push("/contractors");
+              } else {
+                setShowPreview(false);
+                setParsedData([]);
+                setSelectedFile(null);
+                setImportResult(null);
+              }
             }}
             disabled={confirming}
           >
-            Back to Upload
+            {importResult ? "Go to Contractors List" : "Back to Upload"}
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={confirming || parsedData.length === 0}
+            disabled={
+              confirming || parsedData.length === 0 || Boolean(importResult)
+            }
             className="bg-green-600 hover:bg-green-700 text-white"
           >
-            {confirming ? "Importing..." : "Confirm & Import"}
+            {confirming
+              ? "Importing..."
+              : importResult
+                ? "Import Completed"
+                : "Confirm & Import"}
           </Button>
         </div>
+
+        {importResult && importResult.errors.length > 0 && (
+          <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden bg-white rounded-2xl pb-0">
+            <CardHeader>
+              <CardTitle className="text-[16px] text-[#1a2b3c]">
+                Import Errors ({importResult.errors.length})
+              </CardTitle>
+              <CardDescription>
+                The rows below failed during import.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-[#FDE8E8] hover:bg-[#FDE8E8] border-none">
+                      <TableHead className="font-bold text-[#7F1D1D] text-[12px] h-12">
+                        Row Index
+                      </TableHead>
+                      <TableHead className="font-bold text-[#7F1D1D] text-[12px] h-12">
+                        Reason
+                      </TableHead>
+                      <TableHead className="font-bold text-[#7F1D1D] text-[12px] h-12">
+                        Contractor Code
+                      </TableHead>
+                      <TableHead className="font-bold text-[#7F1D1D] text-[12px] h-12">
+                        Contractor Name
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {importResult.errors.map((error, index) => (
+                      <TableRow
+                        key={`${error.index}-${index}`}
+                        className="border-b border-gray-50 hover:bg-gray-50/50"
+                      >
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          Row {error.index + 1}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-red-700 py-4 font-medium">
+                          {error.reason}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {error.item?.contractor_code || error.item?.contractorid || "N/A"}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {error.item?.contractorname || "N/A"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }

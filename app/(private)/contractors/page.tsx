@@ -5,10 +5,27 @@ import { UserRole } from "@/types/usertypes";
 import { cookies } from "next/headers";
 import { forbidden } from "next/navigation";
 
-export default async function ContractorsPage() {
+export interface ContractorsPageProps {
+  searchParams?: Promise<{
+    page?: string;
+    limit?: string;
+    search?: string;
+  }>;
+}
+
+export default async function ContractorsPage({
+  searchParams,
+}: ContractorsPageProps) {
+  const resolvedParams = searchParams ? await searchParams : {};
+  const currentPage = Number(resolvedParams.page) || 1;
+  const limit = Number(resolvedParams.limit) || 20;
+  const search = resolvedParams.search || "";
+
   const cookieStore = await cookies();
   const role = cookieStore.get("admin_role")?.value;
   let contractors: Contractor[] = [];
+  let totalContractors = 0;
+  let totalPages = 1;
   let error = null;
 
   if (role !== UserRole.DistrictOfficer && role !== UserRole.HeadOfficer) {
@@ -17,11 +34,23 @@ export default async function ContractorsPage() {
 
   try {
     const apiClient = await createServerApiClient();
-    let url = "";
-    url = "";
-    const res = await apiClient.get<Contractor[]>("/users/contractors");
+    const res = await apiClient.get<any>("/users/contractors", {
+      params: {
+        page: currentPage,
+        limit,
+        search: search || undefined,
+      },
+    });
 
-    contractors = res.data || [];
+    if (Array.isArray(res.data)) {
+      contractors = res.data;
+      totalContractors = res.data.length;
+      totalPages = 1;
+    } else if (res.data) {
+      contractors = res.data.data || [];
+      totalContractors = res.data.total || 0;
+      totalPages = res.data.totalPages || 1;
+    }
   } catch (err: any) {
     error = err.message;
   }
@@ -75,6 +104,11 @@ export default async function ContractorsPage() {
               contractors={contractors}
               role={role}
               canEdit={role === UserRole.DistrictOfficer || role === UserRole.HeadOfficer}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalContractors={totalContractors}
+              limit={limit}
+              search={search}
             />
           </div>
         )}

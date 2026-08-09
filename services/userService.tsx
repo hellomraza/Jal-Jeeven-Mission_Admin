@@ -10,10 +10,12 @@ export const getUserInfo = async () => {
   }
 };
 
-export const getContractors = async (page = 1, limit = 500) => {
+export const getContractors = async (page = 1, limit = 1000, search?: string) => {
   try {
-    const response = await apiClient.get<Contractor[]>(`/users/contractors`);
-    return response.data || [];
+    const response = await apiClient.get(`/users/contractors`, {
+      params: { page, limit, search },
+    });
+    return response.data?.data || response.data || [];
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message || "Failed to fetch contractors",
@@ -60,6 +62,11 @@ type ImportedContractorResponse = {
   filename: string;
   sheetCount: number;
   contractorTable?: ImportedContractor[];
+};
+
+export type ContractorBulkImportResult = {
+  inserted: any[];
+  errors: { index: number; reason: string; item: ImportedContractor }[];
 };
 
 export const uploadContractorFile = async (file: File) => {

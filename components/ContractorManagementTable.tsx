@@ -4,6 +4,7 @@ import { toggleContractorStatus } from "@/actions/userAction";
 import EditContractorDialog from "@/components/EditContractorDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -14,25 +15,56 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { UserRole } from "@/types/usertypes";
-import { CheckCircle2, Loader2, Pencil, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, Pencil, Search, XCircle } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface ContractorManagementTableProps {
   contractors: Contractor[];
   canEdit?: boolean;
   role: UserRole;
+  currentPage?: number;
+  totalPages?: number;
+  totalContractors?: number;
+  limit?: number;
+  search?: string;
 }
 
 export default function ContractorManagementTable({
   contractors,
   role,
   canEdit = false,
+  currentPage = 1,
+  totalPages = 1,
+  totalContractors = 0,
+  limit = 20,
+  search = "",
 }: ContractorManagementTableProps) {
+  const router = useRouter();
   const { toast } = useToast();
   const [selectedContractor, setSelectedContractor] =
     useState<Contractor | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [searchInput, setSearchInput] = useState(search);
+
+  const getPageUrl = (pageNumber: number) => {
+    const params = new URLSearchParams();
+    params.set("page", String(pageNumber));
+    if (limit) params.set("limit", String(limit));
+    if (search) params.set("search", search);
+    return `/contractors?${params.toString()}`;
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    params.set("page", "1");
+    if (limit) params.set("limit", String(limit));
+    if (searchInput.trim()) params.set("search", searchInput.trim());
+    router.push(`/contractors?${params.toString()}`);
+  };
 
   const handleEditClick = (contractor: Contractor) => {
     setSelectedContractor(contractor);
@@ -77,6 +109,26 @@ export default function ContractorManagementTable({
   return (
     <>
       <div className="space-y-4">
+        {/* Search Bar */}
+        <form onSubmit={handleSearchSubmit} className="flex gap-2 max-w-sm">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search by name, code, email, mobile..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-9 h-10 text-[13px] bg-white border-gray-200"
+            />
+          </div>
+          <Button
+            type="submit"
+            className="h-10 px-4 bg-[#1a2b3c] hover:bg-[#1a2b3c]/90 text-white font-bold text-[12px]"
+          >
+            Search
+          </Button>
+        </form>
+
         <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white py-0">
           <CardContent className="p-0">
             {contractors.length === 0 ? (
@@ -85,7 +137,9 @@ export default function ContractorManagementTable({
                   No contractors listed yet
                 </p>
                 <p className="text-[12px] text-gray-400 mt-1">
-                {role === UserRole.HeadOfficer ? "Click 'Upload Contractors' button to add a new contractor" : "No contractors available in your district or under you work"}
+                  {role === UserRole.HeadOfficer
+                    ? "Click 'Upload Contractors' button to add a new contractor"
+                    : "No contractors available in your district or under you work"}
                 </p>
               </div>
             ) : (
@@ -208,6 +262,59 @@ export default function ContractorManagementTable({
             )}
           </CardContent>
         </Card>
+
+        {/* Pagination Controls */}
+        {totalPages > 0 && (
+          <div className="flex flex-col gap-3 rounded-2xl bg-white px-4 py-3 shadow-[0_4px_24px_rgba(0,0,0,0.02)] md:flex-row md:items-center md:justify-between">
+            <p className="text-[12px] font-medium text-gray-600">
+              Showing page {currentPage} of {totalPages} · {totalContractors}{" "}
+              total contractor{totalContractors === 1 ? "" : "s"}
+            </p>
+            <div className="flex items-center gap-2">
+              {currentPage <= 1 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 px-4 text-[12px]"
+                  disabled
+                >
+                  Previous
+                </Button>
+              ) : (
+                <Link href={getPageUrl(currentPage - 1)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-9 px-4 text-[12px]"
+                  >
+                    Previous
+                  </Button>
+                </Link>
+              )}
+
+              {currentPage >= totalPages ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 px-4 text-[12px]"
+                  disabled
+                >
+                  Next
+                </Button>
+              ) : (
+                <Link href={getPageUrl(currentPage + 1)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-9 px-4 text-[12px]"
+                  >
+                    Next
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <EditContractorDialog
