@@ -2,10 +2,13 @@ type Agreement = {
   id: string;
   agreementno: string;
   agreementyear: string;
-  contractor_id: string;
+  contractor_id?: string | null;
   work_id?: string; // Optional/Deprecated
   created_at: string;
-  division_code: string
+  division_code?: string | null;
+  dispatch_no?: string | null;
+  dispatch_date?: string | null;
+  already_sent?: string | null;
 };
 
 type AgreementFile = {

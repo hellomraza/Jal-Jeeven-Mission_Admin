@@ -151,24 +151,36 @@ export default function UploadAgreementPage() {
                   <TableHeader>
                     <TableRow className="bg-[#DFEEF9] hover:bg-[#DFEEF9] border-none">
                       <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                        S No.
+                        Sr.no
                       </TableHead>
-                      {parsedData.length > 0 &&
-                        Object.keys(parsedData[0]).map((key) => (
-                          <TableHead
-                            key={key}
-                            className="font-bold text-[#1a2b3c] text-[12px] h-12"
-                          >
-                            {key}
-                          </TableHead>
-                        ))}
+                      <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                        Agreement_No
+                      </TableHead>
+                      <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                        year_of_agreement
+                      </TableHead>
+                      <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                        ddocode
+                      </TableHead>
+                      <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                        CId
+                      </TableHead>
+                      <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                        WorkCodeNew
+                      </TableHead>
+                      <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                        DispatchNo
+                      </TableHead>
+                      <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                        DispatchDate
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {parsedData.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={10}
+                          colSpan={8}
                           className="text-center py-10 text-gray-500"
                         >
                           No data to preview.
@@ -181,17 +193,29 @@ export default function UploadAgreementPage() {
                           className="border-b border-gray-50 hover:bg-gray-50/50"
                         >
                           <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                            {index + 1}
+                            {row.sr ?? index + 1}
                           </TableCell>
-                          {Object.values(row).map((value, idx) => (
-                            <TableCell
-                              key={idx}
-                              className="text-[12px] text-gray-900 py-4 font-medium max-w-xs truncate"
-                              title={String(value)}
-                            >
-                              {String(value)}
-                            </TableCell>
-                          ))}
+                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                            {row.agreementno ?? "N/A"}
+                          </TableCell>
+                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                            {row.agreementyear ?? "N/A"}
+                          </TableCell>
+                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                            {row.division_code ?? "N/A"}
+                          </TableCell>
+                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                            {row.contractor_code ?? "N/A"}
+                          </TableCell>
+                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                            {row.workcode ?? "N/A"}
+                          </TableCell>
+                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                            {row.dispatch_no ?? "N/A"}
+                          </TableCell>
+                          <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                            {row.dispatch_date ?? "N/A"}
+                          </TableCell>
                         </TableRow>
                       ))
                     )}

@@ -116,19 +116,19 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                     Work Code
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                    Dispatch No.
+                  </TableHead>
+                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                    Dispatch Date
+                  </TableHead>
+                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Name Of Contractor
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Contractor Code
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Work Order No.
-                  </TableHead>
-                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Work Order Date
-                  </TableHead>
-                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Division
+                    ddocode
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Agreement File
@@ -142,16 +142,6 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
               </TableHeader>
               <TableBody>
                 {
-                  // loading ? (
-                  //   <TableRow>
-                  //     <TableCell
-                  //       colSpan={10}
-                  //       className="text-center py-10 text-gray-500"
-                  //     >
-                  //       Loading agreements...
-                  //     </TableCell>
-                  //   </TableRow>
-                  // ) :
                   agreements.length === 0 ? (
                     <TableRow>
                       <TableCell
@@ -171,15 +161,21 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                           {(currentPage - 1) * 10 + index + 1}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {row.agreementno}
+                          {row.agreementno || "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {row.agreementyear}
+                          {row.agreementyear || "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {row.workItems && row.workItems.length > 0
                             ? row.workItems.map((w) => w.work_code).join(", ")
                             : "N/A"}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {row.dispatch_no || "N/A"}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                          {row.dispatch_date || "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {row.contractor?.name
@@ -194,15 +190,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                           {row.contractor?.code || "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {row.agreementno}
-                        </TableCell>
-                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium max-w-30">
-                          {row.created_at
-                            ? new Date(row.created_at).toLocaleDateString()
-                            : "N/A"}
-                        </TableCell>
-                        <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {row.workItems && row.division_code}
+                          {row.division_code || "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {(() => {
