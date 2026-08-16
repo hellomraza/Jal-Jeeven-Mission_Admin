@@ -1,5 +1,4 @@
 import BackButton from "@/components/BackButton";
-import WorkOrderTPIComponentsTable from "@/components/WorkOrderTPIComponentsTable";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { createServerApiClient } from "@/lib/server-api-client";
@@ -89,11 +88,17 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
 
   if (isTpiMode) {
     let tpiWorkOrder: any = null;
+    let tpiEmployees: any[] = [];
     try {
-      const tpiRes = await apiClient.get(`/work-order-tpi/${id}`);
+      const [tpiRes, empRes] = await Promise.all([
+        apiClient.get(`/work-order-tpi/${id}`),
+        apiClient.get(`/work-order-tpi/${id}/employees`).catch(() => ({ data: [] })),
+      ]);
       tpiWorkOrder = tpiRes.data;
+      tpiEmployees = empRes.data ?? [];
     } catch {
       tpiWorkOrder = null;
+      tpiEmployees = [];
     }
 
     if (!tpiWorkOrder) {
@@ -308,14 +313,50 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
           </Card>
         </div>
 
-        <div className="space-y-3">
-          <WorkOrderTPIComponentsTable
-            workOrderTpiId={tpiWorkOrder.id}
-            components={components}
-            userRole={userRole || undefined}
-            isExecutiveEngineer={isExecutiveEngineer}
-          />
-        </div>
+        <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white rounded-3xl">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-[#DFEEF9] p-2 text-[#136FB6]">
+                <Users size={18} />
+              </div>
+              <div>
+                <h3 className="text-[16px] font-extrabold text-[#1a2b3c]">
+                  Employees Working
+                </h3>
+                <p className="text-[12px] font-medium text-gray-500">
+                  Team members currently assigned to this work order.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {tpiEmployees.length > 0 ? (
+                tpiEmployees.map((employee: any) => (
+                  <div
+                    key={employee.id}
+                    className="rounded-3xl border border-gray-100 bg-linear-to-br from-white to-[#F8FBFF] p-5 shadow-sm"
+                  >
+                    <p className="text-[15px] font-extrabold text-[#1a2b3c]">
+                      {employee.name}
+                    </p>
+                    <p className="mt-1 text-[12px] font-medium text-gray-500">
+                      Code: {employee.code}
+                    </p>
+                    <p className="mt-1 text-[12px] font-medium text-gray-500">
+                      {employee.email}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full rounded-3xl border border-dashed border-gray-200 bg-gray-50/60 p-8 text-center">
+                  <p className="text-[13px] font-semibold text-gray-500">
+                    No employees are assigned to this work order yet.
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
