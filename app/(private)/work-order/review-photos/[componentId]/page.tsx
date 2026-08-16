@@ -41,7 +41,11 @@ const ReviewPhotos = async ({
         PhotoStatusState.SELECTED,
         PhotoStatusState.APPROVED,
         PhotoStatusState.REJECTED,
-      ].includes(p.status),
+      ].includes(p.status) ||
+      p.uploader_role === "TPI" ||
+      p.is_tpi ||
+      p.photo?.employee?.role === "TPI" ||
+      p.photo?.uploader_role === "TPI",
     );
   } else if (role === UserRole.HeadOfficer) {
     visiblePhotoStatuses = photoStatuses.filter(

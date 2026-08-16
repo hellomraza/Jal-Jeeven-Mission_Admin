@@ -116,7 +116,11 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                     Agreement Year
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    {isTpiMode ? "TPI Work Code" : "Work Code"}
+                    {userRole === "CO" || userRole === UserRole.Contractor
+                      ? "Work Code"
+                      : isTpiMode
+                      ? "TPI Work Code"
+                      : "Work Code"}
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Dispatch No.
@@ -170,13 +174,21 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                           {row.agreementyear || "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {isTpiMode
-                            ? row.workOrderTpis && row.workOrderTpis.length > 0
-                              ? row.workOrderTpis.map((w: any) => w.work_code).join(", ")
-                              : "N/A"
-                            : row.workItems && row.workItems.length > 0
-                            ? row.workItems.map((w) => w.work_code).join(", ")
-                            : "N/A"}
+                          {(() => {
+                            if (userRole === "CO" || userRole === UserRole.Contractor) {
+                              const svsCodes = row.workItems?.map((w) => w.work_code) || [];
+                              const tpiCodes = row.workOrderTpis?.map((w: any) => w.work_code) || [];
+                              const combinedCodes = Array.from(new Set([...svsCodes, ...tpiCodes]));
+                              return combinedCodes.length > 0 ? combinedCodes.join(", ") : "N/A";
+                            }
+                            return isTpiMode
+                              ? row.workOrderTpis && row.workOrderTpis.length > 0
+                                ? row.workOrderTpis.map((w: any) => w.work_code).join(", ")
+                                : "N/A"
+                              : row.workItems && row.workItems.length > 0
+                              ? row.workItems.map((w) => w.work_code).join(", ")
+                              : "N/A";
+                          })()}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                           {row.dispatch_no || "N/A"}

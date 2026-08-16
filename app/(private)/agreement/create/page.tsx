@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useAppMode } from "@/components/mode-context";
 import { useUser } from "@/hooks/useUser";
 import { createAgreement } from "@/services/agreementService";
 import { getContractors } from "@/services/userService";
@@ -50,6 +51,7 @@ type CreateAgreementFormValues = z.infer<typeof createAgreementSchema>;
 export default function CreateAgreementPage() {
   const router = useRouter();
   const { data: userInfo, isLoading: isUserLoading } = useUser();
+  const { isTpiMode } = useAppMode();
 
   const form = useForm<CreateAgreementFormValues>({
     resolver: zodResolver(createAgreementSchema),
@@ -110,6 +112,7 @@ export default function CreateAgreementPage() {
       workorderdate: formattedDate,
       work_ids: values.work_ids && values.work_ids.length > 0 ? values.work_ids : undefined,
       unitag: values.unitag || undefined,
+      is_tpi: isTpiMode,
     };
     createMutation.mutate(payload);
   };

@@ -61,10 +61,12 @@ export const uploadAgreementFile = async (file: File) => {
 
 export const bulkImportAgreements = async (
   agreements: AgreementImport[],
+  isTpi: boolean = false,
 ): Promise<AgreementBulkImportResult> => {
   try {
-    const response = await apiClient.post("/import/agreements/bulk", {
+    const response = await apiClient.post(`/import/agreements/bulk?is_tpi=${isTpi}`, {
       agreements,
+      is_tpi: isTpi,
     });
 
     return response.data;
@@ -86,6 +88,7 @@ export interface CreateAgreementPayload {
   workorderdate?: string;
   work_ids?: string[];
   unitag?: string;
+  is_tpi?: boolean;
 }
 
 export const createAgreement = async (payload: CreateAgreementPayload) => {

@@ -25,6 +25,7 @@ import {
   bulkImportAgreements,
   uploadAgreementFile,
 } from "@/services/agreementService";
+import { useAppMode } from "@/components/mode-context";
 import { AlertCircle, CheckCircle, FileUp, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -32,6 +33,7 @@ import { toast } from "react-toastify";
 
 export default function UploadAgreementPage() {
   const router = useRouter();
+  const { isTpiMode } = useAppMode();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [parsedData, setParsedData] = useState<AgreementImport[]>([]);
@@ -82,7 +84,7 @@ export default function UploadAgreementPage() {
   const handleConfirm = async () => {
     try {
       setConfirming(true);
-      const result = await bulkImportAgreements(parsedData);
+      const result = await bulkImportAgreements(parsedData, isTpiMode);
       setImportResult(result);
 
       if (result.errors.length > 0) {
