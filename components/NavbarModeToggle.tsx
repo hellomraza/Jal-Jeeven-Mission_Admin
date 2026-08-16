@@ -1,5 +1,6 @@
 "use client";
 
+import { switchAppModeAction } from "@/actions/modeAction";
 import { useAppMode } from "@/components/mode-context";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@/types/usertypes";
@@ -18,9 +19,14 @@ export default function NavbarModeToggle({
   const { mode, setMode } = useAppMode();
   const router = useRouter();
 
-  const handleModeChange = (newMode: any) => {
+  const handleModeChange = async (newMode: any) => {
     setMode(newMode);
-    router.refresh();
+    try {
+      await switchAppModeAction(newMode);
+    } catch {
+      // continue to reload
+    }
+    window.location.reload();
   };
 
   if (userRole === UserRole.HeadOfficer) {

@@ -33,9 +33,19 @@ export const assignEmployees = async (
       return { error: result.error.errors[0].message, success: "" };
     }
     const apiClient = await createServerApiClient();
-    await apiClient.post(`/work-items/${workItemId}/assign-employee`, {
-      employee_ids: result.data.employeeIds,
-    });
+    try {
+      await apiClient.post(`/work-items/${workItemId}/assign-employee`, {
+        employee_ids: result.data.employeeIds,
+      });
+    } catch (err: any) {
+      if (err instanceof AxiosError && err.response?.status === 404) {
+        await apiClient.post(`/work-order-tpi/${workItemId}/assign-employee`, {
+          employee_ids: result.data.employeeIds,
+        });
+      } else {
+        throw err;
+      }
+    }
 
     return { success: "Employees assigned successfully", error: "" };
   } catch (err) {

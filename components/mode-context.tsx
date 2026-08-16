@@ -1,5 +1,6 @@
 "use client";
 
+import { switchAppModeAction } from "@/actions/modeAction";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type AppMode = "svs" | "tpi" | "do" | "ee";
@@ -31,6 +32,7 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
     document.cookie = `admin_app_mode=${newMode}; path=/; max-age=31536000`;
     // Dispatch storage event for other components
     window.dispatchEvent(new Event("admin_app_mode_changed"));
+    switchAppModeAction(newMode).catch(() => {});
   };
 
   const toggleMode = (role?: string) => {
