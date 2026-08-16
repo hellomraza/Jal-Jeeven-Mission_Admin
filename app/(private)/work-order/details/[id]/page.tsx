@@ -122,6 +122,11 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
     }
 
     const components = tpiWorkOrder.components || [];
+    const approvedComponents = components.filter(
+      (c: any) => c.status === "APPROVED" || c.status === "COMPLETED",
+    ).length;
+    const workProgress = tpiWorkOrder.progress_percentage ?? (components.length > 0 ? Math.round((approvedComponents / components.length) * 100) : 0);
+    const assignedTpi = tpiWorkOrder.tpiAssignment?.tpi || tpiWorkOrder.assignedTpi || null;
 
     return (
       <div className="space-y-6 pb-10">
@@ -129,96 +134,181 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
           <div className="flex items-center gap-4">
             <BackButton />
             <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-[20px] font-extrabold text-[#1a2b3c] tracking-tight">
-                  {tpiWorkOrder.work_code}
-                </h1>
-                <Badge className="bg-[#136FB6] text-white text-[12px] font-bold">
-                  TPI Project
-                </Badge>
-                <Badge
-                  className={`text-[12px] font-bold ${
-                    tpiWorkOrder.status === "COMPLETED"
-                      ? "bg-emerald-100 text-emerald-800"
-                      : tpiWorkOrder.status === "IN_PROGRESS"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-amber-100 text-amber-800"
-                  }`}
-                >
-                  {tpiWorkOrder.status}
-                </Badge>
-              </div>
-              <p className="text-[12px] text-gray-500 font-medium mt-1">
-                {tpiWorkOrder.title || "TPI Work Order Milestone Inspection"}
+              <h1 className="text-[20px] font-extrabold text-[#1a2b3c] tracking-tight">
+                Work Order Details
+              </h1>
+              <p className="text-[12px] text-gray-500 font-medium">
+                Inspect the work item, component progress, contractor, and the
+                assigned workforce.
               </p>
             </div>
           </div>
+
+          <Link
+            href={`/work-order/update/${id}`}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#136FB6] px-4 py-2.5 text-[12px] font-bold text-white shadow-md shadow-[#136FB6]/20 transition-colors hover:bg-[#105E9A]"
+          >
+            View Updates
+            <ArrowRight size={14} />
+          </Link>
         </div>
 
-        {/* Info Grid */}
-        <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              <div>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                  District
-                </p>
-                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
-                  {tpiWorkOrder.district?.districtname ||
-                    tpiWorkOrder.district_id ||
-                    "N/A"}
-                </p>
+        <Card className="overflow-hidden border-none bg-linear-to-br from-[#EFF8FF] via-white to-[#F4FBF8] shadow-[0_10px_40px_rgba(19,111,182,0.08)]">
+          <CardContent className="p-0">
+            <div className="grid gap-6 p-6 lg:grid-cols-[1.5fr_1fr]">
+              <div className="space-y-5">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Badge
+                    className={`border px-3 py-1 ${getStatusClasses(tpiWorkOrder.status || "PENDING")}`}
+                  >
+                    {(tpiWorkOrder.status || "PENDING").replaceAll("_", " ")}
+                  </Badge>
+                </div>
+
+                <div>
+                  <h2 className="text-[28px] font-black tracking-tight text-[#1a2b3c]">
+                    {formatValue(tpiWorkOrder.work_code)}
+                  </h2>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <DetailItem
+                    label="District"
+                    value={
+                      tpiWorkOrder.district?.districtname || tpiWorkOrder.district_id
+                    }
+                  />
+                  <DetailItem label="Block" value={tpiWorkOrder.block?.blockname} />
+                  <DetailItem
+                    label="Panchayat"
+                    value={tpiWorkOrder.panchayat?.panchayatname}
+                  />
+                  <DetailItem
+                    label="Village"
+                    value={tpiWorkOrder.village?.villagename}
+                  />
+                </div>
               </div>
-              <div>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                  Block / Panchayat
-                </p>
-                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
-                  {tpiWorkOrder.block?.blockname || "N/A"} /{" "}
-                  {tpiWorkOrder.panchayat?.panchayatname || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                  Contractor
-                </p>
-                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
-                  {tpiWorkOrder.contractor?.name || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                  Assigned TPI
-                </p>
-                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
-                  {tpiWorkOrder.tpiAssignment?.tpi?.name || "Unassigned"}
-                </p>
-              </div>
-              <div>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                  Inspection Progress
-                </p>
-                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
-                  {tpiWorkOrder.progress_percentage ?? 0}%
-                </p>
-              </div>
-              <div>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                  Status
-                </p>
-                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
-                  {tpiWorkOrder.status}
-                </p>
+
+              <div className="grid gap-4">
+                <StatCard
+                  icon={<ChartNoAxesCombined size={20} />}
+                  label="Work Progress"
+                  value={`${workProgress}%`}
+                  helper="Current work-item progress reported by the system."
+                />
+                <StatCard
+                  icon={<ClipboardList size={20} />}
+                  label="Component Completion"
+                  value={`${approvedComponents}/${components.length || 0}`}
+                  helper="Approved components out of the full component list."
+                />
+                <StatCard
+                  icon={<Users size={20} />}
+                  label="Assigned TPI"
+                  value={assignedTpi?.name || "Unassigned"}
+                  helper="Third Party Inspection agency / officer assigned."
+                />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* 8 Milestone Inspection Components */}
+        <div className="grid gap-6 xl:grid-cols-3">
+          <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white rounded-3xl">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl bg-[#DFEEF9] p-2 text-[#136FB6]">
+                  <MapPin size={18} />
+                </div>
+                <div>
+                  <h3 className="text-[16px] font-extrabold text-[#1a2b3c]">
+                    Work Order Information
+                  </h3>
+                  <p className="text-[12px] font-medium text-gray-500">
+                    Location and approval details for the selected work item.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                <DetailItem label="Scheme Type" value={tpiWorkOrder.schemetype || "TPI"} />
+                <DetailItem label="No. of FHTC" value={tpiWorkOrder.nofhtc} />
+                <DetailItem
+                  label="Amount Approved"
+                  value={tpiWorkOrder.amount_approved}
+                />
+                <DetailItem
+                  label="Payment Amount"
+                  value={tpiWorkOrder.payment_amount}
+                />
+                <DetailItem label="Serial No." value={tpiWorkOrder.serial_no} />
+                <DetailItem
+                  label="Sub-division"
+                  value={
+                    tpiWorkOrder.subdivision?.subdivisionname ||
+                    tpiWorkOrder.subdivision_id
+                  }
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white rounded-3xl">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl bg-[#DFEEF9] p-2 text-[#136FB6]">
+                  <Building2 size={18} />
+                </div>
+                <div>
+                  <h3 className="text-[16px] font-extrabold text-[#1a2b3c]">
+                    Contractor Details
+                  </h3>
+                  <p className="text-[12px] font-medium text-gray-500">
+                    The contractor responsible for this work item.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                <DetailItem label="Name" value={tpiWorkOrder.contractor?.name} />
+                <DetailItem label="Code" value={tpiWorkOrder.contractor?.code} />
+                <DetailItem label="Email" value={tpiWorkOrder.contractor?.email} />
+                <DetailItem
+                  label="District ID"
+                  value={tpiWorkOrder.contractor?.district_id}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white rounded-3xl">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-2xl bg-[#DFEEF9] p-2 text-[#136FB6]">
+                  <Users size={18} />
+                </div>
+                <div>
+                  <h3 className="text-[16px] font-extrabold text-[#1a2b3c]">
+                    Assigned TPI Details
+                  </h3>
+                  <p className="text-[12px] font-medium text-gray-500">
+                    Third Party Inspection officer / agency details.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                <DetailItem label="TPI Name" value={assignedTpi?.name} />
+                <DetailItem label="TPI Code" value={assignedTpi?.code || assignedTpi?.auid} />
+                <DetailItem label="Email" value={assignedTpi?.email} />
+                <DetailItem label="Mobile" value={assignedTpi?.mobile || assignedTpi?.contact_no} />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="space-y-3">
-          <h2 className="text-[16px] font-bold text-[#1a2b3c]">
-            Inspection Milestones (8 Components)
-          </h2>
           <WorkOrderTPIComponentsTable
             workOrderTpiId={tpiWorkOrder.id}
             components={components}

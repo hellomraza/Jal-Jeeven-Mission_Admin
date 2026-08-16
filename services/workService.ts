@@ -1,20 +1,15 @@
 import apiClient from "@/lib/api-client";
 
 export type WorkItemImport = {
-  workcodeid: number | null;
   workcode: string | null;
-  excel: string | null;
   district_code: string | null;
   block_code: string | null;
   panchayat_code: string | null;
   schemetype: string | null;
-  schemecategory: string | null;
   nofhtc: number | null;
   aa_amount: number | null;
   payment_rs: number | null;
   sr: string | null;
-  systemdate: Date | null;
-  contractor_code: string | null;
 };
 
 export const getWorkItem = async (id: string) => {

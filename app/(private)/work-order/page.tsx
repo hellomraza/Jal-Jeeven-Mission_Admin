@@ -29,13 +29,11 @@ const WorkOrderPage = async ({ searchParams }: WorkOrderPageProps) => {
     const workOrders = response.data?.data || response.data || [];
 
     return (
-      <div className="p-6">
-        <WorkOrderTPITable
-          workOrders={workOrders}
-          userRole={role || undefined}
-          isExecutiveEngineer={isExecutiveEngineer}
-        />
-      </div>
+      <WorkOrderTPITable
+        workOrders={workOrders}
+        userRole={role || undefined}
+        isExecutiveEngineer={isExecutiveEngineer}
+      />
     );
   }
 
