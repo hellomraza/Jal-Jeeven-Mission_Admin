@@ -66,7 +66,7 @@ const ReviewPhotos = async ({
               Review Component Photos
             </h1>
             <p className="text-[12px] text-gray-500 font-medium">
-              Component: {componentDetails?.component?.name} (
+              Component: {(componentDetails as any)?.component?.name || (componentDetails as any)?.name || "Inspection Component"} (
               {(componentDetails as any)?.progress ?? "0"} /{" "}
               {(componentDetails as any)?.quantity ?? "0"} completed)
             </p>

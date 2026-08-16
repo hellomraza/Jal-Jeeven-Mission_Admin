@@ -111,9 +111,15 @@ const ReviewPhotosComponent = ({
   const isSelected = photo.status === PhotoStatusState.SELECTED;
   const isApproved = photo.status === PhotoStatusState.APPROVED;
   const isRejected = photo.status === PhotoStatusState.REJECTED;
+  const isTpiPhoto =
+    Boolean((photo as any)?.is_tpi) ||
+    (photo as any)?.uploader_role === "TPI" ||
+    (photo as any)?.photo?.employee?.role === "TPI";
+
   const canModify =
     !isApproved &&
     !isRejected &&
+    !isTpiPhoto &&
     (userRole === UserRole.Contractor || userRole === "CO");
 
   const quantityValue = Number(
@@ -190,9 +196,17 @@ const ReviewPhotosComponent = ({
           <div className="absolute right-3 bottom-3 rounded-full bg-black/60 text-white p-2">
             <Expand size={14} />
           </div>
-          {isSelected && (
+          {isTpiPhoto ? (
+            <div className="absolute top-3 left-3 bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg">
+              TPI Inspection Photo
+            </div>
+          ) : isSelected ? (
             <div className="absolute top-3 left-3 bg-green-500 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg">
-              Waiting for Approval
+              Contractor Selected
+            </div>
+          ) : (
+            <div className="absolute top-3 left-3 bg-[#136FB6] text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg">
+              Contractor Photo
             </div>
           )}
           {isApproved && (
@@ -215,7 +229,7 @@ const ReviewPhotosComponent = ({
                   Uploader
                 </p>
                 <p className="text-[#1a2b3c] font-black truncate">
-                  {photo.photo.employee?.name || "Anonymous"}
+                  {photo.photo.employee?.name || "Anonymous"} {isTpiPhoto ? "(TPI)" : ""}
                 </p>
               </div>
 
@@ -284,9 +298,15 @@ const ReviewPhotosComponent = ({
                             {photo.approvedByUser?.name ||
                               photo.approved_by ||
                               "N/A"}
-                            <span className="block font-light">
-                              ({photo?.approvedByUser?.district?.districtname})
-                            </span>
+                            {((photo?.approvedByUser as any)?.district?.districtname ||
+                              (photo?.approvedByUser as any)?.district) && (
+                              <span className="block font-light">
+                                (
+                                {(photo?.approvedByUser as any)?.district?.districtname ||
+                                  (photo?.approvedByUser as any)?.district}
+                                )
+                              </span>
+                            )}
                           </p>
                           <p className="text-gray-400 font-bold uppercase tracking-wider mt-2">
                             Approved At
@@ -339,7 +359,11 @@ const ReviewPhotosComponent = ({
                   View Location
                 </Button>
               </Link>
-              {userRole === UserRole.DistrictOfficer || userRole === "DO" ? (
+              {isTpiPhoto ? (
+                <div className="flex-1 bg-indigo-50 border border-indigo-200 text-indigo-700 h-10 rounded-lg text-[12px] font-bold flex items-center justify-center">
+                  TPI Inspection Reference
+                </div>
+              ) : userRole === UserRole.DistrictOfficer || userRole === "DO" ? (
                 isApproved ? (
                   <Button
                     disabled
