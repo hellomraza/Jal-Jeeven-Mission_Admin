@@ -45,5 +45,6 @@ type AgreementContractor = {
 type AgreementResponse = Agreement & {
   contractor: AgreementContractor;
   workItems: AgreementWorkItem[];
+  workOrderTpis?: any[];
   files: AgreementFile[];
 };

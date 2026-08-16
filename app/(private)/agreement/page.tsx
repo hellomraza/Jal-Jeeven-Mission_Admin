@@ -34,10 +34,13 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
 
   const cookieStore = await cookies();
   const userRole = cookieStore.get("admin_role")?.value || null;
+  const cookieMode = cookieStore.get("admin_app_mode")?.value || "svs";
+  const isTpiMode = cookieMode === "tpi" || cookieMode === "ee";
   
   const queryParams = new URLSearchParams({
     page,
     limit: "10",
+    mode: isTpiMode ? "tpi" : "svs",
   });
   if (search) queryParams.set("search", search);
   if (agreementyear) queryParams.set("agreementyear", agreementyear);
@@ -67,7 +70,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
         <h2 className="text-[16px] font-bold text-[#1a2b3c] whitespace-nowrap px-2">
-          Agreement Details {userRole === "CO" ? "(My Agreements)" : ""}
+          Agreement Details {isTpiMode ? "(TPI Mode)" : ""} {userRole === "CO" ? "(My Agreements)" : ""}
         </h2>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
@@ -113,7 +116,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                     Agreement Year
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Work Code
+                    {isTpiMode ? "TPI Work Code" : "Work Code"}
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Dispatch No.
@@ -167,7 +170,11 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
                           {row.agreementyear || "N/A"}
                         </TableCell>
                         <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                          {row.workItems && row.workItems.length > 0
+                          {isTpiMode
+                            ? row.workOrderTpis && row.workOrderTpis.length > 0
+                              ? row.workOrderTpis.map((w: any) => w.work_code).join(", ")
+                              : "N/A"
+                            : row.workItems && row.workItems.length > 0
                             ? row.workItems.map((w) => w.work_code).join(", ")
                             : "N/A"}
                         </TableCell>

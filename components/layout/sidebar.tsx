@@ -1,11 +1,12 @@
 "use client";
-import { ClipboardList, Globe, LayoutDashboard } from "lucide-react";
+
+import { useAppMode } from "@/components/mode-context";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { UserRole } from "@/types/usertypes";
+import { ClipboardList, Globe, LayoutDashboard, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
-
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { UserRole } from "@/types/usertypes";
 import LogoutButton from "../LogoutButtton";
 
 export interface SidebarItem {
@@ -15,7 +16,43 @@ export interface SidebarItem {
   roles?: string[]; // If specified, only show for these roles
 }
 
-const getMenuItems = (userRole?: string): SidebarItem[] => {
+const getMenuItems = (userRole?: string, mode?: string): SidebarItem[] => {
+  const isTpiMode = mode === "tpi" || mode === "ee";
+
+  if (isTpiMode) {
+    const tpiItems: SidebarItem[] = [
+      {
+        label: "Dashboard",
+        href: "/dashboard",
+        icon: <LayoutDashboard size={20} />,
+        roles: [UserRole.HeadOfficer, UserRole.DistrictOfficer],
+      },
+      {
+        label: "Work Order",
+        href: "/work-order",
+        icon: <ClipboardList size={20} />,
+      },
+      {
+        label: "District Officers",
+        href: "/district-officers",
+        icon: <ClipboardList size={20} />,
+        roles: [UserRole.HeadOfficer],
+      },
+      {
+        label: "TPI Officers",
+        href: "/tpi-officers",
+        icon: <ShieldCheck size={20} />,
+        roles: [UserRole.HeadOfficer, UserRole.DistrictOfficer],
+      },
+      { label: "Agreement", href: "/agreement", icon: <Globe size={20} /> },
+    ];
+
+    return tpiItems.filter((item) => {
+      if (!item.roles) return true;
+      return item.roles.includes(userRole || "");
+    });
+  }
+
   const baseItems: SidebarItem[] = [
     {
       label: "Dashboard",
@@ -59,13 +96,14 @@ const getMenuItems = (userRole?: string): SidebarItem[] => {
 export default function Sidebar() {
   const pathname = usePathname();
   const [userRole, setUserRole] = React.useState<string>();
+  const { mode } = useAppMode();
 
   React.useEffect(() => {
     const role = localStorage.getItem("admin_role");
     setUserRole(role || undefined);
   }, []);
 
-  const menuItems = getMenuItems(userRole);
+  const menuItems = getMenuItems(userRole, mode);
 
   return (
     <aside className="w-64 h-full  bg-white border-r border-gray-100 flex flex-col p-4">

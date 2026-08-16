@@ -3,6 +3,7 @@ export enum UserRole {
   DistrictOfficer = "DO", // District Office
   Contractor = "CO", // Contractor
   Employee = "EM", // Employee
+  TPI = "TPI", // Third Party Inspection
 }
 
 export enum WorkItemComponentStatus {

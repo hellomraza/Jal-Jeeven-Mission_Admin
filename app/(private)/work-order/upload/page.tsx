@@ -19,9 +19,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useAppMode } from "@/components/mode-context";
 import {
   WorkItemImport,
   bulkImportWorkItems,
+  bulkImportWorkOrderTpi,
   uploadWorkItemFile,
 } from "@/services/workService";
 import { AlertCircle, CheckCircle, FileUp, Upload } from "lucide-react";
@@ -31,6 +33,7 @@ import { toast } from "react-toastify";
 
 export default function UploadWorkItemPage() {
   const router = useRouter();
+  const { isTpiMode } = useAppMode();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [parsedData, setParsedData] = useState<WorkItemImport[]>([]);
@@ -77,8 +80,13 @@ export default function UploadWorkItemPage() {
   const handleConfirm = async () => {
     try {
       setConfirming(true);
-      await bulkImportWorkItems(parsedData);
-      toast.success("Workitems imported successfully.");
+      if (isTpiMode) {
+        await bulkImportWorkOrderTpi(parsedData);
+        toast.success("TPI Work orders imported successfully.");
+      } else {
+        await bulkImportWorkItems(parsedData);
+        toast.success("Workitems imported successfully.");
+      }
       router.push("/work-order");
     } catch (error) {
       toast.error(
@@ -95,7 +103,7 @@ export default function UploadWorkItemPage() {
         <div className="flex items-center gap-4">
           <BackButton />
           <h1 className="text-2xl font-bold text-[#1a2b3c]">
-            Verify Workitems
+            Verify {isTpiMode ? "TPI Work Orders" : "Workitems"}
           </h1>
         </div>
 
@@ -191,7 +199,9 @@ export default function UploadWorkItemPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <BackButton />
-        <h1 className="text-2xl font-bold text-[#1a2b3c]">Upload Workitems</h1>
+        <h1 className="text-2xl font-bold text-[#1a2b3c]">
+          {isTpiMode ? "Upload TPI Work Orders" : "Upload Workitems"}
+        </h1>
       </div>
 
       <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white rounded-2xl">

@@ -168,6 +168,20 @@ export const bulkImportWorkItems = async (workItems: WorkItemImport[]) => {
   }
 };
 
+export const bulkImportWorkOrderTpi = async (workItems: any[]) => {
+  try {
+    const response = await apiClient.post("/import/work-order-tpi/bulk", {
+      workItems,
+    });
+
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to import TPI work orders",
+    );
+  }
+};
+
 export const getWorkItemsWithoutAgreement = async () => {
   try {
     const response = await apiClient.get<PaginatedResponse<WorkItem[]>>("/work-items/without-agreement");

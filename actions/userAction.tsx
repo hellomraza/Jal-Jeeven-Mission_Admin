@@ -6,9 +6,11 @@ import {
   createContractorSchema,
   createDOSchema,
   createEmployeeSchema,
+  createTPISchema,
   updateContractorSchema,
   updateDistrictOfficerSchema,
   updateEmployeeSchema,
+  updateTPISchema,
 } from "@/utils/validation";
 import { AxiosError } from "axios";
 import { revalidatePath } from "next/cache";
@@ -324,3 +326,82 @@ export const updateDistrictOfficer = validatedAction(
     }
   },
 );
+
+export const createTPIOfficer = validatedAction(
+  createTPISchema,
+  async (data: {
+    name: string;
+    email: string;
+    password: string;
+    district_id: string;
+    mobile?: string;
+    district_name?: string;
+    pan_number?: string;
+    address?: string;
+  }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const response = await apiClient.post("/users/tpi", data);
+      if (response.data) {
+        return { success: "TPI Officer created successfully", error: "" };
+      }
+      return { success: "", error: "Failed to create TPI Officer" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to create TPI Officer. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to create TPI Officer",
+      };
+    } finally {
+      revalidatePath("/tpi-officers");
+    }
+  },
+);
+
+export const updateTPIOfficer = validatedAction(
+  updateTPISchema,
+  async (data: {
+    id: string;
+    name?: string;
+    email?: string;
+    password?: string;
+    district_id?: string;
+    mobile?: string;
+    district_name?: string;
+    pan_number?: string;
+    address?: string;
+  }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const { id, ...updateData } = data;
+      const response = await apiClient.patch(`/users/tpi/${id}`, updateData);
+      if (response.data) {
+        return { success: "TPI Officer updated successfully", error: "" };
+      }
+      return { success: "", error: "Failed to update TPI Officer" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to update TPI Officer. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to update TPI Officer",
+      };
+    } finally {
+      revalidatePath("/tpi-officers");
+    }
+  },
+);
+

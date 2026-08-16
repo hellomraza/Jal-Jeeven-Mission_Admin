@@ -36,9 +36,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAppMode } from "@/components/mode-context";
 import { useUser } from "@/hooks/useUser";
 import { getAgreements } from "@/services/agreementService";
 import { getLocationsByType } from "@/services/locationService";
+import { createWorkOrderTpi } from "@/services/workOrderTpiService";
 import { createWorkItem } from "@/services/workService";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
@@ -278,10 +280,17 @@ export default function CreateWorkOrderPage() {
     form.setValue("panchayat_id", "");
   }, [selectedDistrictCode, form]);
 
+  const { isTpiMode } = useAppMode();
+
   const createMutation = useMutation({
-    mutationFn: (payload: Record<string, unknown>) => createWorkItem(payload),
+    mutationFn: (payload: Record<string, unknown>) =>
+      isTpiMode ? createWorkOrderTpi(payload) : createWorkItem(payload),
     onSuccess: () => {
-      toast.success("Work item created successfully");
+      toast.success(
+        isTpiMode
+          ? "TPI Work Order created successfully"
+          : "Work item created successfully",
+      );
       router.push("/work-order");
     },
     onError: (error: any) => {
@@ -357,10 +366,10 @@ export default function CreateWorkOrderPage() {
         <BackButton />
         <div>
           <h1 className="text-[22px] font-extrabold text-[#1a2b3c]">
-            Create Work Item
+            {isTpiMode ? "Create TPI Work Order" : "Create Work Item"}
           </h1>
           <p className="text-[12px] text-gray-500 mt-1">
-            Fill out the details to manually register a new work item.
+            Fill out the details to manually register a new {isTpiMode ? "TPI work order" : "work item"}.
           </p>
         </div>
       </div>
@@ -368,7 +377,7 @@ export default function CreateWorkOrderPage() {
       <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.03)] rounded-[20px]">
         <CardHeader className="pb-4">
           <CardTitle className="text-[18px] text-[#1a2b3c]">
-            Work Item Information
+            {isTpiMode ? "TPI Work Order Information" : "Work Item Information"}
           </CardTitle>
           <CardDescription>
             Specify unique identifiers, category, location, and associated agreement.

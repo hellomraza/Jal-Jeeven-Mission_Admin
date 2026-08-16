@@ -152,3 +152,37 @@ export const updateWorkOrderSchema = z.object({
   ),
   status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED"]).optional().default("PENDING"),
 });
+
+export const createTPISchema = z.object({
+  name: nameValidation,
+  email: emailValidation,
+  password: z.string().trim().nonempty("Password is required"),
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits")
+    .optional()
+    .or(z.literal("")),
+  district_id: z.string().min(1, "District is required"),
+  district_name: z.string().optional(),
+  pan_number: z.string().optional(),
+  address: z.string().optional(),
+});
+
+export const updateTPISchema = z.object({
+  id: z.string().min(1, "TPI Officer ID is required"),
+  name: nameValidation.optional(),
+  email: emailValidation.optional(),
+  password: z.string().optional().default(""),
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits")
+    .optional()
+    .or(z.literal("")),
+  district_id: z.string().optional(),
+  district_name: z.string().optional(),
+  pan_number: z.string().optional(),
+  address: z.string().optional(),
+});
+

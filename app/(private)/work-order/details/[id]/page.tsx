@@ -1,7 +1,9 @@
 import BackButton from "@/components/BackButton";
+import WorkOrderTPIComponentsTable from "@/components/WorkOrderTPIComponentsTable";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { createServerApiClient } from "@/lib/server-api-client";
+import { cookies } from "next/headers";
 import {
   ArrowRight,
   Building2,
@@ -77,7 +79,156 @@ const StatCard = ({
 
 export default async function WorkOrderDetailsPage({ params }: PageParams) {
   const { id } = await params;
+  const cookieStore = await cookies();
+  const userRole = cookieStore.get("admin_role")?.value || null;
+  const cookieMode = cookieStore.get("admin_app_mode")?.value || "svs";
+  const isTpiMode = cookieMode === "tpi" || cookieMode === "ee";
+  const isExecutiveEngineer = cookieMode === "ee";
+
   const apiClient = await createServerApiClient();
+
+  if (isTpiMode) {
+    let tpiWorkOrder: any = null;
+    try {
+      const tpiRes = await apiClient.get(`/work-order-tpi/${id}`);
+      tpiWorkOrder = tpiRes.data;
+    } catch {
+      tpiWorkOrder = null;
+    }
+
+    if (!tpiWorkOrder) {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <BackButton />
+            <div>
+              <h1 className="text-[20px] font-extrabold text-[#1a2b3c] tracking-tight">
+                TPI Work Order Details
+              </h1>
+              <p className="text-[12px] text-gray-500 font-medium">
+                The requested TPI work order could not be found.
+              </p>
+            </div>
+          </div>
+          <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white">
+            <CardContent className="p-8 text-center">
+              <p className="text-[13px] font-medium text-gray-500">
+                Please go back and select another work order.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    const components = tpiWorkOrder.components || [];
+
+    return (
+      <div className="space-y-6 pb-10">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-4">
+            <BackButton />
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-[20px] font-extrabold text-[#1a2b3c] tracking-tight">
+                  {tpiWorkOrder.work_code}
+                </h1>
+                <Badge className="bg-[#136FB6] text-white text-[12px] font-bold">
+                  TPI Project
+                </Badge>
+                <Badge
+                  className={`text-[12px] font-bold ${
+                    tpiWorkOrder.status === "COMPLETED"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : tpiWorkOrder.status === "IN_PROGRESS"
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-amber-100 text-amber-800"
+                  }`}
+                >
+                  {tpiWorkOrder.status}
+                </Badge>
+              </div>
+              <p className="text-[12px] text-gray-500 font-medium mt-1">
+                {tpiWorkOrder.title || "TPI Work Order Milestone Inspection"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Info Grid */}
+        <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                  District
+                </p>
+                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
+                  {tpiWorkOrder.district?.districtname ||
+                    tpiWorkOrder.district_id ||
+                    "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                  Block / Panchayat
+                </p>
+                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
+                  {tpiWorkOrder.block?.blockname || "N/A"} /{" "}
+                  {tpiWorkOrder.panchayat?.panchayatname || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                  Contractor
+                </p>
+                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
+                  {tpiWorkOrder.contractor?.name || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                  Assigned TPI
+                </p>
+                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
+                  {tpiWorkOrder.tpiAssignment?.tpi?.name || "Unassigned"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                  Inspection Progress
+                </p>
+                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
+                  {tpiWorkOrder.progress_percentage ?? 0}%
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                  Status
+                </p>
+                <p className="text-[13px] font-bold text-[#1a2b3c] mt-0.5">
+                  {tpiWorkOrder.status}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 8 Milestone Inspection Components */}
+        <div className="space-y-3">
+          <h2 className="text-[16px] font-bold text-[#1a2b3c]">
+            Inspection Milestones (8 Components)
+          </h2>
+          <WorkOrderTPIComponentsTable
+            workOrderTpiId={tpiWorkOrder.id}
+            components={components}
+            userRole={userRole || undefined}
+            isExecutiveEngineer={isExecutiveEngineer}
+          />
+        </div>
+      </div>
+    );
+  }
 
   const [workItemResponse, componentsResponse, employeesResponse] =
     await Promise.all([

@@ -2,6 +2,7 @@ import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
 import Image from "next/image";
 import HeaderMenu from "../HeaderMenu";
+import NavbarModeToggle from "../NavbarModeToggle";
 import MobileNav from "./mobile-nav";
 
 export default async function Header() {
@@ -42,6 +43,14 @@ export default async function Header() {
             ? ` (${user?.district?.districtname})`
             : ""}
         </h2>
+      </div>
+
+      {/* Center - Mode Toggle */}
+      <div className="hidden md:flex items-center justify-center">
+        <NavbarModeToggle
+          userRole={userRole}
+          isExecutiveEngineer={Boolean(user?.is_executive_engineer)}
+        />
       </div>
 
       {/* Right side */}

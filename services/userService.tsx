@@ -107,3 +107,57 @@ export const bulkImportContractors = async (
     );
   }
 };
+
+export const toggleExecutiveEngineer = async (
+  id: string,
+  is_executive_engineer?: boolean,
+) => {
+  try {
+    const response = await apiClient.patch(
+      `/users/${id}/toggle-executive-engineer`,
+      { is_executive_engineer },
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to toggle Executive Engineer status",
+    );
+  }
+};
+
+export const getTPIs = async (districtId?: string) => {
+  try {
+    const response = await apiClient.get(`/users/tpi`, {
+      params: districtId ? { district_id: districtId } : undefined,
+    });
+    return response.data || [];
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch TPI officers",
+    );
+  }
+};
+
+export const createTPI = async (data: any) => {
+  try {
+    const response = await apiClient.post(`/users/tpi`, data);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to create TPI officer",
+    );
+  }
+};
+
+export const updateTPI = async (id: string, data: any) => {
+  try {
+    const response = await apiClient.patch(`/users/tpi/${id}`, data);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to update TPI officer",
+    );
+  }
+};
+
