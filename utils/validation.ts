@@ -203,4 +203,5 @@ export const updateWorkOrderSchema = z.object({
     z.number().min(0).max(100).optional()
   ),
   status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED"]).optional().default("PENDING"),
+  work_order_type: z.enum(["SVS", "BULK_VILLAGE"]).optional(),
 });

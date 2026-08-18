@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUser } from "@/hooks/useUser";
+import { useMode } from "@/components/providers/ModeContext";
 import { getAgreements } from "@/services/agreementService";
 import { getLocationsByType } from "@/services/locationService";
 import { createWorkItem } from "@/services/workService";
@@ -52,6 +53,7 @@ import { z } from "zod";
 const createWorkOrderSchema = z.object({
   work_code: z.string().trim().min(1, "Work code is required"),
   schemetype: z.string().trim().min(1, "Scheme type is required"),
+  work_order_type: z.enum(["SVS", "BULK_VILLAGE"]).optional(),
   workcodeid: z.string().trim().optional(),
   excel: z.string().trim().optional(),
   district_id: z.string().trim().optional(),
@@ -186,12 +188,15 @@ export default function CreateWorkOrderPage() {
   const [pendingValues, setPendingValues] =
     useState<CreateWorkOrderFormValues | null>(null);
 
+  const { mode } = useMode();
+
   const form = useForm<CreateWorkOrderFormValues>({
     resolver: zodResolver(createWorkOrderSchema),
     mode: "onChange",
     defaultValues: {
       work_code: "",
       schemetype: "",
+      work_order_type: (mode as "SVS" | "BULK_VILLAGE") || "SVS",
       workcodeid: "",
       excel: "",
       district_id: "",
@@ -293,6 +298,7 @@ export default function CreateWorkOrderPage() {
     const payload = {
       work_code: values.work_code,
       schemetype: values.schemetype,
+      work_order_type: values.work_order_type || mode || "SVS",
       workcodeid: values.workcodeid || undefined,
       excel: values.excel || undefined,
       district_id: values.district_id || undefined,

@@ -68,6 +68,7 @@ export const updateWorkOrderAction = validatedAction(
             ? payload.progress_percentage
             : undefined,
         status: payload.status || undefined,
+        work_order_type: payload.work_order_type || undefined,
       });
       if (response.data) {
         return { success: "Work item updated successfully", error: "" };

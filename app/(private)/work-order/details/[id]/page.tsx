@@ -11,7 +11,6 @@ import {
   ChartNoAxesCombined,
   ClipboardList,
   MapPin,
-  ShieldCheck,
   Users,
 } from "lucide-react";
 import { cookies } from "next/headers";
@@ -86,15 +85,20 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
   const role = cookieStore.get("admin_role")?.value;
   const apiClient = await createServerApiClient();
 
-  const [workItemResponse, componentsResponse, employeesResponse, profileResponse] =
-    await Promise.all([
-      apiClient.get(`/work-items/${id}`),
-      apiClient.get(`/components/work-item/${id}`),
-      apiClient.get(`/work-items/${id}/employees`),
-      apiClient.get(`/users/my-profile`).catch(() => ({ data: null })),
-    ]);
+  const [
+    workItemResponse,
+    componentsResponse,
+    employeesResponse,
+    profileResponse,
+  ] = await Promise.all([
+    apiClient.get(`/work-items/${id}`),
+    apiClient.get(`/components/work-item/${id}`),
+    apiClient.get(`/work-items/${id}/employees`),
+    apiClient.get(`/users/my-profile`).catch(() => ({ data: null })),
+  ]);
 
   const workItem = workItemResponse.data as WorkItem | undefined;
+
   const components = (componentsResponse.data ?? []) as WorkItemComponent[];
   const employees = (employeesResponse.data ?? []) as Employee[];
   const userProfile = profileResponse.data;

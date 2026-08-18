@@ -310,9 +310,6 @@ export default function WorkOrder({
                     Status
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Type
-                  </TableHead>
-                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     TPI Agency
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
@@ -392,17 +389,6 @@ export default function WorkOrder({
                         >
                           {row.status || "PENDING"}
                         </span>
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.work_order_type === "BULK_VILLAGE" ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-50 text-purple-700 border border-purple-200">
-                            Bulk Village
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-50 text-slate-700 border border-slate-200">
-                            SVS
-                          </span>
-                        )}
                       </TableCell>
                       <TableCell
                         className="text-[12px] text-gray-900 py-4 font-medium"
