@@ -1,5 +1,5 @@
 "use client";
-import { ClipboardList, Globe, LayoutDashboard } from "lucide-react";
+import { ClipboardList, Globe, LayoutDashboard, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
@@ -46,6 +46,12 @@ const getMenuItems = (userRole?: string): SidebarItem[] => {
       href: "/employees",
       icon: <ClipboardList size={20} />,
       roles: [UserRole.Contractor], // Only for contractors
+    },
+    {
+      label: "Completed Workflows",
+      href: "/completed-workflows",
+      icon: <CheckCircle2 size={20} />,
+      roles: [UserRole.DistrictOfficer],
     },
   ];
 

@@ -85,9 +85,7 @@ export default function DOManagementTable({
                         {do_.mobile || "N/A"}
                       </TableCell>
                       <TableCell className="text-[13px] text-gray-600">
-                        {do_.district_name ||
-                          do_.district?.districtname ||
-                          "N/A"}
+                        {do_.district?.districtname || "N/A"}
                       </TableCell>
                       <TableCell className="text-[13px] text-gray-600">
                         <div className="flex gap-2">

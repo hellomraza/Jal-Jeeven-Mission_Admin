@@ -3,7 +3,7 @@ import "server-only";
 import axios, { AxiosRequestConfig } from "axios";
 import { cookies } from "next/headers";
 
-const SERVER_API_BASE_URL = process.env.SERVER_API_BASE_URL
+const SERVER_API_BASE_URL = process.env.SERVER_API_BASE_URL;
 
 type ServerApiClientOptions = {
   token?: string;
@@ -17,6 +17,7 @@ export const createServerApiClient = async (
   const tokenFromCookie = cookieStore.get("admin_token")?.value;
   const token = options.token || tokenFromCookie;
 
+  console.log(SERVER_API_BASE_URL);
   const client = axios.create({
     baseURL: SERVER_API_BASE_URL, // Update with your API base URL
     headers: {
