@@ -58,6 +58,8 @@ const WorkOrderPage = async ({ searchParams }: WorkOrderPageProps) => {
   );
   const workItems = response?.data || [];
 
+  const isExecutiveEngineer = Boolean(userProfile?.is_executive_engineer);
+
   return (
     <WorkOrder
       workItems={workItems}
@@ -66,6 +68,7 @@ const WorkOrderPage = async ({ searchParams }: WorkOrderPageProps) => {
       totalPages={response?.totalPages || 1}
       totalWorkItems={response?.total || 0}
       activeMode={activeMode}
+      isExecutiveEngineer={isExecutiveEngineer}
     />
   );
 };

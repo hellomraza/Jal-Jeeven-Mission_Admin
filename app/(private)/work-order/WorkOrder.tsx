@@ -19,8 +19,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
+import {
+  assignTpiToWorkItem,
+  unassignTpiFromWorkItem,
+} from "@/services/workService";
 import { UserRole } from "@/types/usertypes";
-import { Upload } from "lucide-react";
+import {
+  Building2,
+  Loader2,
+  ShieldCheck,
+  Upload,
+  UserX,
+} from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -31,6 +42,7 @@ export default function WorkOrder({
   totalPages,
   totalWorkItems,
   activeMode,
+  isExecutiveEngineer,
 }: {
   workItems: WorkItem[];
   role: string | null;
@@ -38,10 +50,14 @@ export default function WorkOrder({
   totalPages: number;
   totalWorkItems: number;
   activeMode?: string;
+  isExecutiveEngineer?: boolean;
 }) {
+  const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const [loadingRowId, setLoadingRowId] = useState<string | null>(null);
 
   const currentSearch = searchParams.get("search") || "";
   const [search, setSearch] = useState(currentSearch);
@@ -49,6 +65,13 @@ export default function WorkOrder({
   const [selectedDistrict, setSelectedDistrict] = React.useState<string | null>(
     null,
   );
+
+  const isDO =
+    userRole === UserRole.DistrictOfficer ||
+    userRole === "DO" ||
+    userRole === "DistrictOfficer";
+
+  const canManageTpi = Boolean(isDO && isExecutiveEngineer);
 
   // Sync state with URL if URL changes
   useEffect(() => {
@@ -124,6 +147,58 @@ export default function WorkOrder({
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Work_Orders");
     XLSX.writeFile(wb, "WorkOrders.xlsx");
+  };
+
+  const handleAssignTpi = async (e: React.MouseEvent, workItemId: string) => {
+    e.stopPropagation();
+    try {
+      setLoadingRowId(workItemId);
+      await assignTpiToWorkItem(workItemId);
+      toast({
+        title: "TPI Assigned",
+        description: "Active district TPI agency has been successfully assigned.",
+      });
+      router.refresh();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Assignment Failed",
+        description:
+          error.message ||
+          "Failed to assign TPI agency. Ensure an active TPI exists for this district.",
+      });
+    } finally {
+      setLoadingRowId(null);
+    }
+  };
+
+  const handleUnassignTpi = async (e: React.MouseEvent, workItemId: string) => {
+    e.stopPropagation();
+    if (
+      !window.confirm(
+        "Are you sure you want to unassign the TPI agency from this work order?",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setLoadingRowId(workItemId);
+      await unassignTpiFromWorkItem(workItemId);
+      toast({
+        title: "TPI Unassigned",
+        description: "TPI agency has been unassigned from this work order.",
+      });
+      router.refresh();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Unassignment Failed",
+        description: error.message || "Failed to unassign TPI agency.",
+      });
+    } finally {
+      setLoadingRowId(null);
+    }
   };
 
   return (
@@ -238,17 +313,14 @@ export default function WorkOrder({
                     Type
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                    TPI Agency
+                  </TableHead>
+                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Contractor Name
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Contractor Code
                   </TableHead>
-                  {/* <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Latitude
-                  </TableHead>
-                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Longitude
-                  </TableHead> */}
                   {(userRole === UserRole.HeadOfficer ||
                     userRole === UserRole.DistrictOfficer ||
                     userRole === UserRole.Contractor) && (
@@ -261,7 +333,7 @@ export default function WorkOrder({
               <TableBody>
                 {filteredWorkItems?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={18} className="h-24 text-center">
+                    <TableCell colSpan={19} className="h-24 text-center">
                       <p className="text-[12px] text-gray-500 font-medium">
                         No work items found.
                       </p>
@@ -279,9 +351,6 @@ export default function WorkOrder({
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
                         {(currentPage - 1) * 10 + index + 1}
                       </TableCell>
-                      {/* <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
-                        {row.title || "---"}
-                      </TableCell> */}
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium bg-[#DFEEF9]/50">
                         {row.work_code || "---"}
                       </TableCell>
@@ -335,6 +404,60 @@ export default function WorkOrder({
                           </span>
                         )}
                       </TableCell>
+                      <TableCell
+                        className="text-[12px] text-gray-900 py-4 font-medium"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {row.work_order_type === "BULK_VILLAGE" ? (
+                          row.tpi ? (
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-[#136FB6] border border-blue-200"
+                                title={row.tpi.email || ""}
+                              >
+                                <ShieldCheck size={11} />
+                                {row.tpi.name || row.tpi.code || "TPI"}
+                              </span>
+                              {canManageTpi && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full"
+                                  title="Unassign TPI Agency"
+                                  disabled={loadingRowId === row.id}
+                                  onClick={(e) => handleUnassignTpi(e, row.id)}
+                                >
+                                  {loadingRowId === row.id ? (
+                                    <Loader2 size={11} className="animate-spin text-red-600" />
+                                  ) : (
+                                    <UserX size={12} />
+                                  )}
+                                </Button>
+                              )}
+                            </div>
+                          ) : canManageTpi ? (
+                            <Button
+                              size="sm"
+                              className="h-7 px-2.5 bg-[#136FB6] hover:bg-[#0d5a8f] text-white text-[11px] font-bold shadow-xs flex items-center gap-1"
+                              disabled={loadingRowId === row.id}
+                              onClick={(e) => handleAssignTpi(e, row.id)}
+                            >
+                              {loadingRowId === row.id ? (
+                                <Loader2 size={11} className="animate-spin mr-0.5" />
+                              ) : (
+                                <Building2 size={11} className="mr-0.5" />
+                              )}
+                              Assign TPI
+                            </Button>
+                          ) : (
+                            <span className="text-[11px] text-gray-400 font-medium">
+                              Not Assigned
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-[11px] text-gray-300">—</span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.contractor?.name
                           ? row.contractor.name
@@ -347,12 +470,6 @@ export default function WorkOrder({
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.contractor?.code || "---"}
                       </TableCell>
-                      {/* <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.latitude || "---"}
-                      </TableCell>
-                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
-                        {row.longitude || "---"}
-                      </TableCell> */}
                       {(userRole === UserRole.HeadOfficer ||
                         userRole === UserRole.DistrictOfficer ||
                         userRole === UserRole.Contractor) && (
