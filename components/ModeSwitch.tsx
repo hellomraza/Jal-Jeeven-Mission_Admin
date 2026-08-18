@@ -3,6 +3,7 @@
 import { useMode } from "@/components/providers/ModeContext";
 import { WorkOrderType } from "@/types/usertypes";
 import { Building2, Home } from "lucide-react";
+import { useEffect } from "react";
 
 export default function ModeSwitch({
   serverCanSwitch,
@@ -13,7 +14,29 @@ export default function ModeSwitch({
   serverIsExecutiveEngineer?: boolean;
   serverRole?: string;
 }) {
-  const { mode, setMode, canSwitchMode, userRole } = useMode();
+  const {
+    mode,
+    setMode,
+    canSwitchMode,
+    userRole,
+    setIsExecutiveEngineer,
+    setUserRole,
+  } = useMode();
+
+  // Sync server props from Header to ModeContext if provided
+  useEffect(() => {
+    if (serverIsExecutiveEngineer !== undefined) {
+      setIsExecutiveEngineer(serverIsExecutiveEngineer);
+      localStorage.setItem(
+        "admin_is_executive_engineer",
+        String(serverIsExecutiveEngineer),
+      );
+    }
+    if (serverRole !== undefined) {
+      setUserRole(serverRole);
+      localStorage.setItem("admin_role", serverRole);
+    }
+  }, [serverIsExecutiveEngineer, serverRole, setIsExecutiveEngineer, setUserRole]);
 
   const isVisible =
     canSwitchMode ||
