@@ -1,5 +1,6 @@
 "use client";
 import BackButton from "@/components/BackButton";
+import { useMode } from "@/components/providers/ModeContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +29,6 @@ import { AlertCircle, CheckCircle, FileUp, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { useMode } from "@/components/providers/ModeContext";
 
 export default function UploadWorkItemPage() {
   const router = useRouter();
@@ -62,7 +62,7 @@ export default function UploadWorkItemPage() {
     try {
       setUploading(true);
       const result = await uploadWorkItemFile(selectedFile);
-      const workitems = result.workitemTable || [];
+      const workitems = result.workItemTable || [];
 
       if (!workitems.length) {
         toast.error("No valid work items found in the file.");
