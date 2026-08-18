@@ -45,9 +45,15 @@ export const ModeProvider: React.FC<ModeProviderProps> = ({
   // Sync client profile state if not provided
   useEffect(() => {
     const storedRole = localStorage.getItem("admin_role");
-    const storedMode = localStorage.getItem("app_work_order_mode") as WorkOrderType;
+    const storedMode = localStorage.getItem(
+      "app_work_order_mode",
+    ) as WorkOrderType;
     if (storedRole) setUserRole(storedRole);
-    if (storedMode && (storedMode === WorkOrderType.SVS || storedMode === WorkOrderType.BULK_VILLAGE)) {
+    if (
+      storedMode &&
+      (storedMode === WorkOrderType.SVS ||
+        storedMode === WorkOrderType.BULK_VILLAGE)
+    ) {
       setModeState(storedMode);
     }
   }, []);
@@ -66,9 +72,11 @@ export const ModeProvider: React.FC<ModeProviderProps> = ({
   }, [userRole, canSwitchMode, mode]);
 
   const setMode = (newMode: WorkOrderType) => {
+    console.log(canSwitchMode, newMode, userRole, isExecutiveEngineer);
     if (!canSwitchMode && newMode === WorkOrderType.BULK_VILLAGE) {
       newMode = WorkOrderType.SVS;
     }
+    console.log("setMode", newMode);
     setModeState(newMode);
     localStorage.setItem("app_work_order_mode", newMode);
     document.cookie = `app_work_order_mode=${newMode}; path=/; max-age=31536000; SameSite=Lax`;

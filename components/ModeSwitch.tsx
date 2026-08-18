@@ -3,7 +3,6 @@
 import { useMode } from "@/components/providers/ModeContext";
 import { WorkOrderType } from "@/types/usertypes";
 import { Building2, Home } from "lucide-react";
-import React from "react";
 
 export default function ModeSwitch({
   serverCanSwitch,
@@ -35,20 +34,32 @@ export default function ModeSwitch({
             : "text-gray-500 hover:text-gray-800"
         }`}
       >
-        <Home size={14} className={mode === WorkOrderType.SVS ? "text-[#136FB6]" : "text-gray-400"} />
+        <Home
+          size={14}
+          className={
+            mode === WorkOrderType.SVS ? "text-[#136FB6]" : "text-gray-400"
+          }
+        />
         <span>SVS</span>
       </button>
 
       <button
         type="button"
-        onClick={() => setMode(WorkOrderType.BULK_VILLAGE)}
+        onClick={() => {
+          setMode(WorkOrderType.BULK_VILLAGE);
+        }}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-extrabold transition-all duration-200 ${
           mode === WorkOrderType.BULK_VILLAGE
             ? "bg-[#136FB6] text-white shadow-xs"
             : "text-gray-500 hover:text-gray-800"
         }`}
       >
-        <Building2 size={14} className={mode === WorkOrderType.BULK_VILLAGE ? "text-white" : "text-gray-400"} />
+        <Building2
+          size={14}
+          className={
+            mode === WorkOrderType.BULK_VILLAGE ? "text-white" : "text-gray-400"
+          }
+        />
         <span>Bulk Village</span>
       </button>
     </div>
