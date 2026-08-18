@@ -1,6 +1,6 @@
-"use server";
 import BackButton from "@/components/BackButton";
 import ReviewPhotosComponent from "@/components/ReviewPhotosComponent";
+import TpiReferencePhotoReview from "@/components/TpiReferencePhotoReview";
 import { Button } from "@/components/ui/button";
 import { createServerApiClient } from "@/lib/server-api-client";
 import {
@@ -17,25 +17,44 @@ const ReviewPhotos = async ({
 }: {
   params: Promise<{ componentId: string }>;
 }) => {
-  const { componentId } = await params; // Await the params to get the componentId
+  const { componentId } = await params;
   const apiClient = await createServerApiClient();
-
-  const response = await apiClient.get<PaginatedResponse<PhotoStatusRecord>>(
-    `/photo-status/component/${componentId}?page=1&limit=100`,
-  );
-
-  const photoStatuses = response?.data?.data || [];
-  // fetch component details (quantity, progress, status) to enforce CO selection rules
-  const componentResponse = await apiClient.get<Component>(
-    `/components/${componentId}`,
-  );
-  const componentDetails = componentResponse?.data;
   const cookieStore = await cookies();
   const role = cookieStore.get("admin_role")?.value as UserRole | undefined;
 
-  // Filter visible photos per role
+  const [response, componentResponse] = await Promise.all([
+    apiClient.get<PaginatedResponse<PhotoStatusRecord>>(
+      `/photo-status/component/${componentId}?page=1&limit=100`,
+    ),
+    apiClient.get<any>(`/components/${componentId}`),
+  ]);
+
+  const photoStatuses = response?.data?.data || [];
+  const componentDetails = componentResponse?.data;
+
+  // If component is Bulk Village and role is not HO, fetch TPI reference photos
+  let tpiPhotos: any[] = [];
+  let tpiStatus: any = null;
+  const isBulkVillage =
+    componentDetails?.work_order?.work_order_type === "BULK_VILLAGE" ||
+    componentDetails?.workOrderType === "BULK_VILLAGE";
+
+  if (isBulkVillage && role !== UserRole.HeadOfficer && role !== "HO") {
+    try {
+      const [tpiPhotosRes, tpiStatusRes] = await Promise.all([
+        apiClient.get(`/components/${componentId}/tpi-reference-photos`),
+        apiClient.get(`/tpi-photo-status/component/${componentId}`).catch(() => ({ data: null })),
+      ]);
+      tpiPhotos = tpiPhotosRes.data || [];
+      tpiStatus = tpiStatusRes.data;
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  // Filter visible contractor photos per role
   let visiblePhotoStatuses = photoStatuses;
-  if (role === UserRole.DistrictOfficer) {
+  if (role === UserRole.DistrictOfficer || role === "DO") {
     visiblePhotoStatuses = photoStatuses.filter((p: any) =>
       [
         PhotoStatusState.SELECTED,
@@ -43,13 +62,14 @@ const ReviewPhotos = async ({
         PhotoStatusState.REJECTED,
       ].includes(p.status),
     );
-  } else if (role === UserRole.HeadOfficer) {
+  } else if (role === UserRole.HeadOfficer || role === "HO") {
     visiblePhotoStatuses = photoStatuses.filter(
       (p: any) => p.status === PhotoStatusState.APPROVED,
     );
-  } else if (role === UserRole.Contractor) {
-    visiblePhotoStatuses = photoStatuses; // CO sees all uploaded/selected
+  } else if (role === UserRole.Contractor || role === "CO") {
+    visiblePhotoStatuses = photoStatuses;
   }
+
   const hasMapData = photoStatuses.some(
     (photoStatus) =>
       photoStatus.photo.latitude !== null &&
@@ -57,7 +77,7 @@ const ReviewPhotos = async ({
   );
 
   return (
-    <div className="space-y-6 max-w-300 mx-auto">
+    <div className="space-y-8 max-w-300 mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <BackButton />
@@ -66,9 +86,9 @@ const ReviewPhotos = async ({
               Review Component Photos
             </h1>
             <p className="text-[12px] text-gray-500 font-medium">
-              Component: {componentDetails?.component?.name} (
-              {(componentDetails as any)?.progress ?? "0"} /{" "}
-              {(componentDetails as any)?.quantity ?? "0"} completed)
+              Component: {componentDetails?.component?.name || "Component"} (
+              {componentDetails?.progress ?? "0"} /{" "}
+              {componentDetails?.quantity ?? "0"} completed)
             </p>
           </div>
         </div>
@@ -82,27 +102,49 @@ const ReviewPhotos = async ({
         )}
       </div>
 
-      {visiblePhotoStatuses.length === 0 ? (
-        <div className="p-20 text-center bg-white rounded-[20px] shadow-sm">
-          <p className="text-gray-500 text-[14px]">
-            No photos uploaded for this component yet.
+      {/* Group 1: Contractor Evidence Photos */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-[16px] font-extrabold text-[#1a2b3c]">
+            Contractor Execution Evidence
+          </h2>
+          <p className="text-[12px] text-gray-500 font-medium">
+            Photos submitted by contractor for approval
           </p>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {visiblePhotoStatuses.map((photoStatus: any) => (
-            <ReviewPhotosComponent
-              key={photoStatus.id}
-              photo={photoStatus}
-              componentId={componentId}
-              userRole={role ?? UserRole.Contractor}
-              componentDetails={componentDetails}
-            />
-          ))}
-        </div>
+
+        {visiblePhotoStatuses.length === 0 ? (
+          <div className="p-12 text-center bg-white rounded-2xl shadow-xs border border-gray-100">
+            <p className="text-gray-500 text-[14px]">
+              No contractor execution photos uploaded for this component yet.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {visiblePhotoStatuses.map((photoStatus: any) => (
+              <ReviewPhotosComponent
+                key={photoStatus.id}
+                photo={photoStatus}
+                componentId={componentId}
+                userRole={role ?? UserRole.Contractor}
+                componentDetails={componentDetails}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Group 2: TPI Reference Evidence (Isolated Group - No DO Approval Buttons) */}
+      {isBulkVillage && (
+        <TpiReferencePhotoReview
+          tpiPhotos={tpiPhotos}
+          selectedPhotoId={tpiStatus?.photo_id}
+          userRole={role}
+        />
       )}
     </div>
   );
 };
 
 export default ReviewPhotos;
+

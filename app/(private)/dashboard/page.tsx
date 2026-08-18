@@ -1,10 +1,23 @@
 import DODashboard from "@/components/DODashboard";
 import HODashboard from "@/components/HODashboard";
+import TPIDashboard from "@/components/TPIDashboard";
+import { createServerApiClient } from "@/lib/server-api-client";
 import { getDashboardStats } from "@/services/dashboardService";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
-  const stats = await getDashboardStats();
+  const [stats, apiClient] = await Promise.all([
+    getDashboardStats(),
+    createServerApiClient(),
+  ]);
+
+  let user = null;
+  try {
+    const userRes = await apiClient.get("/users/my-profile");
+    user = userRes.data;
+  } catch (e) {
+    // Ignore
+  }
 
   if (!stats) {
     return (
@@ -16,6 +29,11 @@ export default async function DashboardPage() {
         </div>
       </div>
     );
+  }
+
+  // TPI users will have 'totalAssignedWorkOrders' or role TPI
+  if ("totalAssignedWorkOrders" in stats || user?.role === "TPI") {
+    return <TPIDashboard stats={stats} user={user} />;
   }
 
   // HO users will have 'users' property

@@ -14,3 +14,14 @@ export enum WorkItemComponentStatus {
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
 }
+
+export enum WorkOrderType {
+  SVS = "SVS",
+  BULK_VILLAGE = "BULK_VILLAGE",
+}
+
+export enum TpiReferencePhotoStatusEnum {
+  UPLOADED = "UPLOADED",
+  SELECTED = "SELECTED",
+}
+

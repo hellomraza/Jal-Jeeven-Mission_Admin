@@ -1,6 +1,6 @@
 "use client";
 
-import { updateDistrictOfficer } from "@/actions/userAction";
+import { updateTpi } from "@/actions/userAction";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,30 +25,32 @@ import {
   SelectValue,
 } from "./ui/select";
 
-interface EditDODialogProps {
-  officer: any | null;
+interface EditTPIDialogProps {
+  tpi: any | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function EditDODialog({
-  officer,
+export default function EditTPIDialog({
+  tpi,
   isOpen,
   onOpenChange,
-}: EditDODialogProps) {
+}: EditTPIDialogProps) {
   const { toast } = useToast();
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     id: "",
     name: "",
     email: "",
+    code: "",
     mobile: "",
     district_id: "",
+    pan_number: "",
+    address: "",
     password: "",
-    is_executive_engineer: false,
   });
 
-  const [state, formAction, isPending] = useActionState(updateDistrictOfficer, {
+  const [state, formAction, isPending] = useActionState(updateTpi, {
     success: "",
     error: "",
   });
@@ -67,26 +69,27 @@ export default function EditDODialog({
   const districtsLoading = districtsQuery.isLoading;
 
   useEffect(() => {
-    if (isOpen && officer) {
+    if (isOpen && tpi) {
       setFormData({
-        id: officer.id,
-        name: officer.name || "",
-        email: officer.email || "",
-        mobile: officer.mobile || "",
-        district_id:
-          officer.district_id || officer.district_id?.toString() || "",
+        id: tpi.id,
+        name: tpi.name || "",
+        email: tpi.email || "",
+        code: tpi.code || "",
+        mobile: tpi.mobile || "",
+        district_id: tpi.district_id?.toString() || "",
+        pan_number: tpi.pan_number || "",
+        address: tpi.address || "",
         password: "",
-        is_executive_engineer: Boolean(officer.is_executive_engineer),
       });
       setHasSubmitted(false);
     }
-  }, [officer, isOpen]);
+  }, [tpi, isOpen]);
 
   useEffect(() => {
     if (state.success && hasSubmitted) {
       toast({
         title: "Success",
-        description: "District Officer updated successfully.",
+        description: "TPI Agency updated successfully.",
       });
       setHasSubmitted(false);
       onOpenChange(false);
@@ -113,10 +116,12 @@ export default function EditDODialog({
         id: "",
         name: "",
         email: "",
+        code: "",
         mobile: "",
         district_id: "",
+        pan_number: "",
+        address: "",
         password: "",
-        is_executive_engineer: false,
       });
       setHasSubmitted(false);
     }
@@ -125,14 +130,14 @@ export default function EditDODialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit District Officer</DialogTitle>
+          <DialogTitle>Edit TPI Agency</DialogTitle>
         </DialogHeader>
 
         <form
           action={formAction}
-          className="mt-4 space-y-4"
+          className="space-y-3.5 mt-2"
           onSubmit={() => setHasSubmitted(true)}
         >
           <input type="hidden" name="id" value={formData.id} />
@@ -144,7 +149,7 @@ export default function EditDODialog({
 
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
-              Name
+              Agency Name
             </FieldLabel>
             <Input
               type="text"
@@ -158,6 +163,18 @@ export default function EditDODialog({
 
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
+              User Code (Immutable)
+            </FieldLabel>
+            <Input
+              type="text"
+              disabled
+              value={formData.code}
+              className="bg-gray-50 text-gray-500"
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel className="text-xs font-semibold text-gray-500">
               Email
             </FieldLabel>
             <Input
@@ -165,21 +182,6 @@ export default function EditDODialog({
               name="email"
               required
               value={formData.email}
-              onChange={handleInputChange}
-              disabled={isPending}
-            />
-          </Field>
-
-          <Field>
-            <FieldLabel className="text-xs font-semibold text-gray-500">
-              Mobile Number
-            </FieldLabel>
-            <Input
-              type="tel"
-              name="mobile"
-              required
-              maxLength={10}
-              value={formData.mobile}
               onChange={handleInputChange}
               disabled={isPending}
             />
@@ -217,39 +219,58 @@ export default function EditDODialog({
             </Select>
           </Field>
 
-          <InputWithPassword
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            disabled={isPending}
-          />
+          <div className="grid grid-cols-2 gap-3">
+            <Field>
+              <FieldLabel className="text-xs font-semibold text-gray-500">
+                Mobile Number
+              </FieldLabel>
+              <Input
+                type="tel"
+                name="mobile"
+                maxLength={10}
+                value={formData.mobile}
+                onChange={handleInputChange}
+                disabled={isPending}
+              />
+            </Field>
 
-          <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
-            <div>
-              <label
-                htmlFor="edit_is_executive_engineer"
-                className="text-xs font-bold text-[#1a2b3c] cursor-pointer"
-              >
-                Executive Engineer Role
-              </label>
-              <p className="text-[11px] text-gray-500">
-                Grant Bulk Village workflow & TPI assignment permissions for district
-              </p>
-            </div>
-            <input
-              type="checkbox"
-              id="edit_is_executive_engineer"
-              name="is_executive_engineer"
-              checked={formData.is_executive_engineer}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  is_executive_engineer: e.target.checked,
-                }))
-              }
-              className="h-4 w-4 rounded border-gray-300 text-[#136FB6] focus:ring-[#136FB6]"
+            <Field>
+              <FieldLabel className="text-xs font-semibold text-gray-500">
+                PAN Number
+              </FieldLabel>
+              <Input
+                type="text"
+                name="pan_number"
+                value={formData.pan_number}
+                onChange={handleInputChange}
+                disabled={isPending}
+              />
+            </Field>
+          </div>
+
+          <Field>
+            <FieldLabel className="text-xs font-semibold text-gray-500">
+              Address
+            </FieldLabel>
+            <Input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
               disabled={isPending}
             />
+          </Field>
+
+          <div className="space-y-1">
+            <InputWithPassword
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              disabled={isPending}
+            />
+            <p className="text-[11px] text-gray-500">
+              Leave blank to keep existing password
+            </p>
           </div>
 
           {state.error && (

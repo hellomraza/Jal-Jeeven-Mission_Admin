@@ -30,12 +30,14 @@ export default function WorkOrder({
   currentPage,
   totalPages,
   totalWorkItems,
+  activeMode,
 }: {
   workItems: WorkItem[];
   role: string | null;
   currentPage: number;
   totalPages: number;
   totalWorkItems: number;
+  activeMode?: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -232,9 +234,9 @@ export default function WorkOrder({
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Status
                   </TableHead>
-                  {/* <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    Description
-                  </TableHead> */}
+                  <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
+                    Type
+                  </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Contractor Name
                   </TableHead>
@@ -259,7 +261,7 @@ export default function WorkOrder({
               <TableBody>
                 {filteredWorkItems?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={17} className="h-24 text-center">
+                    <TableCell colSpan={18} className="h-24 text-center">
                       <p className="text-[12px] text-gray-500 font-medium">
                         No work items found.
                       </p>
@@ -322,9 +324,17 @@ export default function WorkOrder({
                           {row.status || "PENDING"}
                         </span>
                       </TableCell>
-                      {/* <TableCell className="text-[12px] text-gray-900 py-4 font-medium min-w-37.5 max-w-sm truncate">
-                        {row.description || "---"}
-                      </TableCell> */}
+                      <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
+                        {row.work_order_type === "BULK_VILLAGE" ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-50 text-purple-700 border border-purple-200">
+                            Bulk Village
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-50 text-slate-700 border border-slate-200">
+                            SVS
+                          </span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.contractor?.name
                           ? row.contractor.name

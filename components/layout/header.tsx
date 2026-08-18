@@ -2,6 +2,7 @@ import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
 import Image from "next/image";
 import HeaderMenu from "../HeaderMenu";
+import ModeSwitch from "../ModeSwitch";
 import MobileNav from "./mobile-nav";
 
 export default async function Header() {
@@ -16,6 +17,12 @@ export default async function Header() {
 
   const userName = user?.name || "User";
   const userRole = user?.role || "Role";
+  const isExecutiveEngineer = Boolean(user?.is_executive_engineer);
+  const canSwitchMode =
+    userRole === UserRole.HeadOfficer ||
+    userRole === "HO" ||
+    ((userRole === UserRole.DistrictOfficer || userRole === "DO") &&
+      isExecutiveEngineer);
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-6 py-2 md:py-4 h-16 md:h-24 transition-all shadow-[0_4px_24px_rgba(0,0,0,0.01)]">
@@ -36,30 +43,30 @@ export default async function Header() {
             Jal Jeevan Mission
           </h1>
         </div>
-        <h2 className="hidden md:block text-[14px] font-bold text-[#1a2b3c] tracking-wide">
-          Welcome {userName.toUpperCase()} ({userRole})
-          {userRole === UserRole.DistrictOfficer
-            ? ` (${user?.district?.districtname})`
-            : ""}
-        </h2>
+        <div className="flex flex-col">
+          <h2 className="hidden md:block text-[14px] font-bold text-[#1a2b3c] tracking-wide">
+            Welcome {userName.toUpperCase()} ({userRole})
+            {userRole === UserRole.DistrictOfficer
+              ? ` (${user?.district?.districtname})`
+              : ""}
+            {isExecutiveEngineer && (
+              <span className="ml-2 px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold">
+                Executive Engineer
+              </span>
+            )}
+          </h2>
+        </div>
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-3 md:gap-6 lg:gap-8">
-        {/* Notifications */}
+        <ModeSwitch
+          serverCanSwitch={canSwitchMode}
+          serverIsExecutiveEngineer={isExecutiveEngineer}
+          serverRole={userRole}
+        />
+
         <div className="flex items-center gap-3 md:gap-5">
-          {/* <Link href="/notifications" className="relative cursor-pointer">
-            <Bell
-              size={20}
-              className="md:w-6 md:h-6 text-[#64748B] hover:text-[#136FB6] transition-colors"
-            />
-            <span className="absolute -top-1.5 -right-1.5 flex h-[16px] w-[16px] items-center justify-center rounded-full bg-[#136FB6] text-[9px] font-bold text-white border-2 border-white">
-              5
-            </span>
-          </Link> */}
-
-          {/* <div className="hidden md:block h-8 w-px bg-gray-200"></div> */}
-
           {/* User Profile */}
           <HeaderMenu userName={userName} userRole={userRole} />
           <MobileNav />

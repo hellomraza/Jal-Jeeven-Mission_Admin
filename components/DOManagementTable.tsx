@@ -65,6 +65,9 @@ export default function DOManagementTable({
                       District
                     </TableHead>
                     <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
+                      Executive Engineer
+                    </TableHead>
+                    <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
                       Actions
                     </TableHead>
                   </TableRow>
@@ -86,6 +89,17 @@ export default function DOManagementTable({
                       </TableCell>
                       <TableCell className="text-[13px] text-gray-600">
                         {do_.district?.districtname || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-[13px] text-gray-600">
+                        {do_.is_executive_engineer ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                            Yes (Bulk Access)
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-50 text-gray-500 border border-gray-200">
+                            No (SVS Only)
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell className="text-[13px] text-gray-600">
                         <div className="flex gap-2">

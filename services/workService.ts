@@ -154,11 +154,15 @@ export const uploadWorkItemFile = async (file: File) => {
   }
 };
 
-export const bulkImportWorkItems = async (workItems: WorkItemImport[]) => {
+export const bulkImportWorkItems = async (
+  workItems: WorkItemImport[],
+  workOrderType: "SVS" | "BULK_VILLAGE" = "SVS",
+) => {
   try {
-    const response = await apiClient.post("/import/work-items/bulk", {
-      workItems,
-    });
+    const response = await apiClient.post(
+      `/import/work-items/bulk?workOrderType=${workOrderType}`,
+      { workItems },
+    );
 
     return response.data;
   } catch (error: any) {
@@ -170,11 +174,14 @@ export const bulkImportWorkItems = async (workItems: WorkItemImport[]) => {
 
 export const getWorkItemsWithoutAgreement = async () => {
   try {
-    const response = await apiClient.get<PaginatedResponse<WorkItem[]>>("/work-items/without-agreement");
+    const response = await apiClient.get<PaginatedResponse<WorkItem[]>>(
+      "/work-items/without-agreement",
+    );
     return response.data || [];
   } catch (error: any) {
     throw new Error(
-      error.response?.data?.message || "Failed to fetch work items without agreement",
+      error.response?.data?.message ||
+        "Failed to fetch work items without agreement",
     );
   }
 };
@@ -189,5 +196,57 @@ export const updateWorkItem = async (id: string, payload: any) => {
     );
   }
 };
+
+export const assignTpiToWorkItem = async (id: string) => {
+  try {
+    const response = await apiClient.post(`/work-items/${id}/assign-tpi`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to assign TPI agency",
+    );
+  }
+};
+
+export const unassignTpiFromWorkItem = async (id: string) => {
+  try {
+    const response = await apiClient.delete(`/work-items/${id}/tpi`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to unassign TPI agency",
+    );
+  }
+};
+
+export const assignTpiStaffToWorkItem = async (id: string, staffId: string) => {
+  try {
+    const response = await apiClient.post(`/work-items/${id}/assign-tpi-staff`, {
+      staffId,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to assign TPI staff",
+    );
+  }
+};
+
+export const unassignTpiStaffFromWorkItem = async (
+  id: string,
+  staffId: string,
+) => {
+  try {
+    const response = await apiClient.delete(
+      `/work-items/${id}/tpi-staff/${staffId}`,
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to unassign TPI staff",
+    );
+  }
+};
+
 
 

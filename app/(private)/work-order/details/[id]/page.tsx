@@ -1,15 +1,20 @@
 import BackButton from "@/components/BackButton";
+import TpiAssignmentControls from "@/components/TpiAssignmentControls";
+import TpiStaffAssignmentControls from "@/components/TpiStaffAssignmentControls";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { createServerApiClient } from "@/lib/server-api-client";
+import { UserRole } from "@/types/usertypes";
 import {
   ArrowRight,
   Building2,
   ChartNoAxesCombined,
   ClipboardList,
   MapPin,
+  ShieldCheck,
   Users,
 } from "lucide-react";
+import { cookies } from "next/headers";
 import Link from "next/link";
 
 type PageParams = {
@@ -77,18 +82,35 @@ const StatCard = ({
 
 export default async function WorkOrderDetailsPage({ params }: PageParams) {
   const { id } = await params;
+  const cookieStore = await cookies();
+  const role = cookieStore.get("admin_role")?.value;
   const apiClient = await createServerApiClient();
 
-  const [workItemResponse, componentsResponse, employeesResponse] =
+  const [workItemResponse, componentsResponse, employeesResponse, profileResponse] =
     await Promise.all([
       apiClient.get(`/work-items/${id}`),
       apiClient.get(`/components/work-item/${id}`),
       apiClient.get(`/work-items/${id}/employees`),
+      apiClient.get(`/users/my-profile`).catch(() => ({ data: null })),
     ]);
 
   const workItem = workItemResponse.data as WorkItem | undefined;
   const components = (componentsResponse.data ?? []) as WorkItemComponent[];
   const employees = (employeesResponse.data ?? []) as Employee[];
+  const userProfile = profileResponse.data;
+
+  let tpiStaffList: any[] = [];
+  if (role === UserRole.TPI || role === "TPI") {
+    try {
+      const staffRes = await apiClient.get("/users/tpi-staff");
+      tpiStaffList = staffRes.data?.data || staffRes.data || [];
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  const isExecutiveEngineer = Boolean(userProfile?.is_executive_engineer);
+  const isBulkVillage = workItem?.work_order_type === "BULK_VILLAGE";
 
   if (!workItem) {
     return (
@@ -219,6 +241,25 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Bulk Village TPI Assignment Controls for Executive Engineer */}
+      {isBulkVillage && isExecutiveEngineer && (
+        <TpiAssignmentControls
+          workItemId={workItem.id}
+          isExecutiveEngineer={isExecutiveEngineer}
+          tpi={workItem.tpi}
+          tpiAssignedAt={workItem.tpi_assigned_at}
+        />
+      )}
+
+      {/* Bulk Village TPI Staff Assignment Controls for TPI Agency */}
+      {isBulkVillage && (role === UserRole.TPI || role === "TPI") && (
+        <TpiStaffAssignmentControls
+          workItemId={workItem.id}
+          assignedStaff={workItem.tpiStaffAssignments || []}
+          allStaff={tpiStaffList}
+        />
+      )}
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white rounded-3xl">

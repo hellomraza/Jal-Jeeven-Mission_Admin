@@ -207,6 +207,27 @@ export default function CreateDODialog({
                 Min 8 chars, uppercase, lowercase, number
               </p>
             </div>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
+              <div>
+                <label
+                  htmlFor="is_executive_engineer"
+                  className="text-xs font-bold text-[#1a2b3c] cursor-pointer"
+                >
+                  Executive Engineer Role
+                </label>
+                <p className="text-[11px] text-gray-500">
+                  Grant Bulk Village workflow & TPI assignment permissions for district
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                id="is_executive_engineer"
+                name="is_executive_engineer"
+                className="h-4 w-4 rounded border-gray-300 text-[#136FB6] focus:ring-[#136FB6]"
+                disabled={isPending}
+              />
+            </div>
+
             {state.error && (
               <div className="rounded-md bg-red-50 p-3">
                 <p className="text-sm text-red-700">{state.error}</p>
