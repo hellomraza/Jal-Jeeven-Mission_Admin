@@ -36,19 +36,43 @@ const ReviewPhotos = async ({
   let tpiPhotos: any[] = [];
   let tpiStatus: any = null;
   const isBulkVillage =
+    componentDetails?.workItem?.work_order_type === "BULK_VILLAGE" ||
     componentDetails?.work_order?.work_order_type === "BULK_VILLAGE" ||
-    componentDetails?.workOrderType === "BULK_VILLAGE";
+    componentDetails?.workOrderType === "BULK_VILLAGE" ||
+    componentDetails?.component?.work_order_type === "BULK_VILLAGE" ||
+    Boolean(componentDetails?.workItem?.tpi_id);
 
-  if (isBulkVillage && role !== UserRole.HeadOfficer && role !== "HO") {
+  const isTpi =
+    role === UserRole.TPI ||
+    role === "TPI" ||
+    role === UserRole.TPI_STAFF ||
+    role === "TPI_STAFF";
+  const isContractor = role === UserRole.Contractor || role === "CO";
+  const isHO = role === UserRole.HeadOfficer || role === "HO";
+
+  const showContractorEvidence = !isTpi;
+  const showTpiEvidence = isBulkVillage && !isContractor && !isHO;
+
+  if (showTpiEvidence) {
     try {
       const [tpiPhotosRes, tpiStatusRes] = await Promise.all([
-        apiClient.get(`/components/${componentId}/tpi-reference-photos`),
-        apiClient.get(`/tpi-photo-status/component/${componentId}`).catch(() => ({ data: null })),
+        apiClient
+          .get(`/components/${componentId}/tpi-reference-photos`)
+          .catch((err) => {
+            console.error(
+              "Error fetching tpi reference photos:",
+              err?.response?.data || err?.message,
+            );
+            return { data: [] };
+          }),
+        apiClient
+          .get(`/tpi-photo-status/component/${componentId}`)
+          .catch(() => ({ data: null })),
       ]);
       tpiPhotos = tpiPhotosRes.data || [];
       tpiStatus = tpiStatusRes.data;
     } catch (e) {
-      // Ignore
+      console.error("Error fetching TPI reference data:", e);
     }
   }
 
@@ -102,40 +126,42 @@ const ReviewPhotos = async ({
         )}
       </div>
 
-      {/* Group 1: Contractor Evidence Photos */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-[16px] font-extrabold text-[#1a2b3c]">
-            Contractor Execution Evidence
-          </h2>
-          <p className="text-[12px] text-gray-500 font-medium">
-            Photos submitted by contractor for approval
-          </p>
-        </div>
-
-        {visiblePhotoStatuses.length === 0 ? (
-          <div className="p-12 text-center bg-white rounded-2xl shadow-xs border border-gray-100">
-            <p className="text-gray-500 text-[14px]">
-              No contractor execution photos uploaded for this component yet.
+      {/* Group 1: Contractor Evidence Photos (Visible to Contractor, DO, HO, EM - NOT TPI) */}
+      {showContractorEvidence && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-[16px] font-extrabold text-[#1a2b3c]">
+              Contractor Execution Evidence
+            </h2>
+            <p className="text-[12px] text-gray-500 font-medium">
+              Photos submitted by contractor for approval
             </p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visiblePhotoStatuses.map((photoStatus: any) => (
-              <ReviewPhotosComponent
-                key={photoStatus.id}
-                photo={photoStatus}
-                componentId={componentId}
-                userRole={role ?? UserRole.Contractor}
-                componentDetails={componentDetails}
-              />
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* Group 2: TPI Reference Evidence (Isolated Group - No DO Approval Buttons) */}
-      {isBulkVillage && (
+          {visiblePhotoStatuses.length === 0 ? (
+            <div className="p-12 text-center bg-white rounded-2xl shadow-xs border border-gray-100">
+              <p className="text-gray-500 text-[14px]">
+                No contractor execution photos uploaded for this component yet.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visiblePhotoStatuses.map((photoStatus: any) => (
+                <ReviewPhotosComponent
+                  key={photoStatus.id}
+                  photo={photoStatus}
+                  componentId={componentId}
+                  userRole={role ?? UserRole.Contractor}
+                  componentDetails={componentDetails}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Group 2: TPI Reference Evidence (Visible to TPI Agency, TPI Staff, DO - NOT Contractor or HO) */}
+      {showTpiEvidence && (
         <TpiReferencePhotoReview
           tpiPhotos={tpiPhotos}
           selectedPhotoId={tpiStatus?.photo_id}
