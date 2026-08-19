@@ -248,5 +248,13 @@ export const unassignTpiStaffFromWorkItem = async (
   }
 };
 
-
-
+export const getAssignedTpiStaffForWorkItem = async (id: string) => {
+  try {
+    const response = await apiClient.get(`/work-items/${id}/tpi-staff`);
+    return response.data || [];
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch assigned TPI staff",
+    );
+  }
+};
