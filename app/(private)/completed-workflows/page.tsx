@@ -60,10 +60,10 @@ export default async function CompletedWorkflowsPage({
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-[28px] font-bold text-[#1a2b3c]">
-            Completed Workflows
+            SD Payment
           </h1>
           <p className="text-[14px] text-gray-500 font-medium mt-2">
-            Submit and approve contractor bank details for completed projects
+            Submit and approve contractor bank details & vouchers for completed projects
           </p>
         </div>
 
