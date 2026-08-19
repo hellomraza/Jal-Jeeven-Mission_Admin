@@ -13,10 +13,12 @@ import {
   CheckCircle2,
   Image as ImageIcon,
   Loader2,
+  MapPinned,
   ShieldCheck,
   XCircle,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
@@ -24,12 +26,14 @@ interface TpiReferencePhotoReviewProps {
   tpiPhotos: TpiReferencePhoto[];
   selectedPhotoId?: string | null;
   userRole?: string;
+  componentId?: string;
 }
 
 export default function TpiReferencePhotoReview({
   tpiPhotos = [],
   selectedPhotoId,
   userRole,
+  componentId,
 }: TpiReferencePhotoReviewProps) {
   const { toast } = useToast();
   const router = useRouter();
@@ -42,6 +46,13 @@ export default function TpiReferencePhotoReview({
   if (userRole === UserRole.HeadOfficer || userRole === "HO") {
     return null;
   }
+
+  // DO should ONLY see the TPI selected photo; TPI sees all uploaded photos to manage/select
+  const displayedPhotos = isDO
+    ? tpiPhotos.filter(
+        (photo) => selectedPhotoId === photo.id || photo.status === "SELECTED",
+      )
+    : tpiPhotos;
 
   const handleSelect = async (photoId: string) => {
     try {
@@ -103,22 +114,26 @@ export default function TpiReferencePhotoReview({
         </div>
       </div>
 
-      {tpiPhotos.length === 0 ? (
+      {displayedPhotos.length === 0 ? (
         <Card className="border border-dashed border-gray-200 bg-gray-50/50 rounded-2xl">
           <CardContent className="p-8 text-center">
             <ImageIcon size={32} className="mx-auto text-gray-300 mb-2" />
             <p className="text-[13px] font-bold text-gray-600">
-              No TPI reference photos uploaded yet
+              {isDO
+                ? "No TPI reference photo selected yet"
+                : "No TPI reference photos uploaded yet"}
             </p>
             <p className="text-[11px] text-gray-400 mt-0.5">
-              TPI field staff upload baseline photos via the mobile app.
+              {isDO
+                ? "The assigned TPI agency has not yet selected an active baseline reference photo for this component."
+                : "TPI field staff upload baseline photos via the mobile app."}
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tpiPhotos.map((photo) => {
-            const isSelected = selectedPhotoId === photo.id;
+          {displayedPhotos.map((photo) => {
+            const isSelected = selectedPhotoId === photo.id || photo.status === "SELECTED";
             const isLoading = loadingPhotoId === photo.id;
 
             return (
@@ -176,6 +191,23 @@ export default function TpiReferencePhotoReview({
                     )}
                   </div>
 
+                  {/* View Location Button (Always present for every photo) */}
+                  {componentId && (
+                    <Link
+                      href={`/work-order/review-photos/${componentId}/location/${photo.id}`}
+                      className="block w-full"
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full h-9 rounded-lg text-[12px] font-bold border-[#136FB6]/20 text-[#136FB6] hover:bg-[#DFEEF9] hover:text-[#105E9A]"
+                      >
+                        <MapPinned size={15} className="mr-1.5" />
+                        View Location
+                      </Button>
+                    </Link>
+                  )}
+
                   {/* TPI Agency Selection Buttons */}
                   {isTpiUser && (
                     <div className="pt-2 border-t border-gray-50">
@@ -212,11 +244,11 @@ export default function TpiReferencePhotoReview({
                     </div>
                   )}
 
-                  {/* DO View Note: strictly read-only reference, NO approval buttons */}
+                  {/* DO View Note: strictly read-only reference */}
                   {isDO && (
-                    <div className="pt-2 border-t border-gray-50 text-center">
+                    <div className="pt-1 border-t border-gray-50 text-center">
                       <p className="text-[11px] font-medium text-gray-400 italic">
-                        Reference evidence only (No action required)
+                        Reference evidence (Read-only)
                       </p>
                     </div>
                   )}

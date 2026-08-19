@@ -42,6 +42,7 @@ const ReviewPhotos = async ({
     componentDetails?.component?.work_order_type === "BULK_VILLAGE" ||
     Boolean(componentDetails?.workItem?.tpi_id);
 
+  const isDO = role === UserRole.DistrictOfficer || role === "DO";
   const isTpi =
     role === UserRole.TPI ||
     role === "TPI" ||
@@ -51,7 +52,8 @@ const ReviewPhotos = async ({
   const isHO = role === UserRole.HeadOfficer || role === "HO";
 
   const showContractorEvidence = !isTpi;
-  const showTpiEvidence = isBulkVillage && !isContractor && !isHO;
+  const showTpiEvidence =
+    (isBulkVillage || isDO || isTpi) && !isContractor && !isHO;
 
   if (showTpiEvidence) {
     try {
@@ -166,6 +168,7 @@ const ReviewPhotos = async ({
           tpiPhotos={tpiPhotos}
           selectedPhotoId={tpiStatus?.photo_id}
           userRole={role}
+          componentId={componentId}
         />
       )}
     </div>
