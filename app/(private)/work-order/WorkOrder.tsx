@@ -25,13 +25,7 @@ import {
   unassignTpiFromWorkItem,
 } from "@/services/workService";
 import { UserRole } from "@/types/usertypes";
-import {
-  Building2,
-  Loader2,
-  ShieldCheck,
-  Upload,
-  UserX,
-} from "lucide-react";
+import { Building2, Loader2, ShieldCheck, Upload, UserX } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -117,8 +111,8 @@ export default function WorkOrder({
   };
   const filteredWorkItems = selectedDistrict
     ? workItems?.filter(
-      (item) => item.district_id.toString() === selectedDistrict,
-    )
+        (item) => item.district_id.toString() === selectedDistrict,
+      )
     : workItems;
 
   let availableDistricts: {
@@ -156,7 +150,8 @@ export default function WorkOrder({
       await assignTpiToWorkItem(workItemId);
       toast({
         title: "TPI Assigned",
-        description: "Active district TPI agency has been successfully assigned.",
+        description:
+          "Active district TPI agency has been successfully assigned.",
       });
       router.refresh();
     } catch (error: any) {
@@ -380,12 +375,13 @@ export default function WorkOrder({
                       </TableCell>
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         <span
-                          className={`px-2 py-1 rounded-full text-[10px] font-bold ${row.status === "COMPLETED"
-                            ? "bg-green-50 text-green-700"
-                            : row.status === "IN_PROGRESS"
-                              ? "bg-amber-50 text-amber-700"
-                              : "bg-gray-50 text-gray-600"
-                            }`}
+                          className={`px-2 py-1 rounded-full text-[10px] font-bold ${
+                            row.status === "COMPLETED"
+                              ? "bg-green-50 text-green-700"
+                              : row.status === "IN_PROGRESS"
+                                ? "bg-amber-50 text-amber-700"
+                                : "bg-gray-50 text-gray-600"
+                          }`}
                         >
                           {row.status || "PENDING"}
                         </span>
@@ -414,7 +410,10 @@ export default function WorkOrder({
                                   onClick={(e) => handleUnassignTpi(e, row.id)}
                                 >
                                   {loadingRowId === row.id ? (
-                                    <Loader2 size={11} className="animate-spin text-red-600" />
+                                    <Loader2
+                                      size={11}
+                                      className="animate-spin text-red-600"
+                                    />
                                   ) : (
                                     <UserX size={12} />
                                   )}
@@ -429,7 +428,10 @@ export default function WorkOrder({
                               onClick={(e) => handleAssignTpi(e, row.id)}
                             >
                               {loadingRowId === row.id ? (
-                                <Loader2 size={11} className="animate-spin mr-0.5" />
+                                <Loader2
+                                  size={11}
+                                  className="animate-spin mr-0.5"
+                                />
                               ) : (
                                 <Building2 size={11} className="mr-0.5" />
                               )}
@@ -447,8 +449,8 @@ export default function WorkOrder({
                       <TableCell className="text-[12px] text-gray-900 py-4 font-medium">
                         {row.contractor?.name
                           ? row.contractor.name
-                            ?.toLowerCase()
-                            ?.includes("temporary")
+                              ?.toLowerCase()
+                              ?.includes("temporary")
                             ? "---"
                             : row.contractor.name
                           : "---"}
@@ -467,7 +469,9 @@ export default function WorkOrder({
                             variant="outline"
                             size="sm"
                             className="h-7 px-3 bg-white text-[#136FB6] border-[#136FB6]/20 hover:bg-[#DFEEF9] text-[11px] font-bold"
-                            onClick={() => router.push(`/work-order/edit/${row.id}`)}
+                            onClick={() =>
+                              router.push(`/work-order/edit/${row.id}`)
+                            }
                           >
                             Edit
                           </Button>
