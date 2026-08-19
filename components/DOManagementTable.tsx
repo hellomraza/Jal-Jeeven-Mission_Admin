@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -10,7 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import apiClient from "@/lib/api-client";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import EditDODialog from "./EditDODialog";
 
 interface DOManagementTableProps {
@@ -20,8 +24,63 @@ interface DOManagementTableProps {
 export default function DOManagementTable({
   districtOfficers,
 }: DOManagementTableProps) {
+  const { toast } = useToast();
+  const [officers, setOfficers] = useState<any[]>(districtOfficers || []);
   const [selectedDO, setSelectedDO] = useState<any | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOfficers(districtOfficers || []);
+  }, [districtOfficers]);
+
+  const handleToggleExecutiveEngineer = async (
+    officerId: string,
+    currentStatus: boolean,
+  ) => {
+    const nextStatus = !currentStatus;
+    setUpdatingId(officerId);
+
+    // Optimistically update local state
+    setOfficers((prev) =>
+      prev.map((o) =>
+        o.id === officerId ? { ...o, is_executive_engineer: nextStatus } : o,
+      ),
+    );
+
+    try {
+      await apiClient.patch(`/users/do/${officerId}`, {
+        is_executive_engineer: nextStatus,
+      });
+
+      toast({
+        title: "Role Updated",
+        description: `District Officer updated to ${
+          nextStatus
+            ? "Executive Engineer (Bulk Access enabled)"
+            : "Regular DO (SVS only)"
+        }.`,
+      });
+    } catch (error: any) {
+      // Revert optimistic update on failure
+      setOfficers((prev) =>
+        prev.map((o) =>
+          o.id === officerId ? { ...o, is_executive_engineer: currentStatus } : o,
+        ),
+      );
+
+      toast({
+        title: "Update Failed",
+        description:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update Executive Engineer status.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   return (
     <>
@@ -32,14 +91,14 @@ export default function DOManagementTable({
               District Officers
             </h2>
             <p className="text-[12px] text-gray-500 font-medium">
-              Manage all District Officers in the system
+              Manage all District Officers and Executive Engineer permissions
             </p>
           </div>
         </div>
 
         <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white">
           <CardContent className="p-0">
-            {districtOfficers.length === 0 ? (
+            {officers.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <p className="text-[14px] text-gray-500 font-medium">
                   No District Officers listed yet
@@ -73,49 +132,72 @@ export default function DOManagementTable({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {districtOfficers.map((do_) => (
-                    <TableRow
-                      key={do_.id}
-                      className="border-gray-100 hover:bg-gray-50"
-                    >
-                      <TableCell className="text-[13px] font-medium text-[#1a2b3c]">
-                        {do_.name}
-                      </TableCell>
-                      <TableCell className="text-[13px] text-gray-600">
-                        {do_.email}
-                      </TableCell>
-                      <TableCell className="text-[13px] text-gray-600">
-                        {do_.mobile || "N/A"}
-                      </TableCell>
-                      <TableCell className="text-[13px] text-gray-600">
-                        {do_.district?.districtname || "N/A"}
-                      </TableCell>
-                      <TableCell className="text-[13px] text-gray-600">
-                        {do_.is_executive_engineer ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
-                            Yes (Bulk Access)
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-50 text-gray-500 border border-gray-200">
-                            No (SVS Only)
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-[13px] text-gray-600">
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              setSelectedDO(do_);
-                              setIsEditOpen(true);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {officers.map((do_) => {
+                    const isEE = Boolean(do_.is_executive_engineer);
+                    const isUpdating = updatingId === do_.id;
+
+                    return (
+                      <TableRow
+                        key={do_.id}
+                        className="border-gray-100 hover:bg-gray-50"
+                      >
+                        <TableCell className="text-[13px] font-medium text-[#1a2b3c]">
+                          {do_.name}
+                        </TableCell>
+                        <TableCell className="text-[13px] text-gray-600">
+                          {do_.email}
+                        </TableCell>
+                        <TableCell className="text-[13px] text-gray-600">
+                          {do_.mobile || "N/A"}
+                        </TableCell>
+                        <TableCell className="text-[13px] text-gray-600">
+                          {do_.district?.districtname || "N/A"}
+                        </TableCell>
+                        <TableCell className="text-[13px] text-gray-600">
+                          <div className="flex items-center gap-3">
+                            <Switch
+                              checked={isEE}
+                              disabled={isUpdating}
+                              onCheckedChange={() =>
+                                handleToggleExecutiveEngineer(do_.id, isEE)
+                              }
+                              aria-label="Toggle Executive Engineer"
+                              className="data-[state=checked]:bg-[#136FB6]"
+                            />
+                            {isUpdating ? (
+                              <Loader2
+                                size={14}
+                                className="animate-spin text-[#136FB6]"
+                              />
+                            ) : isEE ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#136FB6] border border-blue-200">
+                                Yes (Bulk Access)
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-50 text-gray-500 border border-gray-200">
+                                No (SVS Only)
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-[13px] text-gray-600">
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 text-xs font-semibold"
+                              onClick={() => {
+                                setSelectedDO(do_);
+                                setIsEditOpen(true);
+                              }}
+                            >
+                              Edit
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}
