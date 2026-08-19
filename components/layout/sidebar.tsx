@@ -100,7 +100,7 @@ const getMenuItems = (userRole?: string): SidebarItem[] => {
       roles: [UserRole.Contractor, "CO"],
     },
     {
-      label: "Completed Workflows",
+      label: "SD Payment",
       href: "/completed-workflows",
       icon: <CheckCircle2 size={20} />,
       roles: [UserRole.DistrictOfficer, "DO"],
