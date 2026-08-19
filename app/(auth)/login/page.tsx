@@ -21,6 +21,10 @@ export default function LoginPage() {
       }
       localStorage.setItem("admin_token", response.data.access_token);
       localStorage.setItem("admin_role", response.data.user?.role);
+      localStorage.setItem(
+        "admin_is_executive_engineer",
+        String(Boolean(response.data.user?.is_executive_engineer)),
+      );
 
       // Redirect contractors to work-order page, others to dashboard
       const role = response.data.user?.role;

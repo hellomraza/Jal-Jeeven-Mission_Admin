@@ -23,11 +23,23 @@ export type AgreementBulkImportResult = {
   errors: { index: number; reason: string; item: AgreementImport }[];
 };
 
-export const getAgreements = async (page = 1, limit = 20) => {
+export const getAgreements = async (
+  page = 1,
+  limit = 20,
+  search?: string,
+  agreementyear?: string,
+  workOrderType?: string,
+) => {
   try {
-    const response = await apiClient.get(
-      `/agreements?page=${page}&limit=${limit}`,
-    );
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (search) params.set("search", search);
+    if (agreementyear) params.set("agreementyear", agreementyear);
+    if (workOrderType) params.set("workOrderType", workOrderType);
+
+    const response = await apiClient.get(`/agreements?${params.toString()}`);
     return response.data;
   } catch (error: any) {
     throw new Error(

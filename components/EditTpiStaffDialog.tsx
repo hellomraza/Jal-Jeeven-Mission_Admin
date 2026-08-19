@@ -1,0 +1,173 @@
+"use client";
+
+import { updateTpiStaff } from "@/actions/userAction";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
+import InputWithPassword from "./InputWithPassword";
+import { Field, FieldLabel } from "./ui/field";
+
+interface EditTpiStaffDialogProps {
+  staff: any | null;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export default function EditTpiStaffDialog({
+  staff,
+  isOpen,
+  onOpenChange,
+}: EditTpiStaffDialogProps) {
+  const { toast } = useToast();
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    id: "",
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const [state, formAction, isPending] = useActionState(updateTpiStaff, {
+    success: "",
+    error: "",
+  });
+
+  useEffect(() => {
+    if (isOpen && staff) {
+      setFormData({
+        id: staff.id,
+        name: staff.name || "",
+        email: staff.email || "",
+        password: "",
+      });
+      setHasSubmitted(false);
+    }
+  }, [staff, isOpen]);
+
+  useEffect(() => {
+    if (state.success && hasSubmitted) {
+      toast({
+        title: "Success",
+        description: "TPI Staff updated successfully.",
+      });
+      setHasSubmitted(false);
+      onOpenChange(false);
+    }
+  }, [state.success, hasSubmitted, toast, onOpenChange]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setFormData({
+        id: "",
+        name: "",
+        email: "",
+        password: "",
+      });
+      setHasSubmitted(false);
+    }
+    onOpenChange(open);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit TPI Staff Member</DialogTitle>
+        </DialogHeader>
+
+        <form
+          action={formAction}
+          className="space-y-4 mt-2"
+          onSubmit={() => setHasSubmitted(true)}
+        >
+          <input type="hidden" name="id" value={formData.id} />
+
+          <Field>
+            <FieldLabel className="text-xs font-semibold text-gray-500">
+              Full Name
+            </FieldLabel>
+            <Input
+              type="text"
+              name="name"
+              required
+              value={formData.name}
+              onChange={handleInputChange}
+              disabled={isPending}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel className="text-xs font-semibold text-gray-500">
+              Email Address
+            </FieldLabel>
+            <Input
+              type="email"
+              name="email"
+              required
+              value={formData.email}
+              onChange={handleInputChange}
+              disabled={isPending}
+            />
+          </Field>
+
+          <div className="space-y-1">
+            <InputWithPassword
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              disabled={isPending}
+            />
+            <p className="text-[11px] text-gray-500">
+              Leave blank to keep existing password
+            </p>
+          </div>
+
+          {state.error && (
+            <div className="rounded-md bg-red-50 p-3">
+              <p className="text-sm text-red-700">{state.error}</p>
+            </div>
+          )}
+
+          <DialogFooter className="pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="bg-[#136FB6] hover:bg-[#0d5a8f] text-white"
+              disabled={isPending || !formData.id}
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

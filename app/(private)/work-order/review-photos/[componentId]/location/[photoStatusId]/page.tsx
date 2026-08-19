@@ -50,21 +50,63 @@ export default async function PhotoLocationPage({
   const cookieStore = await cookies();
   const role = cookieStore.get("admin_role")?.value as UserRole | undefined;
 
-  const [photoResponse] = await Promise.all([
-    apiClient.get<PhotoStatusRecord>(`/photo-status/${photoStatusId}`),
-  ]);
-  const photo = photoResponse?.data;
+  let photoRecord: any = null;
+  let photoData: any = null;
+  let componentDetails: any = null;
+  let workItemData: any = null;
+  let statusLabel: string = "uploaded";
+  let uploaderName: string = "Unknown";
+  let selectedByUser: any = null;
+  let approvedByUser: any = null;
+  let selectedAt: string | null = null;
+  let approvedAt: string | null = null;
 
-  const componentDetails = photo?.workItemComponent;
+  try {
+    const res = await apiClient.get<PhotoStatusRecord>(
+      `/photo-status/${photoStatusId}`,
+    );
+    photoRecord = res.data;
+    photoData = photoRecord?.photo;
+    componentDetails = photoRecord?.workItemComponent;
+    workItemData = photoRecord?.workItem;
+    statusLabel = photoRecord?.status?.toLowerCase() || "uploaded";
+    uploaderName = photoData?.employee?.name || "Contractor Staff";
+    selectedByUser = photoRecord?.selectedByUser;
+    approvedByUser = photoRecord?.approvedByUser;
+    selectedAt = photoRecord?.selected_at;
+    approvedAt = photoRecord?.approved_at;
+  } catch {
+    // If not a PhotoStatus, check if it's a direct Photo (e.g. TPI reference photo)
+    try {
+      const [directPhotoRes, compRes] = await Promise.all([
+        apiClient.get(`/photos/${photoStatusId}`),
+        apiClient.get(`/components/${componentId}`),
+      ]);
+      photoData = directPhotoRes.data;
+      componentDetails = compRes.data;
+      workItemData = componentDetails?.workItem || componentDetails?.work_order;
+      statusLabel =
+        photoData?.source === "TPI" ? "TPI Reference" : "Uploaded";
+      uploaderName =
+        photoData?.employee?.name ||
+        (photoData?.source === "TPI" ? "TPI Staff" : "Unknown");
+    } catch (e) {
+      console.error("Error fetching photo details:", e);
+    }
+  }
 
-  if (!photo) {
+  if (!photoData) {
     notFound();
   }
 
   const latitude =
-    photo.photo.latitude !== null ? Number(photo.photo.latitude) : null;
+    photoData.latitude !== null && photoData.latitude !== undefined
+      ? Number(photoData.latitude)
+      : null;
   const longitude =
-    photo.photo.longitude !== null ? Number(photo.photo.longitude) : null;
+    photoData.longitude !== null && photoData.longitude !== undefined
+      ? Number(photoData.longitude)
+      : null;
   const hasCoordinates =
     latitude !== null &&
     longitude !== null &&
@@ -74,15 +116,13 @@ export default async function PhotoLocationPage({
   const mapPhotos = hasCoordinates
     ? [
         {
-          id: photo.id,
+          id: photoData.id || photoStatusId,
           latitude: latitude as number,
           longitude: longitude as number,
-          status: photo.status,
+          status: statusLabel.toUpperCase(),
         },
       ]
     : [];
-
-  const photoStatusLabel = photo.status.toLowerCase();
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -130,8 +170,8 @@ export default async function PhotoLocationPage({
 
           <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
             <img
-              src={photo.photo.image_url}
-              alt="Selected component photo"
+              src={photoData.image_url}
+              alt="Component photo"
               className="h-90 w-full object-cover"
             />
           </div>
@@ -142,7 +182,7 @@ export default async function PhotoLocationPage({
             <div className="flex items-center gap-2 text-[#136FB6]">
               <ShieldCheck size={18} />
               <span className="text-[12px] font-bold uppercase tracking-widest">
-                {photoStatusLabel}
+                {statusLabel}
               </span>
             </div>
 
@@ -168,33 +208,33 @@ export default async function PhotoLocationPage({
             <div className="mt-5 space-y-3 text-[12px]">
               <div className="flex items-start gap-2 text-gray-600">
                 <User size={16} className="mt-0.5 shrink-0" />
-                <p>Submitted by {photo.photo.employee?.name || "Unknown"}</p>
+                <p>Submitted by {uploaderName}</p>
               </div>
               <div className="flex items-start gap-2 text-gray-600">
                 <Clock3 size={16} className="mt-0.5 shrink-0" />
-                <p>Uploaded at {formatDateTime(photo.photo.timestamp)}</p>
+                <p>Uploaded at {formatDateTime(photoData.timestamp)}</p>
               </div>
-              {photo.selectedByUser?.name ? (
+              {selectedByUser?.name ? (
                 <>
                   <div className="flex items-start gap-2 text-gray-600">
                     <User size={16} className="mt-0.5 shrink-0" />
-                    <p>Selected by {photo.selectedByUser?.name || "Unknown"}</p>
+                    <p>Selected by {selectedByUser?.name}</p>
                   </div>
                   <div className="flex items-start gap-2 text-gray-600">
                     <Clock3 size={16} className="mt-0.5 shrink-0" />
-                    <p>Selected at {formatDateTime(photo.selected_at)}</p>
+                    <p>Selected at {formatDateTime(selectedAt)}</p>
                   </div>
                 </>
               ) : null}
-              {photo.approvedByUser && (
+              {approvedByUser && (
                 <>
                   <div className="flex items-start gap-2 text-gray-600">
                     <User size={16} className="mt-0.5 shrink-0" />
-                    <p>Approved by {photo.approvedByUser.name || "Unknown"}</p>
+                    <p>Approved by {approvedByUser.name || "Unknown"}</p>
                   </div>
                   <div className="flex items-start gap-2 text-gray-600">
                     <Clock3 size={16} className="mt-0.5 shrink-0" />
-                    <p>Approved at {formatDateTime(photo.approved_at)}</p>
+                    <p>Approved at {formatDateTime(approvedAt)}</p>
                   </div>
                 </>
               )}
@@ -219,7 +259,9 @@ export default async function PhotoLocationPage({
                   District
                 </p>
                 <p className="font-semibold text-[#1a2b3c] break-all">
-                  {photo.workItem?.district?.districtname || "N/A"}
+                  {workItemData?.district?.districtname ||
+                    componentDetails?.workItem?.district?.districtname ||
+                    "N/A"}
                 </p>
               </div>
               <div>
@@ -227,7 +269,9 @@ export default async function PhotoLocationPage({
                   Work Item ID
                 </p>
                 <p className="font-semibold text-[#1a2b3c] break-all">
-                  {photo.workItem?.work_code}
+                  {workItemData?.work_code ||
+                    componentDetails?.workItem?.work_code ||
+                    componentId}
                 </p>
               </div>
               <div>

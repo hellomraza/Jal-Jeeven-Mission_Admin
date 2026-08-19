@@ -34,6 +34,7 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
 
   const cookieStore = await cookies();
   const userRole = cookieStore.get("admin_role")?.value || null;
+  const cookieMode = cookieStore.get("app_work_order_mode")?.value;
   
   const queryParams = new URLSearchParams({
     page,
@@ -41,6 +42,9 @@ const AgreementPage = async ({ searchParams }: PageProps) => {
   });
   if (search) queryParams.set("search", search);
   if (agreementyear) queryParams.set("agreementyear", agreementyear);
+  if (cookieMode && (userRole === "HO" || userRole === "DO")) {
+    queryParams.set("workOrderType", cookieMode);
+  }
 
   const apiClient = await createServerApiClient();
   const response = await apiClient.get<PaginatedResponse<AgreementResponse>>(

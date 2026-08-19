@@ -3,6 +3,8 @@ export enum UserRole {
   DistrictOfficer = "DO", // District Office
   Contractor = "CO", // Contractor
   Employee = "EM", // Employee
+  TPI = "TPI", // Third-Party Inspector
+  TPI_STAFF = "TPI_STAFF", // TPI Staff
 }
 
 export enum WorkItemComponentStatus {
@@ -12,3 +14,14 @@ export enum WorkItemComponentStatus {
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
 }
+
+export enum WorkOrderType {
+  SVS = "SVS",
+  BULK_VILLAGE = "BULK_VILLAGE",
+}
+
+export enum TpiReferencePhotoStatusEnum {
+  UPLOADED = "UPLOADED",
+  SELECTED = "SELECTED",
+}
+

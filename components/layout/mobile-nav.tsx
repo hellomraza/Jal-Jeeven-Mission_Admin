@@ -3,7 +3,15 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { UserRole } from "@/types/usertypes";
-import { ClipboardList, Globe, LayoutDashboard, Menu } from "lucide-react";
+import {
+  ClipboardList,
+  Globe,
+  LayoutDashboard,
+  Menu,
+  CheckCircle2,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -22,31 +30,83 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
       label: "Dashboard",
       href: "/dashboard",
       icon: <LayoutDashboard size={20} />,
-      roles: [UserRole.HeadOfficer, UserRole.DistrictOfficer], // Hide for contractors
+      roles: [
+        UserRole.HeadOfficer,
+        UserRole.DistrictOfficer,
+        UserRole.TPI,
+        "HO",
+        "DO",
+        "TPI",
+      ],
     },
     {
       label: "Work Order",
       href: "/work-order",
       icon: <ClipboardList size={20} />,
+      roles: [
+        UserRole.HeadOfficer,
+        UserRole.DistrictOfficer,
+        UserRole.Contractor,
+        UserRole.TPI,
+        "HO",
+        "DO",
+        "CO",
+        "TPI",
+      ],
     },
     {
       label: "District Officers",
       href: "/district-officers",
       icon: <ClipboardList size={20} />,
-      roles: [UserRole.HeadOfficer], // Only for HO
+      roles: [UserRole.HeadOfficer, "HO"],
     },
     {
       label: "Contractors",
       href: "/contractors",
       icon: <ClipboardList size={20} />,
-      roles: [UserRole.DistrictOfficer, UserRole.HeadOfficer], // Only for DO and HO
+      roles: [
+        UserRole.DistrictOfficer,
+        UserRole.HeadOfficer,
+        "DO",
+        "HO",
+      ],
     },
-    { label: "Agreement", href: "/agreement", icon: <Globe size={20} /> },
+    {
+      label: "TPI Agencies",
+      href: "/tpi",
+      icon: <ShieldCheck size={20} />,
+      roles: [UserRole.HeadOfficer, "HO"],
+    },
+    {
+      label: "Staff Management",
+      href: "/tpi-staff",
+      icon: <Users size={20} />,
+      roles: [UserRole.TPI, "TPI"],
+    },
+    {
+      label: "Agreement",
+      href: "/agreement",
+      icon: <Globe size={20} />,
+      roles: [
+        UserRole.HeadOfficer,
+        UserRole.DistrictOfficer,
+        UserRole.Contractor,
+        "HO",
+        "DO",
+        "CO",
+      ],
+    },
     {
       label: "Employees",
       href: "/employees",
       icon: <ClipboardList size={20} />,
-      roles: [UserRole.Contractor], // Only for contractors
+      roles: [UserRole.Contractor, "CO"],
+    },
+    {
+      label: "Completed Workflows",
+      href: "/completed-workflows",
+      icon: <CheckCircle2 size={20} />,
+      roles: [UserRole.DistrictOfficer, "DO"],
     },
   ];
 

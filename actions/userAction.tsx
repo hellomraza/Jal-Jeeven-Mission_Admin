@@ -6,9 +6,13 @@ import {
   createContractorSchema,
   createDOSchema,
   createEmployeeSchema,
+  createTpiSchema,
+  createTpiStaffSchema,
   updateContractorSchema,
   updateDistrictOfficerSchema,
   updateEmployeeSchema,
+  updateTpiSchema,
+  updateTpiStaffSchema,
 } from "@/utils/validation";
 import { AxiosError } from "axios";
 import { revalidatePath } from "next/cache";
@@ -261,6 +265,7 @@ export const createDistrictOfficer = validatedAction(
     password: string;
     mobile: string;
     district_id: string;
+    is_executive_engineer?: boolean;
   }) => {
     try {
       const apiClient = await createServerApiClient();
@@ -297,6 +302,7 @@ export const updateDistrictOfficer = validatedAction(
     mobile: string;
     district_id: string;
     password?: string;
+    is_executive_engineer?: boolean;
   }) => {
     try {
       const apiClient = await createServerApiClient();
@@ -324,3 +330,174 @@ export const updateDistrictOfficer = validatedAction(
     }
   },
 );
+
+export const createTpi = validatedAction(
+  createTpiSchema,
+  async (data: {
+    name: string;
+    email: string;
+    password: string;
+    code: string;
+    district_id: string;
+    mobile?: string;
+    pan_number?: string;
+    address?: string;
+  }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const response = await apiClient.post("/users/tpi", data);
+      if (response.data) {
+        return { success: "TPI Agency created successfully", error: "" };
+      }
+      return { success: "", error: "Failed to create TPI Agency" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to create TPI Agency. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to create TPI Agency",
+      };
+    } finally {
+      revalidatePath("/tpi");
+    }
+  },
+);
+
+export const updateTpi = validatedAction(
+  updateTpiSchema,
+  async (data: {
+    id: string;
+    name: string;
+    email: string;
+    district_id: string;
+    password?: string;
+    mobile?: string;
+    pan_number?: string;
+    address?: string;
+  }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const { id, ...updateData } = data;
+      const response = await apiClient.patch(`/users/tpi/${id}`, updateData);
+      if (response.data) {
+        return { success: "TPI Agency updated successfully", error: "" };
+      }
+      return { success: "", error: "Failed to update TPI Agency" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to update TPI Agency. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to update TPI Agency",
+      };
+    } finally {
+      revalidatePath("/tpi");
+    }
+  },
+);
+
+export const toggleTpiStatus = async (id: string, is_active: boolean) => {
+  try {
+    const apiClient = await createServerApiClient();
+    const response = await apiClient.patch(`/users/tpi/${id}/status`, {
+      is_active,
+    });
+    if (response.data) {
+      return {
+        success: `TPI Agency ${is_active ? "activated" : "deactivated"} successfully`,
+        error: "",
+      };
+    }
+    return {
+      success: "",
+      error: `Failed to ${is_active ? "activate" : "deactivate"} TPI Agency`,
+    };
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      return {
+        success: "",
+        error:
+          error.response?.data?.message ||
+          `Failed to ${is_active ? "activate" : "deactivate"} TPI Agency.`,
+      };
+    }
+    return {
+      success: "",
+      error: `Failed to ${is_active ? "activate" : "deactivate"} TPI Agency`,
+    };
+  } finally {
+    revalidatePath("/tpi");
+  }
+};
+
+export const createTpiStaff = validatedAction(
+  createTpiStaffSchema,
+  async (data: { name: string; email: string; password: string }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const response = await apiClient.post("/users/tpi-staff", data);
+      if (response.data) {
+        return { success: "TPI Staff created successfully", error: "" };
+      }
+      return { success: "", error: "Failed to create TPI Staff" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to create TPI Staff. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to create TPI Staff",
+      };
+    } finally {
+      revalidatePath("/tpi-staff");
+    }
+  },
+);
+
+export const updateTpiStaff = validatedAction(
+  updateTpiStaffSchema,
+  async (data: { id: string; name: string; email: string; password?: string }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const { id, ...updateData } = data;
+      const response = await apiClient.patch(`/users/tpi-staff/${id}`, updateData);
+      if (response.data) {
+        return { success: "TPI Staff updated successfully", error: "" };
+      }
+      return { success: "", error: "Failed to update TPI Staff" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to update TPI Staff. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to update TPI Staff",
+      };
+    } finally {
+      revalidatePath("/tpi-staff");
+    }
+  },
+);
+

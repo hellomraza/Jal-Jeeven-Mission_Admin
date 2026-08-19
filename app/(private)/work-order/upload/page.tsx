@@ -1,5 +1,6 @@
 "use client";
 import BackButton from "@/components/BackButton";
+import { useMode } from "@/components/providers/ModeContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,7 @@ import { toast } from "react-toastify";
 
 export default function UploadWorkItemPage() {
   const router = useRouter();
+  const { mode } = useMode();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [parsedData, setParsedData] = useState<WorkItemImport[]>([]);
@@ -59,26 +61,34 @@ export default function UploadWorkItemPage() {
 
     try {
       setUploading(true);
-      const data = await uploadWorkItemFile(selectedFile);
-      setParsedData((data.workItemTable || []) as WorkItemImport[]);
+      const result = await uploadWorkItemFile(selectedFile);
+      const workitems = result.workItemTable || [];
+
+      if (!workitems.length) {
+        toast.error("No valid work items found in the file.");
+        return;
+      }
+
+      setParsedData(workitems);
       setShowPreview(true);
-      toast.success("File parsed successfully. Please verify the data.");
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to upload workitem file",
+        error instanceof Error ? error.message : "Failed to parse file",
       );
     } finally {
       setUploading(false);
     }
   };
 
-  const handleConfirm = async () => {
+  const handleConfirmImport = async () => {
     try {
       setConfirming(true);
-      await bulkImportWorkItems(parsedData);
-      toast.success("Workitems imported successfully.");
+      await bulkImportWorkItems(parsedData, mode);
+      toast.success(
+        `Workitems imported successfully as ${
+          mode === "BULK_VILLAGE" ? "Bulk Village" : "SVS"
+        }.`,
+      );
       router.push("/work-order");
     } catch (error) {
       toast.error(
@@ -176,7 +186,7 @@ export default function UploadWorkItemPage() {
             Back to Upload
           </Button>
           <Button
-            onClick={handleConfirm}
+            onClick={handleConfirmImport}
             disabled={confirming || parsedData.length === 0}
             className="bg-green-600 hover:bg-green-700 text-white"
           >

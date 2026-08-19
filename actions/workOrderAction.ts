@@ -6,7 +6,12 @@ import { updateWorkOrderSchema } from "@/utils/validation";
 import { AxiosError } from "axios";
 import { revalidatePath } from "next/cache";
 
-export const getWorkItems = async (page = 1, limit = 20, search?: string) => {
+export const getWorkItems = async (
+  page = 1,
+  limit = 20,
+  search?: string,
+  workOrderType?: string,
+) => {
   try {
     const serverApiClient = await createServerApiClient();
     const queryParams = new URLSearchParams({
@@ -15,6 +20,9 @@ export const getWorkItems = async (page = 1, limit = 20, search?: string) => {
     });
     if (search) {
       queryParams.set("search", search);
+    }
+    if (workOrderType) {
+      queryParams.set("workOrderType", workOrderType);
     }
     const response = await serverApiClient.get<PaginatedResponse<WorkItem>>(
       `/work-items/my-work-items?${queryParams.toString()}`,
@@ -60,6 +68,7 @@ export const updateWorkOrderAction = validatedAction(
             ? payload.progress_percentage
             : undefined,
         status: payload.status || undefined,
+        work_order_type: payload.work_order_type || undefined,
       });
       if (response.data) {
         return { success: "Work item updated successfully", error: "" };

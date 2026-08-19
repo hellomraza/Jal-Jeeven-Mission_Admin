@@ -90,6 +90,7 @@ export default function EditWorkOrder({ workItem, userRole, agreements, assigned
     longitude: workItem.longitude !== undefined ? String(workItem.longitude) : "",
     progress_percentage: workItem.progress_percentage !== undefined ? String(workItem.progress_percentage) : "0",
     status: workItem.status || "PENDING",
+    work_order_type: workItem.work_order_type || "SVS",
   });
 
   const [state, formAction, isPending] = useActionState(updateWorkOrderAction, {
@@ -192,6 +193,7 @@ export default function EditWorkOrder({ workItem, userRole, agreements, assigned
             <input type="hidden" name="block_id" value={formData.block_id} />
             <input type="hidden" name="panchayat_id" value={formData.panchayat_id} />
             <input type="hidden" name="agreement_id" value={formData.agreement_id} />
+            <input type="hidden" name="work_order_type" value={formData.work_order_type} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Field>

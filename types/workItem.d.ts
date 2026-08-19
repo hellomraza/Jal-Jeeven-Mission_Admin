@@ -37,8 +37,19 @@ type WorkItem = {
   work_code: string;
   zone_id: number;
   workcodeid: string;
-  excel: string;
-  agreement_id: string;
+  excel?: string;
+  agreement_id?: string;
+  work_order_type?: "SVS" | "BULK_VILLAGE";
+  tpi_id?: string | null;
+  tpi?: TpiAgency | null;
+  tpi_assigned_by_id?: string | null;
+  tpi_assigned_at?: string | null;
+  tpiStaffAssignments?: {
+    id: string;
+    staff_id: string;
+    staff?: TpiStaff;
+    created_at: string;
+  }[];
 };
 
 type WorkItemComponent = {
@@ -48,10 +59,24 @@ type WorkItemComponent = {
   id: string;
   progress: string;
   quantity: string;
-  remarks: null;
+  remarks: null | string;
   status: "PENDING" | "APPROVED" | "REJECTED" | "IN_PROGRESS" | "SUBMITTED";
   updated_at: string;
   work_item_id: string;
+  tpiReferencePhotoStatus?: {
+    id: string;
+    photo_id: string;
+    status: "UPLOADED" | "SELECTED";
+    selected_by?: string | null;
+    selected_at?: string | null;
+    photo?: {
+      id: string;
+      image_url?: string;
+      latitude?: number;
+      longitude?: number;
+      timestamp?: string;
+    };
+  } | null;
 };
 
 type Component = {
@@ -59,6 +84,8 @@ type Component = {
   name: string;
   unit: string;
   order_number: number;
+  work_order_type?: "SVS" | "BULK_VILLAGE";
   created_at: string;
   updated_at: string;
 };
+

@@ -37,6 +37,7 @@ export const updateDistrictOfficerSchema = z.object({
     .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
   district_id: z.string().min(1, "District is required"),
   password: z.string().optional().default(""),
+  is_executive_engineer: z.preprocess((val) => val === true || val === "true" || val === "on", z.boolean()).optional().default(false),
 });
 
 export const createDOSchema = z.object({
@@ -48,7 +49,58 @@ export const createDOSchema = z.object({
     .trim()
     .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
   district_id: z.string().min(1, "District is required"),
+  is_executive_engineer: z.preprocess((val) => val === true || val === "true" || val === "on", z.boolean()).optional().default(false),
 });
+
+export const createTpiSchema = z.object({
+  name: nameValidation,
+  email: emailValidation,
+  password: z.string().trim().nonempty("Password is required"),
+  code: z
+    .string()
+    .trim()
+    .min(3, "User code must be at least 3 characters")
+    .regex(/^[a-zA-Z0-9_-]+$/, "User code must be alphanumeric"),
+  district_id: z.string().min(1, "District is required"),
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits")
+    .optional()
+    .or(z.literal("")),
+  pan_number: z.string().trim().toUpperCase().optional().or(z.literal("")),
+  address: z.string().trim().optional().or(z.literal("")),
+});
+
+export const updateTpiSchema = z.object({
+  id: z.string().min(1, "TPI ID is required"),
+  name: nameValidation,
+  email: emailValidation,
+  district_id: z.string().min(1, "District is required"),
+  password: z.string().optional().default(""),
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits")
+    .optional()
+    .or(z.literal("")),
+  pan_number: z.string().trim().toUpperCase().optional().or(z.literal("")),
+  address: z.string().trim().optional().or(z.literal("")),
+});
+
+export const createTpiStaffSchema = z.object({
+  name: nameValidation,
+  email: emailValidation,
+  password: z.string().trim().nonempty("Password is required"),
+});
+
+export const updateTpiStaffSchema = z.object({
+  id: z.string().min(1, "Staff ID is required"),
+  name: nameValidation,
+  email: emailValidation,
+  password: z.string().optional().default(""),
+});
+
 
 export const createEmployeeSchema = z.object({
   name: nameValidation,
@@ -151,4 +203,5 @@ export const updateWorkOrderSchema = z.object({
     z.number().min(0).max(100).optional()
   ),
   status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED"]).optional().default("PENDING"),
+  work_order_type: z.enum(["SVS", "BULK_VILLAGE"]).optional(),
 });

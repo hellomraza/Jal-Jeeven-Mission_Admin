@@ -31,36 +31,21 @@ const ViewPhoto = ({ component, role }: { component: any; role: string }) => {
     );
   }
 
+  // DO can always view photos (to inspect TPI reference photos and submitted contractor photos)
   if (isDO) {
-    if (doEnabled) {
-      return (
-        <Link href={`/work-order/review-photos/${component.id}`}>
-          <div className="flex justify-center">
-            <Button
-              variant="default"
-              size="sm"
-              className="rounded-lg hover:bg-emerald-50"
-              title="Review selected photos"
-            >
-              View Photos
-            </Button>
-          </div>
-        </Link>
-      );
-    }
-
     return (
-      <div className="flex justify-center">
-        <Button
-          variant="outline"
-          size="sm"
-          className="rounded-lg cursor-not-allowed bg-gray-100 text-gray-400 border-gray-300 hover:bg-gray-100"
-          title="View enabled when component is submitted or approved"
-          disabled
-        >
-          View Photos
-        </Button>
-      </div>
+      <Link href={`/work-order/review-photos/${component.id}`}>
+        <div className="flex justify-center">
+          <Button
+            variant="default"
+            size="sm"
+            className="rounded-lg hover:bg-emerald-50"
+            title="Review photos"
+          >
+            View Photos
+          </Button>
+        </div>
+      </Link>
     );
   }
 
