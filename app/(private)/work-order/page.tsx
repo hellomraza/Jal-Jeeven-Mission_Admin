@@ -29,11 +29,18 @@ const WorkOrderPage = async ({ searchParams }: WorkOrderPageProps) => {
     // Ignore error
   }
 
+  const isExecutiveEngineer =
+    role === UserRole.ExecutiveEngineer || role === "EE";
+
   let activeMode: WorkOrderType | undefined = undefined;
 
   if (role === UserRole.TPI || role === "TPI") {
     activeMode = WorkOrderType.BULK_VILLAGE;
-  } else if (role === UserRole.HeadOfficer || role === "HO") {
+  } else if (
+    role === UserRole.HeadOfficer ||
+    role === "HO" ||
+    isExecutiveEngineer
+  ) {
     activeMode =
       (resolvedSearchParams?.mode as WorkOrderType) ||
       (cookieMode as WorkOrderType) ||
