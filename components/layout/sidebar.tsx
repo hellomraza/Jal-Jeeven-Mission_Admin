@@ -119,7 +119,16 @@ const getMenuItems = (userRole?: string): SidebarItem[] => {
       label: "SD Payment",
       href: "/completed-workflows",
       icon: <CheckCircle2 size={20} />,
-      roles: [UserRole.DistrictOfficer, "DO"],
+      roles: [
+        UserRole.DistrictOfficer,
+        UserRole.DOStaff,
+        UserRole.ExecutiveEngineer,
+        UserRole.HeadOfficer,
+        "DO",
+        "DO_STAFF",
+        "EE",
+        "HO",
+      ],
     },
   ];
 
