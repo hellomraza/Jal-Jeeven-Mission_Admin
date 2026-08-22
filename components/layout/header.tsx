@@ -17,12 +17,12 @@ export default async function Header() {
 
   const userName = user?.name || "User";
   const userRole = user?.role || "Role";
-  const isExecutiveEngineer = Boolean(user?.is_executive_engineer);
+  const isBulkOrderAllowed = Boolean(user?.is_bulk_order_allowed);
   const canSwitchMode =
     userRole === UserRole.HeadOfficer ||
     userRole === "HO" ||
     ((userRole === UserRole.DistrictOfficer || userRole === "DO") &&
-      isExecutiveEngineer);
+      isBulkOrderAllowed);
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-6 py-2 md:py-4 h-16 md:h-24 transition-all shadow-[0_4px_24px_rgba(0,0,0,0.01)]">
@@ -46,12 +46,19 @@ export default async function Header() {
         <div className="flex flex-col">
           <h2 className="hidden md:block text-[14px] font-bold text-[#1a2b3c] tracking-wide">
             Welcome {userName.toUpperCase()} ({userRole})
-            {userRole === UserRole.DistrictOfficer
-              ? ` (${user?.district?.districtname})`
+            {userRole === UserRole.DistrictOfficer || userRole === "DO"
+              ? user?.district?.districtname
+                ? ` (${user.district.districtname})`
+                : ""
               : ""}
-            {isExecutiveEngineer && (
+            {userRole === UserRole.ExecutiveEngineer || userRole === "EE"
+              ? user?.district?.districtname
+                ? ` (${user.district.districtname})`
+                : ""
+              : ""}
+            {isBulkOrderAllowed && (
               <span className="ml-2 px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold">
-                Executive Engineer
+                Bulk Orders Enabled
               </span>
             )}
           </h2>
@@ -62,7 +69,7 @@ export default async function Header() {
       <div className="flex items-center gap-3 md:gap-6 lg:gap-8">
         <ModeSwitch
           serverCanSwitch={canSwitchMode}
-          serverIsExecutiveEngineer={isExecutiveEngineer}
+          serverIsBulkOrderAllowed={isBulkOrderAllowed}
           serverRole={userRole}
         />
 

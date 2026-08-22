@@ -5,6 +5,8 @@ export enum UserRole {
   Employee = "EM", // Employee
   TPI = "TPI", // Third-Party Inspector
   TPI_STAFF = "TPI_STAFF", // TPI Staff
+  ExecutiveEngineer = "EE", // Executive Engineer
+  DOStaff = "DO_STAFF", // DO Staff
 }
 
 export enum WorkItemComponentStatus {

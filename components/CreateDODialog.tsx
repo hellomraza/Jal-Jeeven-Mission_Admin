@@ -210,10 +210,10 @@ export default function CreateDODialog({
             <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
               <div>
                 <label
-                  htmlFor="is_executive_engineer"
+                  htmlFor="is_bulk_order_allowed"
                   className="text-xs font-bold text-[#1a2b3c] cursor-pointer"
                 >
-                  Executive Engineer Role
+                  Allow Bulk Orders
                 </label>
                 <p className="text-[11px] text-gray-500">
                   Grant Bulk Village workflow & TPI assignment permissions for district
@@ -221,8 +221,8 @@ export default function CreateDODialog({
               </div>
               <input
                 type="checkbox"
-                id="is_executive_engineer"
-                name="is_executive_engineer"
+                id="is_bulk_order_allowed"
+                name="is_bulk_order_allowed"
                 className="h-4 w-4 rounded border-gray-300 text-[#136FB6] focus:ring-[#136FB6]"
                 disabled={isPending}
               />

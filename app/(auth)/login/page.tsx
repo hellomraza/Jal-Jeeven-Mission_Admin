@@ -22,8 +22,8 @@ export default function LoginPage() {
       localStorage.setItem("admin_token", response.data.access_token);
       localStorage.setItem("admin_role", response.data.user?.role);
       localStorage.setItem(
-        "admin_is_executive_engineer",
-        String(Boolean(response.data.user?.is_executive_engineer)),
+        "admin_is_bulk_order_allowed",
+        String(Boolean(response.data.user?.is_bulk_order_allowed)),
       );
 
       // Redirect contractors to work-order page, others to dashboard

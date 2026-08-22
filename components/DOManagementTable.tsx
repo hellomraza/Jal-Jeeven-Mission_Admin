@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import apiClient from "@/lib/api-client";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import CreateDODialog from "./CreateDODialog";
 import EditDODialog from "./EditDODialog";
 
 interface DOManagementTableProps {
@@ -28,13 +29,14 @@ export default function DOManagementTable({
   const [officers, setOfficers] = useState<any[]>(districtOfficers || []);
   const [selectedDO, setSelectedDO] = useState<any | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
     setOfficers(districtOfficers || []);
   }, [districtOfficers]);
 
-  const handleToggleExecutiveEngineer = async (
+  const handleToggleBulkOrderAllowed = async (
     officerId: string,
     currentStatus: boolean,
   ) => {
@@ -44,37 +46,35 @@ export default function DOManagementTable({
     // Optimistically update local state
     setOfficers((prev) =>
       prev.map((o) =>
-        o.id === officerId ? { ...o, is_executive_engineer: nextStatus } : o,
+        o.id === officerId ? { ...o, is_bulk_order_allowed: nextStatus } : o,
       ),
     );
 
     try {
       await apiClient.patch(`/users/do/${officerId}`, {
-        is_executive_engineer: nextStatus,
+        is_bulk_order_allowed: nextStatus,
       });
 
       toast({
-        title: "Role Updated",
+        title: "Permission Updated",
         description: `District Officer updated to ${
           nextStatus
-            ? "Executive Engineer (Bulk Access enabled)"
-            : "Regular DO (SVS only)"
+            ? "Bulk Access enabled"
+            : "SVS only"
         }.`,
       });
     } catch (error: any) {
       // Revert optimistic update on failure
       setOfficers((prev) =>
         prev.map((o) =>
-          o.id === officerId ? { ...o, is_executive_engineer: currentStatus } : o,
+          o.id === officerId ? { ...o, is_bulk_order_allowed: currentStatus } : o,
         ),
       );
-
       toast({
-        title: "Update Failed",
+        title: "Error",
         description:
-          error.response?.data?.message ||
-          error.message ||
-          "Failed to update Executive Engineer status.",
+          error?.response?.data?.message ||
+          "Failed to update bulk order permission. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -85,18 +85,7 @@ export default function DOManagementTable({
   return (
     <>
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-[18px] font-bold text-[#1a2b3c]">
-              District Officers
-            </h2>
-            <p className="text-[12px] text-gray-500 font-medium">
-              Manage all District Officers and Executive Engineer permissions
-            </p>
-          </div>
-        </div>
-
-        <Card className="border-none shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white">
+        <Card className="border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white">
           <CardContent className="p-0">
             {officers.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
@@ -124,7 +113,7 @@ export default function DOManagementTable({
                       District
                     </TableHead>
                     <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
-                      Executive Engineer
+                      Allow Bulk Orders
                     </TableHead>
                     <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
                       Actions
@@ -133,7 +122,7 @@ export default function DOManagementTable({
                 </TableHeader>
                 <TableBody>
                   {officers.map((do_) => {
-                    const isEE = Boolean(do_.is_executive_engineer);
+                    const isBulkAllowed = Boolean(do_.is_bulk_order_allowed);
                     const isUpdating = updatingId === do_.id;
 
                     return (
@@ -156,12 +145,12 @@ export default function DOManagementTable({
                         <TableCell className="text-[13px] text-gray-600">
                           <div className="flex items-center gap-3">
                             <Switch
-                              checked={isEE}
+                              checked={isBulkAllowed}
                               disabled={isUpdating}
                               onCheckedChange={() =>
-                                handleToggleExecutiveEngineer(do_.id, isEE)
+                                handleToggleBulkOrderAllowed(do_.id, isBulkAllowed)
                               }
-                              aria-label="Toggle Executive Engineer"
+                              aria-label="Toggle Bulk Orders Allowed"
                               className="data-[state=checked]:bg-[#136FB6]"
                             />
                             {isUpdating ? (
@@ -169,7 +158,7 @@ export default function DOManagementTable({
                                 size={14}
                                 className="animate-spin text-[#136FB6]"
                               />
-                            ) : isEE ? (
+                            ) : isBulkAllowed ? (
                               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#136FB6] border border-blue-200">
                                 Yes (Bulk Access)
                               </span>
@@ -204,6 +193,11 @@ export default function DOManagementTable({
           </CardContent>
         </Card>
       </div>
+
+      <CreateDODialog
+        isOpen={isCreateOpen}
+        onOpenChange={(v) => setIsCreateOpen(v)}
+      />
 
       <EditDODialog
         key={isEditOpen ? "open" : "close"}

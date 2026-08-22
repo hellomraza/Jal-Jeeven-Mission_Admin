@@ -7,11 +7,11 @@ import { useEffect } from "react";
 
 export default function ModeSwitch({
   serverCanSwitch,
-  serverIsExecutiveEngineer,
+  serverIsBulkOrderAllowed,
   serverRole,
 }: {
   serverCanSwitch?: boolean;
-  serverIsExecutiveEngineer?: boolean;
+  serverIsBulkOrderAllowed?: boolean;
   serverRole?: string;
 }) {
   const {
@@ -19,30 +19,30 @@ export default function ModeSwitch({
     setMode,
     canSwitchMode,
     userRole,
-    setIsExecutiveEngineer,
+    setIsBulkOrderAllowed,
     setUserRole,
   } = useMode();
 
   // Sync server props from Header to ModeContext if provided
   useEffect(() => {
-    if (serverIsExecutiveEngineer !== undefined) {
-      setIsExecutiveEngineer(serverIsExecutiveEngineer);
+    if (serverIsBulkOrderAllowed !== undefined) {
+      setIsBulkOrderAllowed(serverIsBulkOrderAllowed);
       localStorage.setItem(
-        "admin_is_executive_engineer",
-        String(serverIsExecutiveEngineer),
+        "admin_is_bulk_order_allowed",
+        String(serverIsBulkOrderAllowed),
       );
     }
     if (serverRole !== undefined) {
       setUserRole(serverRole);
       localStorage.setItem("admin_role", serverRole);
     }
-  }, [serverIsExecutiveEngineer, serverRole, setIsExecutiveEngineer, setUserRole]);
+  }, [serverIsBulkOrderAllowed, serverRole, setIsBulkOrderAllowed, setUserRole]);
 
   const isVisible =
     canSwitchMode ||
     serverCanSwitch ||
     serverRole === "HO" ||
-    (serverRole === "DO" && serverIsExecutiveEngineer);
+    (serverRole === "DO" && serverIsBulkOrderAllowed);
 
   if (!isVisible) return null;
 

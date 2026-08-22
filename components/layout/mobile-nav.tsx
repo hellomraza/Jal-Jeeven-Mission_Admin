@@ -34,9 +34,13 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
         UserRole.HeadOfficer,
         UserRole.DistrictOfficer,
         UserRole.TPI,
+        UserRole.ExecutiveEngineer,
+        UserRole.DOStaff,
         "HO",
         "DO",
         "TPI",
+        "EE",
+        "DO_STAFF",
       ],
     },
     {
@@ -57,6 +61,12 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
     {
       label: "District Officers",
       href: "/district-officers",
+      icon: <ClipboardList size={20} />,
+      roles: [UserRole.HeadOfficer, "HO"],
+    },
+    {
+      label: "Executive Engineers",
+      href: "/executive-engineers",
       icon: <ClipboardList size={20} />,
       roles: [UserRole.HeadOfficer, "HO"],
     },
@@ -82,6 +92,12 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
       href: "/tpi-staff",
       icon: <Users size={20} />,
       roles: [UserRole.TPI, "TPI"],
+    },
+    {
+      label: "Staff Management",
+      href: "/do-staff",
+      icon: <Users size={20} />,
+      roles: [UserRole.DistrictOfficer, "DO"],
     },
     {
       label: "Agreement",

@@ -39,8 +39,8 @@ const WorkOrderPage = async ({ searchParams }: WorkOrderPageProps) => {
       (cookieMode as WorkOrderType) ||
       WorkOrderType.SVS;
   } else if (role === UserRole.DistrictOfficer || role === "DO") {
-    const isExecutiveEngineer = Boolean(userProfile?.is_executive_engineer);
-    if (isExecutiveEngineer) {
+    const isBulkAllowed = Boolean(userProfile?.is_bulk_order_allowed);
+    if (isBulkAllowed) {
       activeMode =
         (resolvedSearchParams?.mode as WorkOrderType) ||
         (cookieMode as WorkOrderType) ||
@@ -58,7 +58,7 @@ const WorkOrderPage = async ({ searchParams }: WorkOrderPageProps) => {
   );
   const workItems = response?.data || [];
 
-  const isExecutiveEngineer = Boolean(userProfile?.is_executive_engineer);
+  const isBulkAllowed = Boolean(userProfile?.is_bulk_order_allowed);
 
   return (
     <WorkOrder

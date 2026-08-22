@@ -1,6 +1,6 @@
 "use client";
 
-import { updateDistrictOfficer } from "@/actions/userAction";
+import { updateExecutiveEngineer } from "@/actions/userAction";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,17 +25,17 @@ import {
   SelectValue,
 } from "./ui/select";
 
-interface EditDODialogProps {
-  officer: any | null;
+interface EditEEDialogProps {
+  ee: any | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function EditDODialog({
-  officer,
+export default function EditEEDialog({
+  ee,
   isOpen,
   onOpenChange,
-}: EditDODialogProps) {
+}: EditEEDialogProps) {
   const { toast } = useToast();
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -45,13 +45,15 @@ export default function EditDODialog({
     mobile: "",
     district_id: "",
     password: "",
-    is_bulk_order_allowed: false,
   });
 
-  const [state, formAction, isPending] = useActionState(updateDistrictOfficer, {
-    success: "",
-    error: "",
-  });
+  const [state, formAction, isPending] = useActionState(
+    updateExecutiveEngineer,
+    {
+      success: "",
+      error: "",
+    },
+  );
 
   const districtsQuery = useQuery({
     queryKey: ["districts"],
@@ -67,26 +69,24 @@ export default function EditDODialog({
   const districtsLoading = districtsQuery.isLoading;
 
   useEffect(() => {
-    if (isOpen && officer) {
+    if (isOpen && ee) {
       setFormData({
-        id: officer.id,
-        name: officer.name || "",
-        email: officer.email || "",
-        mobile: officer.mobile || "",
-        district_id:
-          officer.district_id || officer.district_id?.toString() || "",
+        id: ee.id,
+        name: ee.name || "",
+        email: ee.email || "",
+        mobile: ee.mobile || "",
+        district_id: ee.district_id || ee.district_id?.toString() || "",
         password: "",
-        is_bulk_order_allowed: Boolean(officer.is_bulk_order_allowed),
       });
       setHasSubmitted(false);
     }
-  }, [officer, isOpen]);
+  }, [ee, isOpen]);
 
   useEffect(() => {
     if (state.success && hasSubmitted) {
       toast({
         title: "Success",
-        description: "District Officer updated successfully.",
+        description: "Executive Engineer updated successfully.",
       });
       setHasSubmitted(false);
       onOpenChange(false);
@@ -116,7 +116,6 @@ export default function EditDODialog({
         mobile: "",
         district_id: "",
         password: "",
-        is_bulk_order_allowed: false,
       });
       setHasSubmitted(false);
     }
@@ -127,7 +126,7 @@ export default function EditDODialog({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit District Officer</DialogTitle>
+          <DialogTitle>Edit Executive Engineer</DialogTitle>
         </DialogHeader>
 
         <form
@@ -207,7 +206,7 @@ export default function EditDODialog({
               <SelectContent>
                 {districts.map((district: any) => (
                   <SelectItem
-                    key={district.district_code}
+                    key={district.districtid || district.district_code}
                     value={String(district.district_code)}
                   >
                     {district.districtname}
@@ -223,34 +222,6 @@ export default function EditDODialog({
             onChange={handleInputChange}
             disabled={isPending}
           />
-
-          <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
-            <div>
-              <label
-                htmlFor="edit_is_bulk_order_allowed"
-                className="text-xs font-bold text-[#1a2b3c] cursor-pointer"
-              >
-                Allow Bulk Orders
-              </label>
-              <p className="text-[11px] text-gray-500">
-                Grant Bulk Village workflow & TPI assignment permissions for district
-              </p>
-            </div>
-            <input
-              type="checkbox"
-              id="edit_is_bulk_order_allowed"
-              name="is_bulk_order_allowed"
-              checked={formData.is_bulk_order_allowed}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  is_bulk_order_allowed: e.target.checked,
-                }))
-              }
-              className="h-4 w-4 rounded border-gray-300 text-[#136FB6] focus:ring-[#136FB6]"
-              disabled={isPending}
-            />
-          </div>
 
           {state.error && (
             <div className="rounded-md bg-red-50 p-3">
