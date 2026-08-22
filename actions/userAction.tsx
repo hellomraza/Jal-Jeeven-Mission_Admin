@@ -151,6 +151,9 @@ export const updateEmployee = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(
         `/users/employee/${id}`,
         updateData,
@@ -196,6 +199,9 @@ export const updateContractor = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(
         `/users/contractor/${id}`,
         updateData,
@@ -311,6 +317,9 @@ export const updateDistrictOfficer = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(`/users/do/${id}`, updateData);
       if (response.data) {
         return { success: "District Officer updated successfully", error: "" };
@@ -388,6 +397,9 @@ export const updateTpi = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(`/users/tpi/${id}`, updateData);
       if (response.data) {
         return { success: "TPI Agency updated successfully", error: "" };
@@ -481,6 +493,9 @@ export const updateTpiStaff = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(`/users/tpi-staff/${id}`, updateData);
       if (response.data) {
         return { success: "TPI Staff updated successfully", error: "" };
@@ -556,6 +571,9 @@ export const updateExecutiveEngineer = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(`/users/ee/${id}`, updateData);
       if (response.data) {
         return {
@@ -632,6 +650,9 @@ export const updateDOStaff = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(`/users/do-staff/${id}`, updateData);
       if (response.data) {
         return {
