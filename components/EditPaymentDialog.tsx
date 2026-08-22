@@ -16,9 +16,9 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { PaymentDetail } from "@/types/payment";
+import VoucherFileViewerModal from "./VoucherFileViewerModal";
 import {
   CheckCircle2,
-  ExternalLink,
   FileText,
   Loader2,
   UploadCloud,
@@ -414,22 +414,21 @@ export default function EditPaymentDialog({
 
                   <div className="flex items-center gap-2">
                     {formData.voucher_file_url && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="h-8 text-xs text-[#136FB6]"
+                      <VoucherFileViewerModal
+                        fileUrl={formData.voucher_file_url}
+                        fileName={formData.file_name || pdfFile?.name}
+                        voucherNumber={formData.voucher_number}
                       >
-                        <a
-                          href={formData.voucher_file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs text-[#136FB6]"
                         >
-                          <ExternalLink size={13} className="mr-1" />
+                          <FileText size={13} className="mr-1" />
                           View
-                        </a>
-                      </Button>
+                        </Button>
+                      </VoucherFileViewerModal>
                     )}
                     <Button
                       type="button"

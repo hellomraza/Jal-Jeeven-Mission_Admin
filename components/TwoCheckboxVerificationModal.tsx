@@ -10,8 +10,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { PaymentDetail } from "@/types/payment";
-import { CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
+import { CheckCircle2, FileText, Loader2, ShieldAlert } from "lucide-react";
 import { useState } from "react";
+import VoucherFileViewerModal from "./VoucherFileViewerModal";
 
 interface TwoCheckboxVerificationModalProps {
   isOpen: boolean;
@@ -114,14 +115,18 @@ export default function TwoCheckboxVerificationModal({
               </span>
             )}
             {payment.voucher_file_url && (
-              <a
-                href={payment.voucher_file_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-semibold text-[#136FB6] hover:underline"
+              <VoucherFileViewerModal
+                fileUrl={payment.voucher_file_url}
+                voucherNumber={payment.voucher_number}
               >
-                View Voucher PDF
-              </a>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 font-semibold text-[#136FB6] hover:underline"
+                >
+                  <FileText size={12} />
+                  View Voucher PDF
+                </button>
+              </VoucherFileViewerModal>
             )}
           </div>
         </div>

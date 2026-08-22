@@ -5,6 +5,7 @@ import {
   uploadPaymentVoucherPdfAction,
 } from "@/actions/paymentAction";
 import BackButton from "@/components/BackButton";
+import VoucherFileViewerModal from "@/components/VoucherFileViewerModal";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -441,22 +442,21 @@ export default function CreatePaymentPage() {
 
                       <div className="flex items-center gap-2">
                         {formData.voucher_file_url && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            asChild
-                            className="text-xs text-[#136FB6]"
+                          <VoucherFileViewerModal
+                            fileUrl={formData.voucher_file_url}
+                            fileName={formData.file_name || pdfFile?.name}
+                            voucherNumber={formData.voucher_number}
                           >
-                            <a
-                              href={formData.voucher_file_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="text-xs text-[#136FB6]"
                             >
-                              <ExternalLink size={14} className="mr-1" />
+                              <FileText size={14} className="mr-1" />
                               View PDF
-                            </a>
-                          </Button>
+                            </Button>
+                          </VoucherFileViewerModal>
                         )}
                         <Button
                           type="button"

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  deletePaymentAction,
-  doCheckPaymentAction,
-  eeCheckPaymentAction,
-  sendToDOAction,
-  sendToEEAction,
-} from "@/actions/paymentAction";
+import { deletePaymentAction, sendToEEAction } from "@/actions/paymentAction";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,14 +13,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import apiClient from "@/lib/api-client";
 import { PaymentDetail, PaymentDetailStatus } from "@/types/payment";
 import { UserRole } from "@/types/usertypes";
 import {
   Building2,
   CheckCircle,
-  CheckCircle2,
   Edit3,
+  Eye,
   FileCheck,
   History,
   Loader2,
@@ -38,8 +31,8 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import DeletePaymentConfirmModal from "./DeletePaymentConfirmModal";
 import EditPaymentDialog from "./EditPaymentDialog";
-import TwoCheckboxVerificationModal from "./TwoCheckboxVerificationModal";
 import VoucherFileViewerModal from "./VoucherFileViewerModal";
 
 interface PaymentDetailsTableProps {
@@ -71,13 +64,13 @@ export default function PaymentDetailsTable({
 
   // Dialog & Modal States
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState<PaymentDetail | null>(null);
-
-  // Verification Modal State
-  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
-  const [verificationType, setVerificationType] = useState<
-    "SEND_TO_DO" | "DO_CHECK" | "EE_CHECK" | null
-  >(null);
+  const [selectedPayment, setSelectedPayment] = useState<PaymentDetail | null>(
+    null,
+  );
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState<PaymentDetail | null>(
+    null,
+  );
 
   const isStaff =
     role === UserRole.DOStaff || role === "DO_STAFF" || role === "STAFF";
@@ -103,62 +96,6 @@ export default function PaymentDetailsTable({
     router.push(`/completed-workflows?${params.toString()}`);
   };
 
-  const openVerificationModal = (
-    payment: PaymentDetail,
-    type: "SEND_TO_DO" | "DO_CHECK" | "EE_CHECK",
-  ) => {
-    setSelectedPayment(payment);
-    setVerificationType(type);
-    setIsVerificationModalOpen(true);
-  };
-
-  const handleVerificationConfirm = async () => {
-    if (!selectedPayment || !verificationType) return;
-    setLoadingId(selectedPayment.id);
-
-    try {
-      if (verificationType === "SEND_TO_DO") {
-        const res = await sendToDOAction(selectedPayment.id);
-        if (res.success) {
-          toast({
-            title: "Sent to DO",
-            description: "Payment record verified and submitted to District Officer.",
-          });
-          setIsVerificationModalOpen(false);
-          router.refresh();
-        } else {
-          toast({ title: "Error", description: res.error, variant: "destructive" });
-        }
-      } else if (verificationType === "DO_CHECK") {
-        const res = await doCheckPaymentAction(selectedPayment.id);
-        if (res.success) {
-          toast({
-            title: "Details Verified",
-            description: "Payment details checked and verified.",
-          });
-          setIsVerificationModalOpen(false);
-          router.refresh();
-        } else {
-          toast({ title: "Error", description: res.error, variant: "destructive" });
-        }
-      } else if (verificationType === "EE_CHECK") {
-        const res = await eeCheckPaymentAction(selectedPayment.id);
-        if (res.success) {
-          toast({
-            title: "EE Verified",
-            description: "Payment details verified by Executive Engineer.",
-          });
-          setIsVerificationModalOpen(false);
-          router.refresh();
-        } else {
-          toast({ title: "Error", description: res.error, variant: "destructive" });
-        }
-      }
-    } finally {
-      setLoadingId(null);
-    }
-  };
-
   const handleSendToEE = async (paymentId: string) => {
     setLoadingId(paymentId);
     try {
@@ -166,11 +103,16 @@ export default function PaymentDetailsTable({
       if (res.success) {
         toast({
           title: "Sent to Executive Engineer",
-          description: "Payment record successfully forwarded to Executive Engineer.",
+          description:
+            "Payment record successfully forwarded to Executive Engineer.",
         });
         router.refresh();
       } else {
-        toast({ title: "Error", description: res.error, variant: "destructive" });
+        toast({
+          title: "Error",
+          description: res.error,
+          variant: "destructive",
+        });
       }
     } finally {
       setLoadingId(null);
@@ -196,7 +138,11 @@ export default function PaymentDetailsTable({
         });
         router.refresh();
       } else {
-        toast({ title: "Error", description: res.error, variant: "destructive" });
+        toast({
+          title: "Error",
+          description: res.error,
+          variant: "destructive",
+        });
       }
     } finally {
       setLoadingId(null);
@@ -255,7 +201,10 @@ export default function PaymentDetailsTable({
       <div className="space-y-6">
         {/* Header Actions */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <form onSubmit={handleSearch} className="flex items-center gap-2 max-w-md w-full">
+          <form
+            onSubmit={handleSearch}
+            className="flex items-center gap-2 max-w-md w-full"
+          >
             <div className="relative w-full">
               <Search
                 size={16}
@@ -299,82 +248,83 @@ export default function PaymentDetailsTable({
                   No Payment Records Found
                 </h3>
                 <p className="text-[13px] text-gray-500 max-w-sm mt-1">
-                  {(isStaff || isDO)
+                  {isStaff || isDO
                     ? "Click 'Create Payment Record' above to submit contractor payment details."
                     : "No payment records are currently pending for your review."}
                 </p>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-gray-100 hover:bg-transparent">
-                    <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
-                      Contractor (as per Bank)
-                    </TableHead>
-                    <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
-                      Work Order
-                    </TableHead>
-                    <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
-                      Bank & Account
-                    </TableHead>
-                    <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
-                      Voucher / Cheque
-                    </TableHead>
-                    <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
-                      Amount
-                    </TableHead>
-                    <TableHead className="text-[12px] font-bold text-[#1a2b3c]">
-                      Status
-                    </TableHead>
-                    <TableHead className="text-[12px] font-bold text-[#1a2b3c] text-right">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {initialPayments.map((p) => {
-                    const isRowLoading = loadingId === p.id;
+              <div className="overflow-x-auto">
+                <Table className="min-w-[1100px]">
+                  <TableHeader>
+                    <TableRow className="border-gray-100 hover:bg-transparent">
+                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
+                        Contractor (as per Bank)
+                      </TableHead>
+                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
+                        Work Order
+                      </TableHead>
+                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
+                        Bank & Account
+                      </TableHead>
+                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
+                        Voucher / Cheque
+                      </TableHead>
+                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
+                        Amount
+                      </TableHead>
+                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
+                        Status
+                      </TableHead>
+                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] text-right whitespace-nowrap min-w-[340px]">
+                        Actions
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {initialPayments.map((p) => {
+                      const isRowLoading = loadingId === p.id;
 
-                    return (
-                      <TableRow
-                        key={p.id}
-                        className="border-gray-100 hover:bg-gray-50/70"
-                      >
-                        <TableCell>
-                          <div className="space-y-0.5">
-                            <span className="text-[13px] font-bold text-[#1a2b3c] block">
-                              {p.contractor_name}
-                            </span>
-                            <span className="text-[11px] text-gray-500 font-mono">
-                              {p.contractor_code}
-                            </span>
-                          </div>
-                        </TableCell>
+                      return (
+                        <TableRow
+                          key={p.id}
+                          className="border-gray-100 hover:bg-gray-50/70"
+                        >
+                          <TableCell className="whitespace-nowrap">
+                            <div className="space-y-0.5">
+                              <span className="text-[13px] font-bold text-[#1a2b3c] block">
+                                {p.contractor_name}
+                              </span>
+                              <span className="text-[11px] text-gray-500 font-mono">
+                                {p.contractor_code}
+                              </span>
+                            </div>
+                          </TableCell>
 
-                        <TableCell>
-                          <span className="text-[13px] font-medium text-[#1a2b3c] font-mono">
-                            {p.work_order_code}
-                          </span>
-                        </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            <span className="text-[13px] font-medium text-[#1a2b3c] font-mono">
+                              {p.work_order_code}
+                            </span>
+                          </TableCell>
 
-                        <TableCell>
-                          <div className="space-y-0.5">
-                            <span className="text-[13px] font-medium text-[#1a2b3c] block">
-                              {p.bank_name}
-                            </span>
-                            <span className="text-[11px] text-gray-500 font-mono block">
-                              A/C: {p.bank_account_number}
-                            </span>
-                            <span className="text-[10px] text-gray-400 font-mono">
-                              IFSC: {p.ifsc_code} | {p.branch}
-                            </span>
-                          </div>
-                        </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            <div className="space-y-0.5">
+                              <span className="text-[13px] font-medium text-[#1a2b3c] block">
+                                {p.bank_name}
+                              </span>
+                              <span className="text-[11px] text-gray-500 font-mono block">
+                                A/C: {p.bank_account_number}
+                              </span>
+                              <span className="text-[10px] text-gray-400 font-mono">
+                                IFSC: {p.ifsc_code} | {p.branch}
+                              </span>
+                            </div>
+                          </TableCell>
 
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-[12px] font-semibold text-[#1a2b3c] font-mono">
+                          <TableCell className="whitespace-nowrap">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-[12px] font-semibold text-[#1a2b3c] font-mono">
                                 VCH: {p.voucher_number}
                               </span>
                               {p.voucher_file_url && (
@@ -399,16 +349,19 @@ export default function PaymentDetailsTable({
                           </div>
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell className="whitespace-nowrap">
                           <span className="text-[14px] font-extrabold text-[#136FB6]">
-                            ₹{Number(p.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                            ₹
+                            {Number(p.amount).toLocaleString("en-IN", {
+                              minimumFractionDigits: 2,
+                            })}
                           </span>
                         </TableCell>
 
-                        <TableCell>{getStatusBadge(p.status)}</TableCell>
+                        <TableCell className="whitespace-nowrap">{getStatusBadge(p.status)}</TableCell>
 
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                        <TableCell className="text-right whitespace-nowrap min-w-[340px]">
+                          <div className="flex items-center justify-end gap-2 whitespace-nowrap">
                             {/* Staff Actions */}
                             {isStaff && p.status === "DETAILS_FILLED" && (
                               <>
@@ -429,11 +382,14 @@ export default function PaymentDetailsTable({
                                 <Button
                                   size="sm"
                                   className="h-8 text-xs font-semibold bg-[#136FB6] hover:bg-[#0d5a8f] text-white"
-                                  onClick={() => openVerificationModal(p, "SEND_TO_DO")}
-                                  disabled={isRowLoading}
+                                  asChild
                                 >
-                                  <Send size={13} className="mr-1" />
-                                  Send to DO
+                                  <Link
+                                    href={`/completed-workflows/check/${p.id}`}
+                                  >
+                                    <Send size={13} className="mr-1" />
+                                    Send to DO
+                                  </Link>
                                 </Button>
                               </>
                             )}
@@ -443,11 +399,14 @@ export default function PaymentDetailsTable({
                               <Button
                                 size="sm"
                                 className="h-8 text-xs font-semibold bg-[#136FB6] hover:bg-[#0d5a8f] text-white"
-                                onClick={() => openVerificationModal(p, "DO_CHECK")}
-                                disabled={isRowLoading}
+                                asChild
                               >
-                                <CheckCircle size={13} className="mr-1" />
-                                Check Details
+                                <Link
+                                  href={`/completed-workflows/check/${p.id}`}
+                                >
+                                  <CheckCircle size={13} className="mr-1" />
+                                  Check Details
+                                </Link>
                               </Button>
                             )}
 
@@ -459,7 +418,10 @@ export default function PaymentDetailsTable({
                                 disabled={isRowLoading}
                               >
                                 {isRowLoading ? (
-                                  <Loader2 size={13} className="animate-spin mr-1" />
+                                  <Loader2
+                                    size={13}
+                                    className="animate-spin mr-1"
+                                  />
                                 ) : (
                                   <Send size={13} className="mr-1" />
                                 )}
@@ -472,11 +434,14 @@ export default function PaymentDetailsTable({
                               <Button
                                 size="sm"
                                 className="h-8 text-xs font-semibold bg-[#136FB6] hover:bg-[#0d5a8f] text-white"
-                                onClick={() => openVerificationModal(p, "EE_CHECK")}
-                                disabled={isRowLoading}
+                                asChild
                               >
-                                <CheckCircle size={13} className="mr-1" />
-                                Check Details
+                                <Link
+                                  href={`/completed-workflows/check/${p.id}`}
+                                >
+                                  <CheckCircle size={13} className="mr-1" />
+                                  Check Details
+                                </Link>
                               </Button>
                             )}
 
@@ -485,10 +450,10 @@ export default function PaymentDetailsTable({
                                 size="sm"
                                 className="h-8 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
                                 onClick={() => {
-                                  toast({
+                                  /* toast({
                                     title: "Payment Release",
                                     description: "Payment release processing triggered.",
-                                  });
+                                  }); */
                                 }}
                                 disabled={isRowLoading}
                               >
@@ -496,6 +461,20 @@ export default function PaymentDetailsTable({
                                 Release Payment
                               </Button>
                             )}
+
+                            {/* View Details Page Link (Available to all users) */}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 text-xs text-gray-600 hover:text-[#1a2b3c]"
+                              asChild
+                              title="View payment details"
+                            >
+                              <Link href={`/completed-workflows/details/${p.id}`}>
+                                <Eye size={14} className="mr-1 text-gray-400" />
+                                View Details
+                              </Link>
+                            </Button>
 
                             {/* Audit Trail Page Link */}
                             <Button
@@ -506,22 +485,28 @@ export default function PaymentDetailsTable({
                               title="View audit trail history"
                             >
                               <Link href={`/completed-workflows/audit/${p.id}`}>
-                                <History size={14} className="mr-1 text-gray-400" />
+                                <History
+                                  size={14}
+                                  className="mr-1 text-gray-400"
+                                />
                                 Audit Log
                               </Link>
                             </Button>
 
-                            {/* Soft Delete Action for DO / EE / HO */}
+                            {/* Delete Action with explicit text and confirmation modal */}
                             {(isDO || isEE || isHO) && (
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-8 text-xs text-red-600 hover:bg-red-50 hover:text-red-700"
-                                onClick={() => handleDelete(p.id)}
-                                disabled={isRowLoading}
+                                className="h-8 text-xs text-red-600 hover:bg-red-50 hover:text-red-700 font-medium"
+                                onClick={() => {
+                                  setPaymentToDelete(p);
+                                  setIsDeleteModalOpen(true);
+                                }}
                                 title="Delete payment record"
                               >
-                                <Trash2 size={14} />
+                                <Trash2 size={13} className="mr-1" />
+                                Delete
                               </Button>
                             )}
                           </div>
@@ -531,6 +516,7 @@ export default function PaymentDetailsTable({
                   })}
                 </TableBody>
               </Table>
+            </div>
             )}
           </CardContent>
         </Card>
@@ -539,7 +525,8 @@ export default function PaymentDetailsTable({
         {totalPages > 1 && (
           <div className="flex items-center justify-between py-2">
             <p className="text-xs text-gray-500">
-              Showing page <strong>{currentPage}</strong> of <strong>{totalPages}</strong> ({totalPayments} records)
+              Showing page <strong>{currentPage}</strong> of{" "}
+              <strong>{totalPages}</strong> ({totalPayments} records)
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -570,25 +557,10 @@ export default function PaymentDetailsTable({
         payment={selectedPayment}
       />
 
-      <TwoCheckboxVerificationModal
-        isOpen={isVerificationModalOpen}
-        onOpenChange={setIsVerificationModalOpen}
-        payment={selectedPayment}
-        title={
-          verificationType === "SEND_TO_DO"
-            ? "Verify & Send to District Officer"
-            : verificationType === "DO_CHECK"
-            ? "District Officer Verification"
-            : "Executive Engineer Verification"
-        }
-        description="Please cross-check and complete the 2-point voucher verification before proceeding."
-        actionButtonLabel={
-          verificationType === "SEND_TO_DO"
-            ? "Confirm & Send to DO"
-            : "Confirm Verification"
-        }
-        onConfirm={handleVerificationConfirm}
-        isLoading={loadingId === selectedPayment?.id}
+      <DeletePaymentConfirmModal
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        payment={paymentToDelete}
       />
     </>
   );
