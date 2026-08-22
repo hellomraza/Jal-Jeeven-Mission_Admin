@@ -1,4 +1,4 @@
-import CompletedWorkflowsTable from "@/components/CompletedWorkflowsTable";
+import PaymentDetailsTable from "@/components/PaymentDetailsTable";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
 import { cookies } from "next/headers";
@@ -21,20 +21,31 @@ export default async function CompletedWorkflowsPage({
   const search = resolvedParams.search || "";
 
   const cookieStore = await cookies();
-  const role = cookieStore.get("admin_role")?.value;
+  const role = cookieStore.get("admin_role")?.value || "";
 
-  if (role !== UserRole.DistrictOfficer) {
+  const allowedRoles = [
+    UserRole.DistrictOfficer,
+    UserRole.DOStaff,
+    UserRole.ExecutiveEngineer,
+    UserRole.HeadOfficer,
+    "DO",
+    "DO_STAFF",
+    "EE",
+    "HO",
+  ];
+
+  if (!allowedRoles.includes(role as any)) {
     forbidden();
   }
 
-  let workItems = [];
-  let totalWorkItems = 0;
+  let payments = [];
+  let totalPayments = 0;
   let totalPages = 1;
   let error = null;
 
   try {
     const apiClient = await createServerApiClient();
-    const res = await apiClient.get<any>("/work-items/completed", {
+    const res = await apiClient.get<any>("/payments", {
       params: {
         page: currentPage,
         limit,
@@ -43,27 +54,27 @@ export default async function CompletedWorkflowsPage({
     });
 
     if (res.data) {
-      workItems = res.data.data || [];
-      totalWorkItems = res.data.total || 0;
+      payments = res.data.data || [];
+      totalPayments = res.data.total || 0;
       totalPages = res.data.totalPages || 1;
     }
   } catch (err: any) {
-    console.log(err);
+    console.error(err);
     error =
       err.response?.data?.message ||
       err.message ||
-      "Failed to load completed workflows";
+      "Failed to load payment records";
   }
 
   return (
     <div className="min-h-screen bg-gray-50/50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="space-y-1">
           <h1 className="text-[28px] font-bold text-[#1a2b3c]">
             SD Payment
           </h1>
-          <p className="text-[14px] text-gray-500 font-medium mt-2">
-            Submit and approve contractor bank details & vouchers for completed projects
+          <p className="text-[14px] text-gray-500 font-medium">
+            Manage contractor payment details, voucher verification, and approval workflow
           </p>
         </div>
 
@@ -72,13 +83,14 @@ export default async function CompletedWorkflowsPage({
             <p className="text-sm font-medium">{error}</p>
           </div>
         ) : (
-          <CompletedWorkflowsTable
-            initialWorkItems={workItems}
+          <PaymentDetailsTable
+            initialPayments={payments}
             currentPage={currentPage}
             totalPages={totalPages}
-            totalWorkItems={totalWorkItems}
+            totalPayments={totalPayments}
             limit={limit}
             search={search}
+            role={role}
           />
         )}
       </div>

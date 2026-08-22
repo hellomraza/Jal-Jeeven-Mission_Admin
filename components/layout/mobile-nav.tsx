@@ -34,9 +34,13 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
         UserRole.HeadOfficer,
         UserRole.DistrictOfficer,
         UserRole.TPI,
+        UserRole.ExecutiveEngineer,
+        UserRole.DOStaff,
         "HO",
         "DO",
         "TPI",
+        "EE",
+        "DO_STAFF",
       ],
     },
     {
@@ -57,6 +61,12 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
     {
       label: "District Officers",
       href: "/district-officers",
+      icon: <ClipboardList size={20} />,
+      roles: [UserRole.HeadOfficer, "HO"],
+    },
+    {
+      label: "Executive Engineers",
+      href: "/executive-engineers",
       icon: <ClipboardList size={20} />,
       roles: [UserRole.HeadOfficer, "HO"],
     },
@@ -84,6 +94,12 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
       roles: [UserRole.TPI, "TPI"],
     },
     {
+      label: "Staff Management",
+      href: "/do-staff",
+      icon: <Users size={20} />,
+      roles: [UserRole.DistrictOfficer, "DO"],
+    },
+    {
       label: "Agreement",
       href: "/agreement",
       icon: <Globe size={20} />,
@@ -106,7 +122,16 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
       label: "SD Payment",
       href: "/completed-workflows",
       icon: <CheckCircle2 size={20} />,
-      roles: [UserRole.DistrictOfficer, "DO"],
+      roles: [
+        UserRole.DistrictOfficer,
+        UserRole.DOStaff,
+        UserRole.ExecutiveEngineer,
+        UserRole.HeadOfficer,
+        "DO",
+        "DO_STAFF",
+        "EE",
+        "HO",
+      ],
     },
   ];
 

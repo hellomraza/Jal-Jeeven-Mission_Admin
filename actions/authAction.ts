@@ -13,7 +13,7 @@ type LoginResponse = {
     name: string;
     email: string;
     role: string;
-    is_executive_engineer?: boolean;
+    is_bulk_order_allowed?: boolean;
   };
 };
 
@@ -69,8 +69,8 @@ export const loginUserAction = async (formData: FormData) => {
     });
 
     cookieStore.set(
-      "admin_is_executive_engineer",
-      String(Boolean(response.data.user?.is_executive_engineer)),
+      "admin_is_bulk_order_allowed",
+      String(Boolean(response.data.user?.is_bulk_order_allowed)),
       {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -94,6 +94,7 @@ export const logoutUserAction = async () => {
   const cookieStore = await cookies();
   cookieStore.delete("admin_token");
   cookieStore.delete("admin_role");
+  cookieStore.delete("admin_is_bulk_order_allowed");
   cookieStore.delete("admin_is_executive_engineer");
   redirect("/login");
 };

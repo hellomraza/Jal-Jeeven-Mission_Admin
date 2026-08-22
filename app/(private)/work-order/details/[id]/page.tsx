@@ -113,7 +113,7 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
     }
   }
 
-  const isExecutiveEngineer = Boolean(userProfile?.is_executive_engineer);
+  const isBulkAllowed = Boolean(userProfile?.is_bulk_order_allowed);
   const isBulkVillage = workItem?.work_order_type === "BULK_VILLAGE";
 
   if (!workItem) {

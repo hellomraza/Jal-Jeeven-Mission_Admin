@@ -1,4 +1,6 @@
 import DODashboard from "@/components/DODashboard";
+import DOStaffDashboard from "@/components/DOStaffDashboard";
+import EEDashboard from "@/components/EEDashboard";
 import HODashboard from "@/components/HODashboard";
 import TPIDashboard from "@/components/TPIDashboard";
 import { createServerApiClient } from "@/lib/server-api-client";
@@ -17,6 +19,15 @@ export default async function DashboardPage() {
     user = userRes.data;
   } catch (e) {
     // Ignore
+  }
+
+  // Check role first from user profile
+  if (user?.role === "EE") {
+    return <EEDashboard stats={stats} user={user} />;
+  }
+
+  if (user?.role === "DO_STAFF") {
+    return <DOStaffDashboard stats={stats} user={user} />;
   }
 
   if (!stats) {

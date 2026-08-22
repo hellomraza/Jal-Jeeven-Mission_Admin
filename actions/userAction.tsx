@@ -5,11 +5,15 @@ import {
   assignEmployeesSchema,
   createContractorSchema,
   createDOSchema,
+  createDOStaffSchema,
+  createEESchema,
   createEmployeeSchema,
   createTpiSchema,
   createTpiStaffSchema,
   updateContractorSchema,
   updateDistrictOfficerSchema,
+  updateDOStaffSchema,
+  updateEESchema,
   updateEmployeeSchema,
   updateTpiSchema,
   updateTpiStaffSchema,
@@ -147,6 +151,9 @@ export const updateEmployee = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(
         `/users/employee/${id}`,
         updateData,
@@ -192,6 +199,9 @@ export const updateContractor = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(
         `/users/contractor/${id}`,
         updateData,
@@ -265,7 +275,7 @@ export const createDistrictOfficer = validatedAction(
     password: string;
     mobile: string;
     district_id: string;
-    is_executive_engineer?: boolean;
+    is_bulk_order_allowed?: boolean;
   }) => {
     try {
       const apiClient = await createServerApiClient();
@@ -302,11 +312,14 @@ export const updateDistrictOfficer = validatedAction(
     mobile: string;
     district_id: string;
     password?: string;
-    is_executive_engineer?: boolean;
+    is_bulk_order_allowed?: boolean;
   }) => {
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(`/users/do/${id}`, updateData);
       if (response.data) {
         return { success: "District Officer updated successfully", error: "" };
@@ -384,6 +397,9 @@ export const updateTpi = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(`/users/tpi/${id}`, updateData);
       if (response.data) {
         return { success: "TPI Agency updated successfully", error: "" };
@@ -477,6 +493,9 @@ export const updateTpiStaff = validatedAction(
     try {
       const apiClient = await createServerApiClient();
       const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
       const response = await apiClient.patch(`/users/tpi-staff/${id}`, updateData);
       if (response.data) {
         return { success: "TPI Staff updated successfully", error: "" };
@@ -497,6 +516,166 @@ export const updateTpiStaff = validatedAction(
       };
     } finally {
       revalidatePath("/tpi-staff");
+    }
+  },
+);
+
+export const createExecutiveEngineer = validatedAction(
+  createEESchema,
+  async (data: {
+    name: string;
+    email: string;
+    password: string;
+    mobile: string;
+    district_id: string;
+  }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const response = await apiClient.post("/users/ee", data);
+      if (response.data) {
+        return {
+          success: "Executive Engineer created successfully",
+          error: "",
+        };
+      }
+      return { success: "", error: "Failed to create Executive Engineer" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to create Executive Engineer. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to create Executive Engineer",
+      };
+    } finally {
+      revalidatePath("/executive-engineers");
+    }
+  },
+);
+
+export const updateExecutiveEngineer = validatedAction(
+  updateEESchema,
+  async (data: {
+    id: string;
+    name: string;
+    email: string;
+    mobile: string;
+    district_id: string;
+    password?: string;
+  }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
+      const response = await apiClient.patch(`/users/ee/${id}`, updateData);
+      if (response.data) {
+        return {
+          success: "Executive Engineer updated successfully",
+          error: "",
+        };
+      }
+      return { success: "", error: "Failed to update Executive Engineer" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to update Executive Engineer. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to update Executive Engineer",
+      };
+    } finally {
+      revalidatePath("/executive-engineers");
+    }
+  },
+);
+
+export const createDOStaff = validatedAction(
+  createDOStaffSchema,
+  async (data: {
+    name: string;
+    email: string;
+    password: string;
+    mobile: string;
+  }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const response = await apiClient.post("/users/do-staff", data);
+      if (response.data) {
+        return {
+          success: "DO Staff member created successfully",
+          error: "",
+        };
+      }
+      return { success: "", error: "Failed to create DO Staff" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to create DO Staff. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to create DO Staff",
+      };
+    } finally {
+      revalidatePath("/do-staff");
+    }
+  },
+);
+
+export const updateDOStaff = validatedAction(
+  updateDOStaffSchema,
+  async (data: {
+    id: string;
+    name: string;
+    email: string;
+    mobile: string;
+    password?: string;
+  }) => {
+    try {
+      const apiClient = await createServerApiClient();
+      const { id, ...updateData } = data;
+      if (!updateData.password || updateData.password.trim() === "") {
+        delete updateData.password;
+      }
+      const response = await apiClient.patch(`/users/do-staff/${id}`, updateData);
+      if (response.data) {
+        return {
+          success: "DO Staff updated successfully",
+          error: "",
+        };
+      }
+      return { success: "", error: "Failed to update DO Staff" };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return {
+          success: "",
+          error:
+            error.response?.data?.message ||
+            "Failed to update DO Staff. Please try again.",
+        };
+      }
+      return {
+        success: "",
+        error: "Failed to update DO Staff",
+      };
+    } finally {
+      revalidatePath("/do-staff");
     }
   },
 );

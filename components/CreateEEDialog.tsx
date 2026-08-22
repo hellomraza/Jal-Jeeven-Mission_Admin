@@ -1,6 +1,6 @@
 "use client";
 
-import { updateDistrictOfficer } from "@/actions/userAction";
+import { createExecutiveEngineer } from "@/actions/userAction";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getLocationsByType } from "@/services/locationService";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import InputWithPassword from "./InputWithPassword";
 import { Field, FieldLabel } from "./ui/field";
 import {
@@ -25,33 +25,42 @@ import {
   SelectValue,
 } from "./ui/select";
 
-interface EditDODialogProps {
-  officer: any | null;
+interface CreateEEDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function EditDODialog({
-  officer,
+export default function CreateEEDialog({
   isOpen,
   onOpenChange,
-}: EditDODialogProps) {
+}: CreateEEDialogProps) {
   const { toast } = useToast();
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const [formData, setFormData] = useState({
-    id: "",
     name: "",
     email: "",
+    password: "",
     mobile: "",
     district_id: "",
-    password: "",
-    is_bulk_order_allowed: false,
   });
 
-  const [state, formAction, isPending] = useActionState(updateDistrictOfficer, {
-    success: "",
-    error: "",
-  });
+  const [state, formAction, isPending] = useActionState(
+    createExecutiveEngineer,
+    {
+      success: "",
+      error: "",
+    },
+  );
+
+  useEffect(() => {
+    if (state.success) {
+      toast({
+        title: "Success",
+        description: "Executive Engineer created successfully.",
+      });
+      onOpenChange(false);
+    }
+  }, [state.success, toast, onOpenChange]);
 
   const districtsQuery = useQuery({
     queryKey: ["districts"],
@@ -66,38 +75,12 @@ export default function EditDODialog({
   const districts = districtsQuery.data || [];
   const districtsLoading = districtsQuery.isLoading;
 
-  useEffect(() => {
-    if (isOpen && officer) {
-      setFormData({
-        id: officer.id,
-        name: officer.name || "",
-        email: officer.email || "",
-        mobile: officer.mobile || "",
-        district_id:
-          officer.district_id || officer.district_id?.toString() || "",
-        password: "",
-        is_bulk_order_allowed: Boolean(officer.is_bulk_order_allowed),
-      });
-      setHasSubmitted(false);
-    }
-  }, [officer, isOpen]);
-
-  useEffect(() => {
-    if (state.success && hasSubmitted) {
-      toast({
-        title: "Success",
-        description: "District Officer updated successfully.",
-      });
-      setHasSubmitted(false);
-      onOpenChange(false);
-    }
-  }, [state.success, hasSubmitted, toast, onOpenChange]);
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleDistrictChange = (value: string) => {
@@ -110,15 +93,12 @@ export default function EditDODialog({
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setFormData({
-        id: "",
         name: "",
         email: "",
+        password: "",
         mobile: "",
         district_id: "",
-        password: "",
-        is_bulk_order_allowed: false,
       });
-      setHasSubmitted(false);
     }
     onOpenChange(open);
   };
@@ -127,21 +107,10 @@ export default function EditDODialog({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit District Officer</DialogTitle>
+          <DialogTitle>Create Executive Engineer</DialogTitle>
         </DialogHeader>
 
-        <form
-          action={formAction}
-          className="mt-4 space-y-4"
-          onSubmit={() => setHasSubmitted(true)}
-        >
-          <input type="hidden" name="id" value={formData.id} />
-          <input
-            type="hidden"
-            name="district_id"
-            value={formData.district_id}
-          />
-
+        <form action={formAction} ref={formRef} className="space-y-4 mt-4">
           <Field>
             <FieldLabel className="text-xs font-semibold text-gray-500">
               Name
@@ -150,6 +119,7 @@ export default function EditDODialog({
               type="text"
               name="name"
               required
+              placeholder="Rajesh Sharma"
               value={formData.name}
               onChange={handleInputChange}
               disabled={isPending}
@@ -164,6 +134,7 @@ export default function EditDODialog({
               type="email"
               name="email"
               required
+              placeholder="ee@jjm.local"
               value={formData.email}
               onChange={handleInputChange}
               disabled={isPending}
@@ -179,6 +150,7 @@ export default function EditDODialog({
               name="mobile"
               required
               maxLength={10}
+              placeholder="9876543210"
               value={formData.mobile}
               onChange={handleInputChange}
               disabled={isPending}
@@ -192,8 +164,8 @@ export default function EditDODialog({
             <Select
               name="district"
               value={formData.district_id}
-              onValueChange={handleDistrictChange}
               disabled={isPending || districtsLoading}
+              onValueChange={handleDistrictChange}
             >
               <SelectTrigger className="w-full">
                 <SelectValue
@@ -207,7 +179,7 @@ export default function EditDODialog({
               <SelectContent>
                 {districts.map((district: any) => (
                   <SelectItem
-                    key={district.district_code}
+                    key={district.districtid || district.district_code}
                     value={String(district.district_code)}
                   >
                     {district.districtname}
@@ -215,41 +187,23 @@ export default function EditDODialog({
                 ))}
               </SelectContent>
             </Select>
+            <input
+              type="hidden"
+              name="district_id"
+              value={formData.district_id}
+            />
           </Field>
 
-          <InputWithPassword
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            disabled={isPending}
-          />
-
-          <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
-            <div>
-              <label
-                htmlFor="edit_is_bulk_order_allowed"
-                className="text-xs font-bold text-[#1a2b3c] cursor-pointer"
-              >
-                Allow Bulk Orders
-              </label>
-              <p className="text-[11px] text-gray-500">
-                Grant Bulk Village workflow & TPI assignment permissions for district
-              </p>
-            </div>
-            <input
-              type="checkbox"
-              id="edit_is_bulk_order_allowed"
-              name="is_bulk_order_allowed"
-              checked={formData.is_bulk_order_allowed}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  is_bulk_order_allowed: e.target.checked,
-                }))
-              }
-              className="h-4 w-4 rounded border-gray-300 text-[#136FB6] focus:ring-[#136FB6]"
+          <div className="space-y-2">
+            <InputWithPassword
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
               disabled={isPending}
             />
+            <p className="text-xs text-gray-500">
+              Min 8 chars, uppercase, lowercase, number
+            </p>
           </div>
 
           {state.error && (
@@ -258,19 +212,27 @@ export default function EditDODialog({
             </div>
           )}
 
-          <DialogFooter className="pt-2">
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
             <Button
               type="submit"
+              disabled={isPending}
               className="bg-[#136FB6] hover:bg-[#0d5a8f] text-white"
-              disabled={isPending || !formData.id}
             >
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  Creating...
                 </>
               ) : (
-                "Save Changes"
+                "Create"
               )}
             </Button>
           </DialogFooter>

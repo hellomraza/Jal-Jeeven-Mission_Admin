@@ -8,8 +8,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 interface ModeContextType {
   mode: WorkOrderType;
   setMode: (mode: WorkOrderType) => void;
-  isExecutiveEngineer: boolean;
-  setIsExecutiveEngineer: (isEE: boolean) => void;
+  isBulkOrderAllowed: boolean;
+  setIsBulkOrderAllowed: (allowed: boolean) => void;
   canSwitchMode: boolean;
   userRole: string | null;
   setUserRole: (role: string | null) => void;
@@ -18,8 +18,8 @@ interface ModeContextType {
 const ModeContext = createContext<ModeContextType>({
   mode: WorkOrderType.SVS,
   setMode: () => {},
-  isExecutiveEngineer: false,
-  setIsExecutiveEngineer: () => {},
+  isBulkOrderAllowed: false,
+  setIsBulkOrderAllowed: () => {},
   canSwitchMode: false,
   userRole: null,
   setUserRole: () => {},
@@ -31,33 +31,33 @@ interface ModeProviderProps {
   children: React.ReactNode;
   initialMode?: WorkOrderType;
   initialRole?: string;
-  initialIsExecutiveEngineer?: boolean;
+  initialIsBulkOrderAllowed?: boolean;
 }
 
 export const ModeProvider: React.FC<ModeProviderProps> = ({
   children,
   initialMode = WorkOrderType.SVS,
   initialRole,
-  initialIsExecutiveEngineer = false,
+  initialIsBulkOrderAllowed = false,
 }) => {
   const router = useRouter();
   const [userRole, setUserRole] = useState<string | null>(initialRole || null);
-  const [isExecutiveEngineer, setIsExecutiveEngineer] = useState<boolean>(
-    initialIsExecutiveEngineer,
+  const [isBulkOrderAllowed, setIsBulkOrderAllowed] = useState<boolean>(
+    initialIsBulkOrderAllowed,
   );
   const [mode, setModeState] = useState<WorkOrderType>(initialMode);
 
   // Sync client profile state and load profile from server
   useEffect(() => {
     const storedRole = localStorage.getItem("admin_role");
-    const storedEE = localStorage.getItem("admin_is_executive_engineer");
+    const storedBulk = localStorage.getItem("admin_is_bulk_order_allowed");
     const storedMode = localStorage.getItem(
       "app_work_order_mode",
     ) as WorkOrderType;
 
     if (storedRole) setUserRole(storedRole);
-    if (storedEE !== null) {
-      setIsExecutiveEngineer(storedEE === "true");
+    if (storedBulk !== null) {
+      setIsBulkOrderAllowed(storedBulk === "true");
     }
     if (
       storedMode &&
@@ -67,7 +67,7 @@ export const ModeProvider: React.FC<ModeProviderProps> = ({
       setModeState(storedMode);
     }
 
-    // Always fetch latest user profile to keep isExecutiveEngineer and role fresh
+    // Always fetch latest user profile to keep isBulkOrderAllowed and role fresh
     getUserInfo()
       .then((user) => {
         if (user) {
@@ -75,9 +75,9 @@ export const ModeProvider: React.FC<ModeProviderProps> = ({
             setUserRole(user.role);
             localStorage.setItem("admin_role", user.role);
           }
-          const isEE = Boolean(user.is_executive_engineer);
-          setIsExecutiveEngineer(isEE);
-          localStorage.setItem("admin_is_executive_engineer", String(isEE));
+          const isAllowed = Boolean(user.is_bulk_order_allowed);
+          setIsBulkOrderAllowed(isAllowed);
+          localStorage.setItem("admin_is_bulk_order_allowed", String(isAllowed));
         }
       })
       .catch((err) => {
@@ -89,7 +89,7 @@ export const ModeProvider: React.FC<ModeProviderProps> = ({
     userRole === UserRole.HeadOfficer ||
     userRole === "HO" ||
     ((userRole === UserRole.DistrictOfficer || userRole === "DO") &&
-      Boolean(isExecutiveEngineer));
+      Boolean(isBulkOrderAllowed));
 
   // If user cannot switch mode, strictly enforce SVS mode
   useEffect(() => {
@@ -113,8 +113,8 @@ export const ModeProvider: React.FC<ModeProviderProps> = ({
       value={{
         mode,
         setMode,
-        isExecutiveEngineer,
-        setIsExecutiveEngineer,
+        isBulkOrderAllowed,
+        setIsBulkOrderAllowed,
         canSwitchMode,
         userRole,
         setUserRole,

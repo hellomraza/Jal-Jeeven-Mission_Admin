@@ -37,7 +37,10 @@ export const updateDistrictOfficerSchema = z.object({
     .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
   district_id: z.string().min(1, "District is required"),
   password: z.string().optional().default(""),
-  is_executive_engineer: z.preprocess((val) => val === true || val === "true" || val === "on", z.boolean()).optional().default(false),
+  is_bulk_order_allowed: z
+    .preprocess((val) => val === true || val === "true" || val === "on", z.boolean())
+    .optional()
+    .default(false),
 });
 
 export const createDOSchema = z.object({
@@ -49,7 +52,54 @@ export const createDOSchema = z.object({
     .trim()
     .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
   district_id: z.string().min(1, "District is required"),
-  is_executive_engineer: z.preprocess((val) => val === true || val === "true" || val === "on", z.boolean()).optional().default(false),
+  is_bulk_order_allowed: z
+    .preprocess((val) => val === true || val === "true" || val === "on", z.boolean())
+    .optional()
+    .default(false),
+});
+
+export const createEESchema = z.object({
+  name: nameValidation,
+  email: emailValidation,
+  password: z.string().trim().nonempty("Password is required"),
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
+  district_id: z.string().min(1, "District is required"),
+});
+
+export const updateEESchema = z.object({
+  id: z.string().min(1, "Executive Engineer ID is required"),
+  name: nameValidation,
+  email: emailValidation,
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
+  district_id: z.string().min(1, "District is required"),
+  password: z.string().optional().default(""),
+});
+
+export const createDOStaffSchema = z.object({
+  name: nameValidation,
+  email: emailValidation,
+  password: z.string().trim().nonempty("Password is required"),
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
+});
+
+export const updateDOStaffSchema = z.object({
+  id: z.string().min(1, "Staff ID is required"),
+  name: nameValidation,
+  email: emailValidation,
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "Mobile number must be 10 digits"),
+  password: z.string().optional().default(""),
 });
 
 export const createTpiSchema = z.object({
