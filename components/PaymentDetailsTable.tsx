@@ -35,11 +35,10 @@ import {
   Send,
   Trash2,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import CreatePaymentDialog from "./CreatePaymentDialog";
 import EditPaymentDialog from "./EditPaymentDialog";
-import PaymentAuditHistoryModal from "./PaymentAuditHistoryModal";
 import TwoCheckboxVerificationModal from "./TwoCheckboxVerificationModal";
 import VoucherFileViewerModal from "./VoucherFileViewerModal";
 
@@ -71,7 +70,6 @@ export default function PaymentDetailsTable({
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   // Dialog & Modal States
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<PaymentDetail | null>(null);
 
@@ -80,11 +78,6 @@ export default function PaymentDetailsTable({
   const [verificationType, setVerificationType] = useState<
     "SEND_TO_DO" | "DO_CHECK" | "EE_CHECK" | null
   >(null);
-
-  // Audit History Modal State
-  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
-  const [auditPayment, setAuditPayment] = useState<PaymentDetail | null>(null);
-  const [loadingAudit, setLoadingAudit] = useState(false);
 
   const isStaff =
     role === UserRole.DOStaff || role === "DO_STAFF" || role === "STAFF";
@@ -210,20 +203,6 @@ export default function PaymentDetailsTable({
     }
   };
 
-  const openAuditHistory = async (payment: PaymentDetail) => {
-    setLoadingAudit(true);
-    try {
-      const res = await apiClient.get(`/payments/${payment.id}`);
-      setAuditPayment(res.data || payment);
-      setIsAuditModalOpen(true);
-    } catch (e) {
-      setAuditPayment(payment);
-      setIsAuditModalOpen(true);
-    } finally {
-      setLoadingAudit(false);
-    }
-  };
-
   const getStatusBadge = (status: PaymentDetailStatus) => {
     switch (status) {
       case "DETAILS_FILLED":
@@ -297,11 +276,13 @@ export default function PaymentDetailsTable({
 
           {(isStaff || isDO) && (
             <Button
-              onClick={() => setIsCreateOpen(true)}
+              asChild
               className="bg-[#136FB6] hover:bg-[#0d5a8f] text-white flex items-center gap-2"
             >
-              <Plus size={16} />
-              Create Payment Record
+              <Link href="/completed-workflows/create">
+                <Plus size={16} />
+                Create Payment Record
+              </Link>
             </Button>
           )}
         </div>
@@ -516,17 +497,18 @@ export default function PaymentDetailsTable({
                               </Button>
                             )}
 
-                            {/* Audit Trail Button */}
+                            {/* Audit Trail Page Link */}
                             <Button
                               size="sm"
                               variant="ghost"
                               className="h-8 text-xs text-gray-600 hover:text-[#1a2b3c]"
-                              onClick={() => openAuditHistory(p)}
-                              disabled={loadingAudit}
+                              asChild
                               title="View audit trail history"
                             >
-                              <History size={14} className="mr-1 text-gray-400" />
-                              Audit Log
+                              <Link href={`/completed-workflows/audit/${p.id}`}>
+                                <History size={14} className="mr-1 text-gray-400" />
+                                Audit Log
+                              </Link>
                             </Button>
 
                             {/* Soft Delete Action for DO / EE / HO */}
@@ -582,11 +564,6 @@ export default function PaymentDetailsTable({
       </div>
 
       {/* Modals & Dialogs */}
-      <CreatePaymentDialog
-        isOpen={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-      />
-
       <EditPaymentDialog
         isOpen={isEditOpen}
         onOpenChange={setIsEditOpen}
@@ -612,12 +589,6 @@ export default function PaymentDetailsTable({
         }
         onConfirm={handleVerificationConfirm}
         isLoading={loadingId === selectedPayment?.id}
-      />
-
-      <PaymentAuditHistoryModal
-        isOpen={isAuditModalOpen}
-        onOpenChange={setIsAuditModalOpen}
-        payment={auditPayment}
       />
     </>
   );
