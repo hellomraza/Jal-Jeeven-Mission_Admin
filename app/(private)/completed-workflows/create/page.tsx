@@ -181,7 +181,21 @@ export default function CreatePaymentPage() {
           </CardHeader>
 
           <CardContent>
-            <form action={formAction} ref={formRef} className="space-y-6">
+            <form
+              action={formAction}
+              ref={formRef}
+              className="space-y-6"
+              onSubmit={(e) => {
+                if (!formData.voucher_file_url) {
+                  e.preventDefault();
+                  toast({
+                    title: "Voucher PDF Required",
+                    description: "Please upload the voucher PDF document before submitting.",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            >
               {/* Hidden File Values */}
               <input
                 type="hidden"
@@ -199,28 +213,12 @@ export default function CreatePaymentPage() {
                 value={formData.file_size}
               />
 
-              {/* Section 1: Contractor & Work Order Info */}
+              {/* Group 1: Contractor & Work Order Information */}
               <div className="space-y-4">
                 <h3 className="text-xs font-bold text-[#1a2b3c] uppercase tracking-wider text-gray-400">
-                  1. Contractor & Work Order
+                  1. Contractor & Work Order Information
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field>
-                    <FieldLabel className="text-xs font-semibold text-gray-700">
-                      Contractor Name as per Bank Account <span className="text-red-500">*</span>
-                    </FieldLabel>
-                    <Input
-                      type="text"
-                      name="contractor_name"
-                      required
-                      placeholder="ABC Infratech Pvt Ltd"
-                      value={formData.contractor_name}
-                      onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
-                      className="bg-white"
-                    />
-                  </Field>
-
                   <Field>
                     <FieldLabel className="text-xs font-semibold text-gray-700">
                       Contractor Code <span className="text-red-500">*</span>
@@ -236,9 +234,7 @@ export default function CreatePaymentPage() {
                       className="bg-white"
                     />
                   </Field>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel className="text-xs font-semibold text-gray-700">
                       Work Order Code <span className="text-red-500">*</span>
@@ -254,31 +250,14 @@ export default function CreatePaymentPage() {
                       className="bg-white"
                     />
                   </Field>
-
-                  <Field>
-                    <FieldLabel className="text-xs font-semibold text-gray-700">
-                      Payment Amount (₹) <span className="text-red-500">*</span>
-                    </FieldLabel>
-                    <Input
-                      type="number"
-                      name="amount"
-                      step="0.01"
-                      required
-                      placeholder="500000.00"
-                      value={formData.amount}
-                      onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
-                      className="bg-white"
-                    />
-                  </Field>
                 </div>
               </div>
 
-              {/* Section 2: Bank Details */}
+              {/* Group 2: Bank Account Information */}
               <div className="space-y-4 pt-4 border-t border-gray-100">
                 <h3 className="text-xs font-bold text-[#1a2b3c] uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                   <Building2 size={14} className="text-[#136FB6]" />
-                  2. Bank Information
+                  2. Bank Account Information
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field>
@@ -347,14 +326,49 @@ export default function CreatePaymentPage() {
                     />
                   </Field>
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field>
+                    <FieldLabel className="text-xs font-semibold text-gray-700">
+                      Contractor Name as per Bank Account <span className="text-red-500">*</span>
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      name="contractor_name"
+                      required
+                      placeholder="ABC Infratech Pvt Ltd"
+                      value={formData.contractor_name}
+                      onChange={handleInputChange}
+                      disabled={isPending || isUploadingPdf}
+                      className="bg-white"
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel className="text-xs font-semibold text-gray-700">
+                      Total Payment Amount (₹) <span className="text-red-500">*</span>
+                    </FieldLabel>
+                    <Input
+                      type="number"
+                      name="amount"
+                      step="0.01"
+                      required
+                      placeholder="500000.00"
+                      value={formData.amount}
+                      onChange={handleInputChange}
+                      disabled={isPending || isUploadingPdf}
+                      className="bg-white"
+                    />
+                  </Field>
+                </div>
               </div>
 
-              {/* Section 3: Voucher & PDF Document */}
+              {/* Group 3: Voucher & Verification Document */}
               <div className="space-y-4 pt-4 border-t border-gray-100">
                 <h3 className="text-xs font-bold text-[#1a2b3c] uppercase tracking-wider text-gray-400">
                   3. Voucher & Verification Document
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <Field>
                     <FieldLabel className="text-xs font-semibold text-gray-700">
                       Voucher Number <span className="text-red-500">*</span>
@@ -370,27 +384,12 @@ export default function CreatePaymentPage() {
                       className="bg-white"
                     />
                   </Field>
-
-                  <Field>
-                    <FieldLabel className="text-xs font-semibold text-gray-700">
-                      Cheque / Check Number (Optional)
-                    </FieldLabel>
-                    <Input
-                      type="text"
-                      name="cheque_number"
-                      placeholder="CHQ-654321"
-                      value={formData.cheque_number}
-                      onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
-                      className="bg-white"
-                    />
-                  </Field>
                 </div>
 
-                {/* Voucher PDF Upload */}
+                {/* Voucher PDF Upload (Mandatory) */}
                 <div className="pt-2">
                   <FieldLabel className="text-xs font-semibold text-gray-700 block mb-2">
-                    Voucher PDF Document (Optional)
+                    Voucher PDF Document <span className="text-red-500">*</span>
                   </FieldLabel>
 
                   <input
@@ -409,7 +408,7 @@ export default function CreatePaymentPage() {
                     >
                       <UploadCloud size={32} className="text-[#136FB6] mb-2" />
                       <p className="text-sm font-semibold text-gray-800">
-                        Click to browse and upload Voucher PDF
+                        Click to browse and upload Voucher PDF (Mandatory)
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
                         PDF files only, max 15MB

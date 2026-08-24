@@ -281,21 +281,21 @@ export const createDistrictOfficer = validatedAction(
       const apiClient = await createServerApiClient();
       const response = await apiClient.post("/users/do", data);
       if (response.data) {
-        return { success: "District Officer created successfully", error: "" };
+        return { success: "Divisional Account Officer created successfully", error: "" };
       }
-      return { success: "", error: "Failed to create District Officer" };
+      return { success: "", error: "Failed to create Divisional Account Officer" };
     } catch (error) {
       if (error instanceof AxiosError) {
         return {
           success: "",
           error:
             error.response?.data?.message ||
-            "Failed to create District Officer. Please try again.",
+            "Failed to create Divisional Account Officer. Please try again.",
         };
       }
       return {
         success: "",
-        error: "Failed to create District Officer",
+        error: "Failed to create Divisional Account Officer",
       };
     } finally {
       revalidatePath("/district-officers");
@@ -322,21 +322,21 @@ export const updateDistrictOfficer = validatedAction(
       }
       const response = await apiClient.patch(`/users/do/${id}`, updateData);
       if (response.data) {
-        return { success: "District Officer updated successfully", error: "" };
+        return { success: "Divisional Account Officer updated successfully", error: "" };
       }
-      return { success: "", error: "Failed to update District Officer" };
+      return { success: "", error: "Failed to update Divisional Account Officer" };
     } catch (error) {
       if (error instanceof AxiosError) {
         return {
           success: "",
           error:
             error.response?.data?.message ||
-            "Failed to update District Officer. Please try again.",
+            "Failed to update Divisional Account Officer. Please try again.",
         };
       }
       return {
         success: "",
-        error: "Failed to update District Officer",
+        error: "Failed to update Divisional Account Officer",
       };
     } finally {
       revalidatePath("/district-officers");
@@ -614,23 +614,23 @@ export const createDOStaff = validatedAction(
       const response = await apiClient.post("/users/do-staff", data);
       if (response.data) {
         return {
-          success: "DO Staff member created successfully",
+          success: "Data Entry Operator created successfully",
           error: "",
         };
       }
-      return { success: "", error: "Failed to create DO Staff" };
+      return { success: "", error: "Failed to create Data Entry Operator" };
     } catch (error) {
       if (error instanceof AxiosError) {
         return {
           success: "",
           error:
             error.response?.data?.message ||
-            "Failed to create DO Staff. Please try again.",
+            "Failed to create Data Entry Operator. Please try again.",
         };
       }
       return {
         success: "",
-        error: "Failed to create DO Staff",
+        error: "Failed to create Data Entry Operator",
       };
     } finally {
       revalidatePath("/do-staff");
@@ -656,23 +656,23 @@ export const updateDOStaff = validatedAction(
       const response = await apiClient.patch(`/users/do-staff/${id}`, updateData);
       if (response.data) {
         return {
-          success: "DO Staff updated successfully",
+          success: "Data Entry Operator updated successfully",
           error: "",
         };
       }
-      return { success: "", error: "Failed to update DO Staff" };
+      return { success: "", error: "Failed to update Data Entry Operator" };
     } catch (error) {
       if (error instanceof AxiosError) {
         return {
           success: "",
           error:
             error.response?.data?.message ||
-            "Failed to update DO Staff. Please try again.",
+            "Failed to update Data Entry Operator. Please try again.",
         };
       }
       return {
         success: "",
-        error: "Failed to update DO Staff",
+        error: "Failed to update Data Entry Operator",
       };
     } finally {
       revalidatePath("/do-staff");

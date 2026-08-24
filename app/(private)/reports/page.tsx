@@ -129,7 +129,7 @@ export default function ReportsPage() {
                     Quantity
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    DO Remark
+                    DAO Remark
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Provision In AA

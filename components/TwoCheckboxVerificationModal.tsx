@@ -108,12 +108,6 @@ export default function TwoCheckboxVerificationModal({
               <strong className="text-gray-500">Voucher No:</strong>{" "}
               <span className="font-mono text-[#1a2b3c] font-semibold">{payment.voucher_number}</span>
             </span>
-            {payment.cheque_number && (
-              <span>
-                <strong className="text-gray-500">Cheque No:</strong>{" "}
-                <span className="font-mono text-[#1a2b3c] font-semibold">{payment.cheque_number}</span>
-              </span>
-            )}
             {payment.voucher_file_url && (
               <VoucherFileViewerModal
                 fileUrl={payment.voucher_file_url}

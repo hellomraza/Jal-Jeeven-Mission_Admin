@@ -59,7 +59,7 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
       ],
     },
     {
-      label: "District Officers",
+      label: "Divisional Account Officers",
       href: "/district-officers",
       icon: <ClipboardList size={20} />,
       roles: [UserRole.HeadOfficer, "HO"],
@@ -94,7 +94,7 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
       roles: [UserRole.TPI, "TPI"],
     },
     {
-      label: "Staff Management",
+      label: "Data Entry Operator",
       href: "/do-staff",
       icon: <Users size={20} />,
       roles: [UserRole.DistrictOfficer, "DO"],

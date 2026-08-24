@@ -115,7 +115,7 @@ export const getDOInfoByWorkItemId = async (workItemId: string) => {
     return response.data;
   } catch (error: any) {
     throw new Error(
-      error.response?.data?.message || "Failed to fetch DO info for work item",
+      error.response?.data?.message || "Failed to fetch DAO info for work item",
     );
   }
 };

@@ -40,7 +40,7 @@ export const getDistrictOfficers = async () => {
     return response.data || [];
   } catch (error: any) {
     throw new Error(
-      error.response?.data?.message || "Failed to fetch district officers",
+      error.response?.data?.message || "Failed to fetch Divisional Account Officers",
     );
   }
 };

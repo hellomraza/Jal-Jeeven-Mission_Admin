@@ -73,7 +73,7 @@ const ViewPhoto = ({ component, role }: { component: any; role: string }) => {
           variant="outline"
           size="sm"
           className="rounded-lg cursor-not-allowed bg-gray-100 text-gray-400 border-gray-300 hover:bg-gray-100"
-          title="Photo will be available once DO approves"
+          title="Photo will be available once DAO approves"
           disabled
         >
           View Photos

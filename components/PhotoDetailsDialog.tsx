@@ -244,7 +244,7 @@ const PhotoDetailsDialog = ({
                           <div className="flex items-center gap-2 shrink-0">
                             <User size={16} className="text-gray-600" />
                             <p className="text-xs font-semibold text-gray-700">
-                              APPROVED BY (DO):
+                              APPROVED BY (DAO):
                             </p>
                           </div>
                           <div className="flex-1 flex gap-2">

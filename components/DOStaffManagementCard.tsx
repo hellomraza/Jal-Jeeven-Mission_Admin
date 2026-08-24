@@ -23,10 +23,10 @@ export default function DOStaffManagementCard({
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h1 className="text-[24px] font-bold text-[#1a2b3c]">
-              Staff Management
+              Data Entry Operator Management
             </h1>
             <p className="text-[13px] text-gray-500 font-medium">
-              Manage your district office staff member (1 staff allowed per district)
+              Manage your Data Entry Operator (1 Data Entry Operator allowed per district)
             </p>
           </div>
           {!staff && (
@@ -35,7 +35,7 @@ export default function DOStaffManagementCard({
               className="bg-[#136FB6] hover:bg-[#0d5a8f] text-white flex items-center gap-2"
             >
               <Plus size={16} />
-              Create Staff Member
+              Create Data Entry Operator
             </Button>
           )}
         </div>
@@ -47,10 +47,10 @@ export default function DOStaffManagementCard({
                 <User size={28} />
               </div>
               <h2 className="text-[16px] font-bold text-[#1a2b3c]">
-                No DO Staff Member Created
+                No Data Entry Operator Created
               </h2>
               <p className="text-[13px] text-gray-500 max-w-sm mt-1">
-                You haven't created a staff member for your district office yet. Click the button above to create one.
+                You haven't created a Data Entry Operator for your district office yet. Click the button above to create one.
               </p>
             </CardContent>
           </Card>
@@ -73,7 +73,7 @@ export default function DOStaffManagementCard({
               <div className="flex items-center gap-3">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <UserCheck size={12} />
-                  Active Staff
+                  Active Data Entry Operator
                 </span>
                 <Button
                   size="sm"
@@ -112,7 +112,7 @@ export default function DOStaffManagementCard({
                     Role
                   </span>
                   <p className="text-[13px] text-gray-700 font-medium">
-                    District Office Staff (DO_STAFF)
+                    Data Entry Operator
                   </p>
                 </div>
               </div>

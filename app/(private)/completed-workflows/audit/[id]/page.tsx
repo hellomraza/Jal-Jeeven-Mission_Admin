@@ -79,14 +79,14 @@ export default async function PaymentAuditPage({
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
             <Send size={11} />
-            Sent to DO
+            Sent to DAO
           </span>
         );
       case "DO_CHECKED":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
             <CheckCircle size={11} />
-            DO Checked & Verified
+            DAO Checked & Verified
           </span>
         );
       case "SEND_TO_EE":
@@ -136,13 +136,13 @@ export default async function PaymentAuditPage({
       case "SEND_TO_DO":
         return (
           <Badge className="bg-purple-100 text-purple-800 border-none font-semibold text-[11px]">
-            SENT TO DO
+            SENT TO DAO
           </Badge>
         );
       case "DO_CHECKED":
         return (
           <Badge className="bg-indigo-100 text-indigo-800 border-none font-semibold text-[11px]">
-            DO VERIFIED
+            DAO VERIFIED
           </Badge>
         );
       case "SEND_TO_EE":
@@ -197,38 +197,32 @@ export default async function PaymentAuditPage({
 
         {/* Overview Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1: Contractor & Work Order */}
+          {/* Card 1: Contractor & Work Order Information */}
           <Card className="border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white">
             <CardHeader className="pb-3">
               <CardTitle className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                 <UserIcon size={14} className="text-[#136FB6]" />
-                Contractor & Work Order
+                Contractor & Work Order Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent className="space-y-3 text-sm">
               <div>
-                <span className="text-xs text-gray-400 block font-medium">Name (as per Bank)</span>
-                <span className="font-bold text-[#1a2b3c]">{payment.contractor_name}</span>
+                <span className="text-xs text-gray-400 block font-medium">Contractor Code</span>
+                <span className="font-mono text-sm font-semibold text-gray-800">{payment.contractor_code}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
-                <div>
-                  <span className="text-xs text-gray-400 block font-medium">Contractor Code</span>
-                  <span className="font-mono text-xs font-semibold text-gray-700">{payment.contractor_code}</span>
-                </div>
-                <div>
-                  <span className="text-xs text-gray-400 block font-medium">Work Order Code</span>
-                  <span className="font-mono text-xs font-semibold text-gray-700">{payment.work_order_code}</span>
-                </div>
+              <div className="pt-2 border-t border-gray-100">
+                <span className="text-xs text-gray-400 block font-medium">Work Order Code</span>
+                <span className="font-mono text-sm font-semibold text-gray-800">{payment.work_order_code}</span>
               </div>
             </CardContent>
           </Card>
 
-          {/* Card 2: Bank Information */}
+          {/* Card 2: Bank Account Information */}
           <Card className="border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white">
             <CardHeader className="pb-3">
               <CardTitle className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Building2 size={14} className="text-[#136FB6]" />
-                Bank Information
+                Bank Account Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
@@ -247,48 +241,47 @@ export default async function PaymentAuditPage({
                   <span className="text-[11px] text-gray-400 block truncate">{payment.branch}</span>
                 </div>
               </div>
+              <div className="pt-2 border-t border-gray-100">
+                <span className="text-xs text-gray-400 block font-medium">Contractor Name (Bank)</span>
+                <span className="font-semibold text-xs text-[#1a2b3c]">{payment.contractor_name}</span>
+              </div>
+              <div className="pt-2 border-t border-gray-100">
+                <span className="text-xs text-gray-400 block font-medium">Total Payment Amount</span>
+                <span className="text-[16px] font-extrabold text-[#136FB6]">
+                  ₹{Number(payment.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                </span>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Card 3: Amount & Voucher */}
+          {/* Card 3: Voucher & Verification Document */}
           <Card className="border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white">
             <CardHeader className="pb-3">
               <CardTitle className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Receipt size={14} className="text-[#136FB6]" />
-                Voucher & Amount
+                Voucher & Verification Document
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent className="space-y-3 text-sm">
               <div>
-                <span className="text-xs text-gray-400 block font-medium">Payment Amount</span>
-                <span className="text-[18px] font-extrabold text-[#136FB6]">
-                  ₹{Number(payment.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                </span>
+                <span className="text-xs text-gray-400 block font-medium">Voucher Number</span>
+                <span className="font-mono text-sm font-bold text-[#1a2b3c]">{payment.voucher_number}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
-                <div>
-                  <span className="text-xs text-gray-400 block font-medium">Voucher Number</span>
-                  <span className="font-mono text-xs font-semibold text-[#1a2b3c]">{payment.voucher_number}</span>
-                  {payment.cheque_number && (
-                    <span className="text-[11px] text-gray-500 block font-mono">CHQ: {payment.cheque_number}</span>
-                  )}
-                </div>
-                <div>
-                  <span className="text-xs text-gray-400 block font-medium">Voucher PDF</span>
-                  {payment.voucher_file_url ? (
-                    <VoucherFileViewerModal
-                      fileUrl={payment.voucher_file_url}
-                      voucherNumber={payment.voucher_number}
-                    >
-                      <Button size="sm" variant="outline" className="h-7 text-xs text-[#136FB6] mt-0.5">
-                        <FileText size={12} className="mr-1" />
-                        Preview PDF
-                      </Button>
-                    </VoucherFileViewerModal>
-                  ) : (
-                    <span className="text-xs text-gray-400">Not uploaded</span>
-                  )}
-                </div>
+              <div className="pt-2 border-t border-gray-100">
+                <span className="text-xs text-gray-400 block font-medium mb-1">Voucher PDF Document</span>
+                {payment.voucher_file_url ? (
+                  <VoucherFileViewerModal
+                    fileUrl={payment.voucher_file_url}
+                    voucherNumber={payment.voucher_number}
+                  >
+                    <Button size="sm" variant="outline" className="h-8 text-xs text-[#136FB6] w-full flex items-center justify-center">
+                      <FileText size={13} className="mr-1.5" />
+                      View Attached PDF
+                    </Button>
+                  </VoucherFileViewerModal>
+                ) : (
+                  <span className="text-xs text-gray-400">Not uploaded</span>
+                )}
               </div>
             </CardContent>
           </Card>

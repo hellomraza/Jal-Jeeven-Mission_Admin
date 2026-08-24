@@ -190,7 +190,21 @@ export default function CreatePaymentDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <form action={formAction} ref={formRef} className="space-y-4 mt-2">
+        <form
+          action={formAction}
+          ref={formRef}
+          className="space-y-5 mt-2"
+          onSubmit={(e) => {
+            if (!formData.voucher_file_url) {
+              e.preventDefault();
+              toast({
+                title: "Voucher PDF Required",
+                description: "Please upload the voucher PDF document before submitting.",
+                variant: "destructive",
+              });
+            }
+          }}
+        >
           {/* Hidden File Values */}
           <input
             type="hidden"
@@ -200,76 +214,48 @@ export default function CreatePaymentDialog({
           <input type="hidden" name="file_name" value={formData.file_name} />
           <input type="hidden" name="file_size" value={formData.file_size} />
 
-          {/* Section: Contractor & Work Order Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field>
-              <FieldLabel className="text-xs font-semibold text-gray-500">
-                Contractor Name as per Bank Account <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input
-                type="text"
-                name="contractor_name"
-                required
-                placeholder="ABC Infratech Pvt Ltd"
-                value={formData.contractor_name}
-                onChange={handleInputChange}
-                disabled={isPending || isUploadingPdf}
-              />
-            </Field>
+          {/* GROUP 1: Contractor & Work Order Information */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold text-[#1a2b3c] uppercase tracking-wider pb-1 border-b border-gray-100 flex items-center gap-1.5">
+              Contractor & Work Order Information
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field>
+                <FieldLabel className="text-xs font-semibold text-gray-500">
+                  Contractor Code <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  type="text"
+                  name="contractor_code"
+                  required
+                  placeholder="CON-1002"
+                  value={formData.contractor_code}
+                  onChange={handleInputChange}
+                  disabled={isPending || isUploadingPdf}
+                />
+              </Field>
 
-            <Field>
-              <FieldLabel className="text-xs font-semibold text-gray-500">
-                Contractor Code <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input
-                type="text"
-                name="contractor_code"
-                required
-                placeholder="CON-1002"
-                value={formData.contractor_code}
-                onChange={handleInputChange}
-                disabled={isPending || isUploadingPdf}
-              />
-            </Field>
+              <Field>
+                <FieldLabel className="text-xs font-semibold text-gray-500">
+                  Work Order Code <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  type="text"
+                  name="work_order_code"
+                  required
+                  placeholder="WO-2026-091"
+                  value={formData.work_order_code}
+                  onChange={handleInputChange}
+                  disabled={isPending || isUploadingPdf}
+                />
+              </Field>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field>
-              <FieldLabel className="text-xs font-semibold text-gray-500">
-                Work Order Code <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input
-                type="text"
-                name="work_order_code"
-                required
-                placeholder="WO-2026-091"
-                value={formData.work_order_code}
-                onChange={handleInputChange}
-                disabled={isPending || isUploadingPdf}
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel className="text-xs font-semibold text-gray-500">
-                Payment Amount (₹) <span className="text-red-500">*</span>
-              </FieldLabel>
-              <Input
-                type="number"
-                name="amount"
-                step="0.01"
-                required
-                placeholder="500000.00"
-                value={formData.amount}
-                onChange={handleInputChange}
-                disabled={isPending || isUploadingPdf}
-              />
-            </Field>
-          </div>
-
-          {/* Section: Bank Details */}
-          <div className="pt-2 border-t border-gray-100">
-            <h4 className="text-xs font-bold text-[#1a2b3c] uppercase tracking-wider mb-3">
-              Bank Details
+          {/* GROUP 2: Bank Account Information */}
+          <div className="space-y-3 pt-2 border-t border-gray-100">
+            <h4 className="text-xs font-bold text-[#1a2b3c] uppercase tracking-wider pb-1 border-b border-gray-100">
+              Bank Account Information
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field>
@@ -303,7 +289,7 @@ export default function CreatePaymentDialog({
               </Field>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field>
                 <FieldLabel className="text-xs font-semibold text-gray-500">
                   IFSC Code <span className="text-red-500">*</span>
@@ -334,14 +320,47 @@ export default function CreatePaymentDialog({
                 />
               </Field>
             </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field>
+                <FieldLabel className="text-xs font-semibold text-gray-500">
+                  Contractor Name as per Bank Account <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  type="text"
+                  name="contractor_name"
+                  required
+                  placeholder="ABC Infratech Pvt Ltd"
+                  value={formData.contractor_name}
+                  onChange={handleInputChange}
+                  disabled={isPending || isUploadingPdf}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel className="text-xs font-semibold text-gray-500">
+                  Total Payment Amount (₹) <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Input
+                  type="number"
+                  name="amount"
+                  step="0.01"
+                  required
+                  placeholder="500000.00"
+                  value={formData.amount}
+                  onChange={handleInputChange}
+                  disabled={isPending || isUploadingPdf}
+                />
+              </Field>
+            </div>
           </div>
 
-          {/* Section: Vouchers & Cheque */}
-          <div className="pt-2 border-t border-gray-100">
-            <h4 className="text-xs font-bold text-[#1a2b3c] uppercase tracking-wider mb-3">
-              Voucher & Reference
+          {/* GROUP 3: Voucher & Verification Document */}
+          <div className="space-y-3 pt-2 border-t border-gray-100">
+            <h4 className="text-xs font-bold text-[#1a2b3c] uppercase tracking-wider pb-1 border-b border-gray-100">
+              Voucher & Verification Document
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <Field>
                 <FieldLabel className="text-xs font-semibold text-gray-500">
                   Voucher Number <span className="text-red-500">*</span>
@@ -356,26 +375,12 @@ export default function CreatePaymentDialog({
                   disabled={isPending || isUploadingPdf}
                 />
               </Field>
-
-              <Field>
-                <FieldLabel className="text-xs font-semibold text-gray-500">
-                  Cheque / Check Number (Optional)
-                </FieldLabel>
-                <Input
-                  type="text"
-                  name="cheque_number"
-                  placeholder="CHQ-654321"
-                  value={formData.cheque_number}
-                  onChange={handleInputChange}
-                  disabled={isPending || isUploadingPdf}
-                />
-              </Field>
             </div>
 
-            {/* Voucher PDF Upload */}
-            <div className="mt-4">
+            {/* Voucher PDF Upload (Mandatory) */}
+            <div className="mt-3">
               <FieldLabel className="text-xs font-semibold text-gray-500 block mb-1.5">
-                Voucher PDF Document (Optional)
+                Voucher PDF Document <span className="text-red-500">*</span>
               </FieldLabel>
 
               <input
@@ -394,7 +399,7 @@ export default function CreatePaymentDialog({
                 >
                   <UploadCloud size={24} className="text-[#136FB6] mb-1" />
                   <p className="text-xs font-semibold text-gray-700">
-                    Click to browse and upload Voucher PDF
+                    Click to browse and upload Voucher PDF (Mandatory)
                   </p>
                   <p className="text-[11px] text-gray-400 mt-0.5">
                     PDF files only, max 15MB

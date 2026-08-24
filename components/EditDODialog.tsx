@@ -86,7 +86,7 @@ export default function EditDODialog({
     if (state.success && hasSubmitted) {
       toast({
         title: "Success",
-        description: "District Officer updated successfully.",
+        description: "Divisional Account Officer updated successfully.",
       });
       setHasSubmitted(false);
       onOpenChange(false);
@@ -127,7 +127,7 @@ export default function EditDODialog({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit District Officer</DialogTitle>
+          <DialogTitle>Edit Divisional Account Officer</DialogTitle>
         </DialogHeader>
 
         <form
