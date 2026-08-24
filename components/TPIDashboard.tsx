@@ -173,7 +173,7 @@ export default function TPIDashboard({ stats, user }: TpiDashboardProps) {
                 No work orders assigned yet
               </p>
               <p className="text-[12px] text-gray-400 mt-1">
-                Work orders assigned to your agency by the District Officer will appear here.
+                Work orders assigned to your agency by the Divisional Account Officer will appear here.
               </p>
             </div>
           ) : (

@@ -16,6 +16,13 @@ type HeaderMenuProps = {
 };
 
 const HeaderMenu = ({ userName, userRole }: HeaderMenuProps) => {
+  const displayRole =
+    userRole === "DO" || userRole === "DistrictOfficer"
+      ? "DAO"
+      : userRole === "DO_STAFF" || userRole === "DOStaff"
+      ? "Data Entry Operator"
+      : userRole;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -28,7 +35,7 @@ const HeaderMenu = ({ userName, userRole }: HeaderMenuProps) => {
               {userName}
             </span>
             <span className="text-[10px] text-gray-500 font-medium tracking-wide mt-1">
-              {userRole}
+              {displayRole}
             </span>
           </div>
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E2E8F0] text-[#475569] font-bold shadow-sm">

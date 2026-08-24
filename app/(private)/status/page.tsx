@@ -25,15 +25,15 @@ export default function StatusPage() {
   const dummyData = [
     {
       id: 1,
-      component: "Supply & Installation Of Submersible Pump (In No.)",
-      qty: "1234",
+      component: "Chlorinator (In No.)",
+      qty: "1221",
       doRemark: "15",
       provision: "1",
       physProgress: "2",
       percentProgress: "2",
       contractorRemark: "Re",
       date: "20/01/2023 9:20:18 PM",
-      status: "Approved By District Officers",
+      status: "Approved By Divisional Account Officers",
       actionDisabled: false,
     },
     {
@@ -46,7 +46,7 @@ export default function StatusPage() {
       percentProgress: "32223",
       contractorRemark: "Re",
       date: "20/01/2023 9:20:18 PM",
-      status: "Edited By District Officers",
+      status: "Edited By Divisional Account Officers",
       actionDisabled: true,
     },
     {
@@ -59,7 +59,7 @@ export default function StatusPage() {
       percentProgress: "3",
       contractorRemark: "Re",
       date: "20/01/2023 9:20:18 PM",
-      status: "Approved By District Officers",
+      status: "Approved By Divisional Account Officers",
       actionDisabled: true,
     },
     {
@@ -72,7 +72,7 @@ export default function StatusPage() {
       percentProgress: "32223",
       contractorRemark: "Re",
       date: "20/01/2023 9:20:18 PM",
-      status: "Edited By District Officers",
+      status: "Edited By Divisional Account Officers",
       actionDisabled: true,
     },
     {
@@ -85,7 +85,7 @@ export default function StatusPage() {
       percentProgress: "2",
       contractorRemark: "Re",
       date: "20/01/2023 9:20:18 PM",
-      status: "Approved By District Officers",
+      status: "Approved By Divisional Account Officers",
       actionDisabled: true,
     },
   ];
@@ -144,7 +144,7 @@ export default function StatusPage() {
                     Quantity
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
-                    DO Remark
+                    DAO Remark
                   </TableHead>
                   <TableHead className="font-bold text-[#1a2b3c] text-[12px] h-12">
                     Provision In AA

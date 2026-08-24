@@ -28,10 +28,10 @@ export default async function DistrictOfficersPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-[28px] font-bold text-[#1a2b3c]">
-              District Officers Management
+              Divisional Account Officers Management
             </h1>
             <p className="text-[14px] text-gray-500 font-medium mt-2">
-              Create and manage District Officers for your organization
+              Create and manage Divisional Account Officers for your organization
             </p>
           </div>
 

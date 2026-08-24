@@ -24,6 +24,13 @@ export default async function Header() {
     ((userRole === UserRole.DistrictOfficer || userRole === "DO") &&
       isBulkOrderAllowed);
 
+  const displayRole =
+    userRole === UserRole.DistrictOfficer || userRole === "DO"
+      ? "DAO"
+      : userRole === UserRole.DOStaff || userRole === "DO_STAFF"
+      ? "Data Entry Operator"
+      : userRole;
+
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-6 py-2 md:py-4 h-16 md:h-24 transition-all shadow-[0_4px_24px_rgba(0,0,0,0.01)]">
       {/* Left side */}
@@ -45,7 +52,7 @@ export default async function Header() {
         </div>
         <div className="flex flex-col">
           <h2 className="hidden md:block text-[14px] font-bold text-[#1a2b3c] tracking-wide">
-            Welcome {userName.toUpperCase()} ({userRole})
+            Welcome {userName.toUpperCase()} ({displayRole})
             {userRole === UserRole.DistrictOfficer || userRole === "DO"
               ? user?.district?.districtname
                 ? ` (${user.district.districtname})`

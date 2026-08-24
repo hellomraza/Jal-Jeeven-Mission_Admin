@@ -28,7 +28,7 @@ export const createUserSchema = z.object({
 });
 
 export const updateDistrictOfficerSchema = z.object({
-  id: z.string().min(1, "District Officer ID is required"),
+  id: z.string().min(1, "Divisional Account Officer ID is required"),
   name: nameValidation,
   email: emailValidation,
   mobile: z

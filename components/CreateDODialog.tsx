@@ -53,7 +53,7 @@ export default function CreateDODialog({
     if (state.success) {
       toast({
         title: "Success",
-        description: "District Officer created successfully.",
+        description: "Divisional Account Officer created successfully.",
       });
       onOpenChange(false);
     }
@@ -109,7 +109,7 @@ export default function CreateDODialog({
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Create New District Officer</DialogTitle>
+            <DialogTitle>Create New Divisional Account Officer</DialogTitle>
           </DialogHeader>
 
           <form action={formAction} ref={fromRef} className="space-y-4 mt-4">
@@ -121,7 +121,7 @@ export default function CreateDODialog({
                 type="text"
                 name="name"
                 required
-                placeholder="John DO"
+                placeholder="John DAO"
                 value={formData.name}
                 onChange={handleInputChange}
                 disabled={isPending}
@@ -136,7 +136,7 @@ export default function CreateDODialog({
                 type="email"
                 name="email"
                 required
-                placeholder="do@jjm.local"
+                placeholder="dao@jjm.local"
                 value={formData.email}
                 onChange={handleInputChange}
                 disabled={isPending}

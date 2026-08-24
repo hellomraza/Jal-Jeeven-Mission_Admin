@@ -43,7 +43,7 @@ export default function CreateDOStaffDialog({
     if (state.success) {
       toast({
         title: "Success",
-        description: "DO Staff created successfully.",
+        description: "Data Entry Operator created successfully.",
       });
       onOpenChange(false);
     }
@@ -73,7 +73,7 @@ export default function CreateDOStaffDialog({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Create DO Staff Member</DialogTitle>
+          <DialogTitle>Create Data Entry Operator</DialogTitle>
         </DialogHeader>
 
         <form action={formAction} ref={formRef} className="space-y-4 mt-4">
@@ -100,7 +100,7 @@ export default function CreateDOStaffDialog({
               type="email"
               name="email"
               required
-              placeholder="dostaff@jjm.local"
+              placeholder="deo@jjm.local"
               value={formData.email}
               onChange={handleInputChange}
               disabled={isPending}

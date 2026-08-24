@@ -59,7 +59,7 @@ export default function EditDOStaffDialog({
     if (state.success && hasSubmitted) {
       toast({
         title: "Success",
-        description: "DO Staff updated successfully.",
+        description: "Data Entry Operator updated successfully.",
       });
       setHasSubmitted(false);
       onOpenChange(false);
@@ -89,7 +89,7 @@ export default function EditDOStaffDialog({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit DO Staff Member</DialogTitle>
+          <DialogTitle>Edit Data Entry Operator</DialogTitle>
         </DialogHeader>
 
         <form

@@ -160,13 +160,13 @@ export default function PaymentDetailsTable({
       case "SEND_TO_DO":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-[#136FB6] border border-blue-200">
-            Sent to DO
+            Sent to DAO
           </span>
         );
       case "DO_CHECKED":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-            DO Checked
+            DAO Checked
           </span>
         );
       case "SEND_TO_EE":
@@ -325,38 +325,33 @@ export default function PaymentDetailsTable({
                             <div className="space-y-1">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="text-[12px] font-semibold text-[#1a2b3c] font-mono">
-                                VCH: {p.voucher_number}
-                              </span>
-                              {p.voucher_file_url && (
-                                <VoucherFileViewerModal
-                                  fileUrl={p.voucher_file_url}
-                                  voucherNumber={p.voucher_number}
-                                >
-                                  <button
-                                    type="button"
-                                    className="inline-flex items-center text-[10px] font-bold text-[#136FB6] bg-blue-50 px-1.5 py-0.5 rounded hover:bg-blue-100 transition-colors"
+                                  VCH: {p.voucher_number}
+                                </span>
+                                {p.voucher_file_url && (
+                                  <VoucherFileViewerModal
+                                    fileUrl={p.voucher_file_url}
+                                    voucherNumber={p.voucher_number}
                                   >
-                                    PDF
-                                  </button>
-                                </VoucherFileViewerModal>
-                              )}
+                                    <button
+                                      type="button"
+                                      className="inline-flex items-center text-[10px] font-bold text-[#136FB6] bg-blue-50 px-1.5 py-0.5 rounded hover:bg-blue-100 transition-colors"
+                                    >
+                                      PDF
+                                    </button>
+                                  </VoucherFileViewerModal>
+                                )}
+                              </div>
                             </div>
-                            {p.cheque_number && (
-                              <span className="text-[11px] text-gray-500 font-mono block">
-                                CHQ: {p.cheque_number}
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
+                          </TableCell>
 
-                        <TableCell className="whitespace-nowrap">
-                          <span className="text-[14px] font-extrabold text-[#136FB6]">
-                            ₹
-                            {Number(p.amount).toLocaleString("en-IN", {
-                              minimumFractionDigits: 2,
-                            })}
-                          </span>
-                        </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            <span className="text-[14px] font-extrabold text-[#136FB6]">
+                              ₹
+                              {Number(p.amount).toLocaleString("en-IN", {
+                                minimumFractionDigits: 2,
+                              })}
+                            </span>
+                          </TableCell>
 
                         <TableCell className="whitespace-nowrap">{getStatusBadge(p.status)}</TableCell>
 
@@ -388,7 +383,7 @@ export default function PaymentDetailsTable({
                                     href={`/completed-workflows/check/${p.id}`}
                                   >
                                     <Send size={13} className="mr-1" />
-                                    Send to DO
+                                    Send to DAO
                                   </Link>
                                 </Button>
                               </>

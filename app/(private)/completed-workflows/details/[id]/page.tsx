@@ -74,13 +74,13 @@ export default async function PaymentDetailsPage({
       case "SEND_TO_DO":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-[#136FB6] border border-blue-200">
-            Sent to DO
+            Sent to DAO
           </span>
         );
       case "DO_CHECKED":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-            DO Checked
+            DAO Checked
           </span>
         );
       case "SEND_TO_EE":
@@ -150,23 +150,13 @@ export default async function PaymentDetailsPage({
         {/* Single-Column Sequential Details Card */}
         <Card className="border-gray-200 shadow-sm bg-white">
           <CardContent className="p-6 space-y-6">
-            {/* GROUP 1: Contractor & Work Order */}
+            {/* GROUP 1: Contractor & Work Order Information */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
                 <UserIcon size={16} className="text-[#136FB6]" />
                 <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500">
                   Contractor & Work Order Information
                 </h2>
-              </div>
-
-              {/* Field: Contractor Name as per Bank Account */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 block">
-                  Contractor Name as per Bank Account
-                </label>
-                <div className="text-base font-bold text-[#1a2b3c] bg-gray-50/70 p-3 rounded-lg border border-gray-100">
-                  {payment.contractor_name}
-                </div>
               </div>
 
               {/* Field: Contractor Code */}
@@ -190,7 +180,7 @@ export default async function PaymentDetailsPage({
               </div>
             </div>
 
-            {/* GROUP 2: Bank Information */}
+            {/* GROUP 2: Bank Account Information */}
             <div className="space-y-4 pt-4 border-t border-gray-200">
               <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
                 <Building2 size={16} className="text-[#136FB6]" />
@@ -229,7 +219,7 @@ export default async function PaymentDetailsPage({
                 </div>
               </div>
 
-              {/* Field: Branch */}
+              {/* Field: Branch Name */}
               <div className="space-y-1">
                 <label className="text-xs font-medium text-gray-500 block">
                   Branch Name
@@ -238,18 +228,18 @@ export default async function PaymentDetailsPage({
                   {payment.branch}
                 </div>
               </div>
-            </div>
 
-            {/* GROUP 3: Voucher & Payment Details */}
-            <div className="space-y-4 pt-4 border-t border-gray-200">
-              <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                <Receipt size={16} className="text-[#136FB6]" />
-                <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                  Voucher & Payment Amount
-                </h2>
+              {/* Field: Contractor Name as per Bank Account */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-500 block">
+                  Contractor Name as per Bank Account
+                </label>
+                <div className="text-base font-bold text-[#1a2b3c] bg-gray-50/70 p-3 rounded-lg border border-gray-100">
+                  {payment.contractor_name}
+                </div>
               </div>
 
-              {/* Field: Payment Amount */}
+              {/* Field: Total Payment Amount */}
               <div className="space-y-1">
                 <label className="text-xs font-medium text-gray-500 block">
                   Total Payment Amount (₹)
@@ -257,6 +247,16 @@ export default async function PaymentDetailsPage({
                 <div className="text-2xl font-extrabold text-[#136FB6] bg-blue-50/60 p-4 rounded-lg border border-blue-200">
                   ₹{Number(payment.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                 </div>
+              </div>
+            </div>
+
+            {/* GROUP 3: Voucher & Verification Document */}
+            <div className="space-y-4 pt-4 border-t border-gray-200">
+              <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                <Receipt size={16} className="text-[#136FB6]" />
+                <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                  Voucher & Verification Document
+                </h2>
               </div>
 
               {/* Field: Voucher Number */}
@@ -266,16 +266,6 @@ export default async function PaymentDetailsPage({
                 </label>
                 <div className="text-base font-mono font-bold text-[#1a2b3c] bg-gray-50/70 p-3 rounded-lg border border-gray-100">
                   {payment.voucher_number}
-                </div>
-              </div>
-
-              {/* Field: Cheque Number */}
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 block">
-                  Cheque / Reference Number
-                </label>
-                <div className="text-sm font-mono text-gray-700 bg-gray-50/70 p-3 rounded-lg border border-gray-100">
-                  {payment.cheque_number || "Not provided"}
                 </div>
               </div>
 

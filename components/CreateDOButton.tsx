@@ -15,7 +15,7 @@ export default function CreateDOButton() {
         className="bg-[#136FB6] hover:bg-[#0d5a8f] text-white text-[13px] font-bold"
       >
         <Plus className="mr-2 h-4 w-4" />
-        Create District Officer
+        Create Divisional Account Officer
       </Button>
 
       <CreateDODialog

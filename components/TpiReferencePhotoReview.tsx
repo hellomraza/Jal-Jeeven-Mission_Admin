@@ -108,7 +108,7 @@ export default function TpiReferencePhotoReview({
             <p className="text-[12px] text-gray-500 font-medium">
               {isTpiUser
                 ? "Manage and select your agency's verified reference photo for this component"
-                : "Official reference photo uploaded by Third-Party Inspector (Read-only reference for DO)"}
+                : "Official reference photo uploaded by Third-Party Inspector (Read-only reference for DAO)"}
             </p>
           </div>
         </div>

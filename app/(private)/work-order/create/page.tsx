@@ -348,7 +348,7 @@ export default function CreateWorkOrderPage() {
           Access Restricted
         </h2>
         <p className="text-[13px] text-gray-600 mt-2">
-          Only Head Officers, District Officers, or Contractors can create new work items.
+          Only Head Officers, Divisional Account Officers, or Contractors can create new work items.
         </p>
         <Button className="mt-4" onClick={() => router.replace("/work-order")}>
           Back

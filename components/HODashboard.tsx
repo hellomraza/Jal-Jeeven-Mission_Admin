@@ -35,7 +35,7 @@ const chartConfig = {
     color: "#ec4899",
   },
   districtOfficers: {
-    label: "District Officers",
+    label: "Divisional Account Officers",
     color: "#f59e0b",
   },
   headOffice: {
@@ -177,7 +177,7 @@ export default function HODashboard({ stats }: HODashboardProps) {
                       fill: chartConfig.contractors.color,
                     },
                     {
-                      name: "District Officers",
+                      name: "Divisional Account Officers",
                       value: stats.users.districtOfficers,
                       fill: chartConfig.districtOfficers.color,
                     },

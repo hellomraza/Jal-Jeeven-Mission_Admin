@@ -57,7 +57,7 @@ export default function DOManagementTable({
 
       toast({
         title: "Permission Updated",
-        description: `District Officer updated to ${
+        description: `Divisional Account Officer updated to ${
           nextStatus
             ? "Bulk Access enabled"
             : "SVS only"
@@ -90,10 +90,10 @@ export default function DOManagementTable({
             {officers.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <p className="text-[14px] text-gray-500 font-medium">
-                  No District Officers listed yet
+                  No Divisional Account Officers listed yet
                 </p>
                 <p className="text-[12px] text-gray-400 mt-1">
-                  Click "Create District Officer" to add a new officer
+                  Click "Create Divisional Account Officer" to add a new officer
                 </p>
               </div>
             ) : (

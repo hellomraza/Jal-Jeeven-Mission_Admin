@@ -145,11 +145,12 @@ export const createPaymentAction = async (
       !ifsc_code ||
       !branch ||
       !voucher_number ||
+      !voucher_file_url ||
       isNaN(amount) ||
       amount <= 0
     ) {
       return {
-        error: "All required fields including voucher number and a valid amount must be filled.",
+        error: "All required fields including voucher number, voucher PDF document, and a valid amount must be filled.",
         success: "",
       };
     }
@@ -258,7 +259,7 @@ export const sendToDOAction = async (id: string) => {
   } catch (error: any) {
     return {
       success: false,
-      error: error?.response?.data?.message || error.message || "Failed to send to DO",
+      error: error?.response?.data?.message || error.message || "Failed to send to DAO",
     };
   }
 };
