@@ -115,6 +115,8 @@ export default async function WorkOrderDetailsPage({ params }: PageParams) {
 
   const isBulkAllowed = Boolean(userProfile?.is_bulk_order_allowed);
   const isBulkVillage = workItem?.work_order_type === "BULK_VILLAGE";
+  const isExecutiveEngineer =
+    role === UserRole.ExecutiveEngineer || role === "EE";
 
   if (!workItem) {
     return (
