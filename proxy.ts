@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_ROUTES = ["/login", "/forgot-password", "/reset-password"];
+const PUBLIC_AUTH_ROUTES = ["/login", "/forgot-password", "/reset-password"];
+const PUBLIC_ROUTES = [...PUBLIC_AUTH_ROUTES, "/payment"];
 
 const isPublicRoute = (pathname: string) => {
   return PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+};
+
+const isAuthRoute = (pathname: string) => {
+  return PUBLIC_AUTH_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 };
@@ -35,7 +42,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (isLoggedIn && isPublicRoute(pathname)) {
+  if (isLoggedIn && isAuthRoute(pathname)) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
