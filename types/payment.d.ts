@@ -4,7 +4,8 @@ export type PaymentDetailStatus =
   | 'DO_CHECKED'
   | 'SEND_TO_EE'
   | 'EE_CHECKED'
-  | 'SEND_FOR_RELEASE_PAYMENT';
+  | 'SEND_FOR_RELEASE_PAYMENT'
+  | 'PAID';
 
 export interface VoucherFile {
   id: string;
@@ -34,8 +35,12 @@ export interface PaymentDetailAudit {
 export interface PaymentDetail {
   id: string;
   contractor_name: string;
-  contractor_code: string;
-  work_order_code: string;
+  contractor_code?: string;
+  work_order_code?: string;
+  contractor_id?: string;
+  agreement_number?: string;
+  year?: string;
+  beneficiary_name?: string;
   bank_name: string;
   bank_account_number: string;
   ifsc_code: string;
@@ -45,6 +50,9 @@ export interface PaymentDetail {
   voucher_file_url?: string | null;
   voucher_file_id?: string | null;
   voucherFile?: VoucherFile | null;
+  additional_pdf_url?: string | null;
+  additional_file_name?: string | null;
+  additional_file_size?: number | null;
   cheque_number?: string | null;
   district_id: string;
   status: PaymentDetailStatus;
@@ -60,8 +68,12 @@ export interface PaymentDetail {
 
 export interface CreatePaymentDetailInput {
   contractor_name: string;
-  contractor_code: string;
-  work_order_code: string;
+  contractor_code?: string;
+  work_order_code?: string;
+  contractor_id?: string;
+  agreement_number?: string;
+  year?: string;
+  beneficiary_name?: string;
   bank_name: string;
   bank_account_number: string;
   ifsc_code: string;
@@ -72,5 +84,8 @@ export interface CreatePaymentDetailInput {
   voucher_file_id?: string;
   file_name?: string;
   file_size?: number;
+  additional_pdf_url?: string;
+  additional_file_name?: string;
+  additional_file_size?: number;
   cheque_number?: string;
 }

@@ -21,6 +21,9 @@ export interface SidebarItem {
   roles?: string[]; // If specified, only show for these roles
 }
 
+// Set to true to re-enable SD Payment menu item in JJM Admin
+const ENABLE_SD_PAYMENT_IN_JJM_ADMIN = false;
+
 const getMenuItems = (userRole?: string): SidebarItem[] => {
   const baseItems: SidebarItem[] = [
     {
@@ -115,21 +118,25 @@ const getMenuItems = (userRole?: string): SidebarItem[] => {
       icon: <ClipboardList size={20} />,
       roles: [UserRole.Contractor, "CO"],
     },
-    {
-      label: "SD Payment",
-      href: "/completed-workflows",
-      icon: <CheckCircle2 size={20} />,
-      roles: [
-        UserRole.DistrictOfficer,
-        UserRole.DOStaff,
-        UserRole.ExecutiveEngineer,
-        UserRole.HeadOfficer,
-        "DO",
-        "DO_STAFF",
-        "EE",
-        "HO",
-      ],
-    },
+    ...(ENABLE_SD_PAYMENT_IN_JJM_ADMIN
+      ? [
+          {
+            label: "SD Payment",
+            href: "/completed-workflows",
+            icon: <CheckCircle2 size={20} />,
+            roles: [
+              UserRole.DistrictOfficer,
+              UserRole.DOStaff,
+              UserRole.ExecutiveEngineer,
+              UserRole.HeadOfficer,
+              "DO",
+              "DO_STAFF",
+              "EE",
+              "HO",
+            ],
+          },
+        ]
+      : []),
   ];
 
   // Filter items based on user role

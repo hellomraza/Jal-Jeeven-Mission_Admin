@@ -3,20 +3,20 @@ import { createServerApiClient } from "@/lib/server-api-client";
 import { PaymentDetail } from "@/types/payment";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import CheckPaymentDetailsClient from "./CheckPaymentDetailsClient";
+import ReleasePaymentClient from "./ReleasePaymentClient";
 
 // Set to true to enable SD Payment workflow inside JJM Admin
 const ENABLE_SD_PAYMENT_IN_JJM_ADMIN = false;
 
-export interface CheckPaymentPageProps {
+export interface ReleasePaymentPageProps {
   params: Promise<{
     id: string;
   }>;
 }
 
-export default async function CheckPaymentPage({
+export default async function ReleasePaymentPage({
   params,
-}: CheckPaymentPageProps) {
+}: ReleasePaymentPageProps) {
   if (!ENABLE_SD_PAYMENT_IN_JJM_ADMIN) {
     redirect("/dashboard");
   }
@@ -33,7 +33,7 @@ export default async function CheckPaymentPage({
     const res = await apiClient.get<PaymentDetail>(`/payments/${id}`);
     payment = res.data;
   } catch (err: any) {
-    console.error("Failed to load payment detail for check:", err);
+    console.error("Failed to load payment detail for release:", err);
     error = err.response?.data?.message || err.message || "Record not found";
   }
 
@@ -45,7 +45,7 @@ export default async function CheckPaymentPage({
           <div className="rounded-xl bg-red-50 p-6 text-red-700 border border-red-100">
             <h2 className="text-lg font-bold">Payment Record Not Found</h2>
             <p className="text-sm mt-1">
-              {error || "The requested payment record could not be loaded for checking."}
+              {error || "The requested payment record could not be loaded."}
             </p>
           </div>
         </div>
@@ -54,6 +54,6 @@ export default async function CheckPaymentPage({
   }
 
   return (
-    <CheckPaymentDetailsClient payment={payment} userRole={role} />
+    <ReleasePaymentClient payment={payment} userRole={role} />
   );
 }

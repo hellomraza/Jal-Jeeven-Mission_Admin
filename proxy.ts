@@ -46,6 +46,15 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  // Set to true to re-enable SD Payment workflow routes in JJM Admin
+  const ENABLE_SD_PAYMENT_IN_JJM_ADMIN = false;
+  if (
+    !ENABLE_SD_PAYMENT_IN_JJM_ADMIN &&
+    pathname.startsWith("/completed-workflows")
+  ) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
   return NextResponse.next({
     request: {
       headers: requestHeaders,

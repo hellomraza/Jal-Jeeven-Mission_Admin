@@ -19,8 +19,10 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   Building2,
+  Calendar,
   CheckCircle2,
   ExternalLink,
+  FilePlus2,
   FileText,
   Loader2,
   Receipt,
@@ -30,16 +32,29 @@ import {
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 
+// Set to true to enable SD Payment workflow inside JJM Admin
+const ENABLE_SD_PAYMENT_IN_JJM_ADMIN = false;
+
 export default function CreatePaymentPage() {
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!ENABLE_SD_PAYMENT_IN_JJM_ADMIN) {
+      router.replace("/dashboard");
+    }
+  }, [router]);
+
   const formRef = useRef<HTMLFormElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const voucherFileInputRef = useRef<HTMLInputElement>(null);
+  const additionalFileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     contractor_name: "",
-    contractor_code: "",
-    work_order_code: "",
+    beneficiary_name: "",
+    contractor_id: "",
+    agreement_number: "",
+    year: "",
     bank_name: "",
     bank_account_number: "",
     ifsc_code: "",
@@ -50,10 +65,20 @@ export default function CreatePaymentPage() {
     voucher_file_url: "",
     file_name: "",
     file_size: 0,
+    additional_pdf_url: "",
+    additional_file_name: "",
+    additional_file_size: 0,
   });
 
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
+  const [voucherPdfFile, setVoucherPdfFile] = useState<File | null>(null);
+  const [isUploadingVoucher, setIsUploadingVoucher] = useState(false);
+
+  const [additionalPdfFile, setAdditionalPdfFile] = useState<File | null>(null);
+  const [isUploadingAdditional, setIsUploadingAdditional] = useState(false);
+
+  // Modal states for previewing PDFs
+  const [previewModalUrl, setPreviewModalUrl] = useState<string | null>(null);
+  const [previewModalTitle, setPreviewModalTitle] = useState("");
 
   const [state, formAction, isPending] = useActionState(createPaymentAction, {
     success: "",
@@ -78,7 +103,9 @@ export default function CreatePaymentPage() {
     }));
   };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVoucherFileSelect = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -100,8 +127,8 @@ export default function CreatePaymentPage() {
       return;
     }
 
-    setPdfFile(file);
-    setIsUploadingPdf(true);
+    setVoucherPdfFile(file);
+    setIsUploadingVoucher(true);
 
     try {
       const uploadData = new FormData();
@@ -118,7 +145,7 @@ export default function CreatePaymentPage() {
           description: res.error || "Failed to upload voucher PDF.",
           variant: "destructive",
         });
-        setPdfFile(null);
+        setVoucherPdfFile(null);
       } else {
         setFormData((prev) => ({
           ...prev,
@@ -128,30 +155,109 @@ export default function CreatePaymentPage() {
         }));
         toast({
           title: "Voucher Uploaded",
-          description: "Voucher PDF file uploaded to Cloudinary successfully.",
+          description: "Voucher PDF file uploaded successfully.",
         });
       }
     } catch (err: any) {
       toast({
         title: "Upload Error",
-        description: err.message || "An unexpected error occurred during upload.",
+        description: err.message || "An error occurred during voucher upload.",
         variant: "destructive",
       });
-      setPdfFile(null);
+      setVoucherPdfFile(null);
     } finally {
-      setIsUploadingPdf(false);
+      setIsUploadingVoucher(false);
     }
   };
 
-  const handleRemoveFile = () => {
-    setPdfFile(null);
+  const handleRemoveVoucherFile = () => {
+    setVoucherPdfFile(null);
     setFormData((prev) => ({
       ...prev,
       voucher_file_url: "",
       file_name: "",
       file_size: 0,
     }));
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (voucherFileInputRef.current) voucherFileInputRef.current.value = "";
+  };
+
+  const handleAdditionalFileSelect = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast({
+        title: "Invalid file",
+        description: "Only PDF documents are allowed.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "PDF file size must be 15 MB or smaller.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAdditionalPdfFile(file);
+    setIsUploadingAdditional(true);
+
+    try {
+      const uploadData = new FormData();
+      uploadData.append("file", file);
+
+      const res = await uploadPaymentVoucherPdfAction(
+        { success: "", error: "", uploadedFile: null },
+        uploadData,
+      );
+
+      if (res.error || !res.uploadedFile) {
+        toast({
+          title: "Upload Failed",
+          description: res.error || "Failed to upload additional PDF.",
+          variant: "destructive",
+        });
+        setAdditionalPdfFile(null);
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          additional_pdf_url: res.uploadedFile?.fileUrl || "",
+          additional_file_name: res.uploadedFile?.fileName || file.name,
+          additional_file_size: res.uploadedFile?.fileSize || file.size,
+        }));
+        toast({
+          title: "Document Uploaded",
+          description: "Additional PDF document uploaded successfully.",
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: "Upload Error",
+        description: err.message || "An error occurred during document upload.",
+        variant: "destructive",
+      });
+      setAdditionalPdfFile(null);
+    } finally {
+      setIsUploadingAdditional(false);
+    }
+  };
+
+  const handleRemoveAdditionalFile = () => {
+    setAdditionalPdfFile(null);
+    setFormData((prev) => ({
+      ...prev,
+      additional_pdf_url: "",
+      additional_file_name: "",
+      additional_file_size: 0,
+    }));
+    if (additionalFileInputRef.current)
+      additionalFileInputRef.current.value = "";
   };
 
   return (
@@ -164,7 +270,7 @@ export default function CreatePaymentPage() {
               Create Payment Record
             </h1>
             <p className="text-[13px] text-gray-500 font-medium">
-              Submit contractor bank information, voucher document, and payment amount for verification
+              Submit contractor details, agreement number, bank information, and voucher documents for verification
             </p>
           </div>
         </div>
@@ -173,10 +279,10 @@ export default function CreatePaymentPage() {
           <CardHeader>
             <CardTitle className="text-lg font-bold text-[#1a2b3c] flex items-center gap-2">
               <Receipt size={20} className="text-[#136FB6]" />
-              Payment & Bank Details
+              Payment & Contractor Details
             </CardTitle>
             <CardDescription className="text-xs text-gray-500">
-              Ensure all fields and bank details match the official physical voucher.
+              Ensure all fields and bank details match the official voucher and agreement documents.
             </CardDescription>
           </CardHeader>
 
@@ -190,7 +296,8 @@ export default function CreatePaymentPage() {
                   e.preventDefault();
                   toast({
                     title: "Voucher PDF Required",
-                    description: "Please upload the voucher PDF document before submitting.",
+                    description:
+                      "Please upload the voucher PDF document before submitting.",
                     variant: "destructive",
                   });
                 }
@@ -212,54 +319,120 @@ export default function CreatePaymentPage() {
                 name="file_size"
                 value={formData.file_size}
               />
+              <input
+                type="hidden"
+                name="additional_pdf_url"
+                value={formData.additional_pdf_url}
+              />
+              <input
+                type="hidden"
+                name="additional_file_name"
+                value={formData.additional_file_name}
+              />
+              <input
+                type="hidden"
+                name="additional_file_size"
+                value={formData.additional_file_size}
+              />
 
-              {/* Group 1: Contractor & Work Order Information */}
+              {/* Group 1: Contractor & Agreement Information */}
               <div className="space-y-4">
                 <h3 className="text-xs font-bold text-[#1a2b3c] uppercase tracking-wider text-gray-400">
-                  1. Contractor & Work Order Information
+                  1. Contractor & Agreement Information
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel className="text-xs font-semibold text-gray-700">
-                      Contractor Code <span className="text-red-500">*</span>
+                      Contractor Name <span className="text-red-500">*</span>
                     </FieldLabel>
                     <Input
                       type="text"
-                      name="contractor_code"
+                      name="contractor_name"
                       required
-                      placeholder="CON-1002"
-                      value={formData.contractor_code}
+                      placeholder="e.g. Shyam Construction Co."
+                      value={formData.contractor_name}
                       onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
                       className="bg-white"
                     />
                   </Field>
 
                   <Field>
                     <FieldLabel className="text-xs font-semibold text-gray-700">
-                      Work Order Code <span className="text-red-500">*</span>
+                      Contractor ID <span className="text-red-500">*</span>
                     </FieldLabel>
                     <Input
                       type="text"
-                      name="work_order_code"
+                      name="contractor_id"
                       required
-                      placeholder="WO-2026-091"
-                      value={formData.work_order_code}
+                      placeholder="e.g. CON-8821"
+                      value={formData.contractor_id}
                       onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
+                      className="bg-white"
+                    />
+                  </Field>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field>
+                    <FieldLabel className="text-xs font-semibold text-gray-700">
+                      Agreement Number <span className="text-red-500">*</span>
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      name="agreement_number"
+                      required
+                      placeholder="e.g. AGR-2026/092"
+                      value={formData.agreement_number}
+                      onChange={handleInputChange}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
+                      className="bg-white"
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                      <Calendar size={13} className="text-gray-400" />
+                      Year (Optional text)
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      name="year"
+                      placeholder="e.g. 2025-26"
+                      value={formData.year}
+                      onChange={handleInputChange}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
                       className="bg-white"
                     />
                   </Field>
                 </div>
               </div>
 
-              {/* Group 2: Bank Account Information */}
+              {/* Group 2: Bank Account & Beneficiary Information */}
               <div className="space-y-4 pt-4 border-t border-gray-100">
                 <h3 className="text-xs font-bold text-[#1a2b3c] uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                   <Building2 size={14} className="text-[#136FB6]" />
-                  2. Bank Account Information
+                  2. Bank Account & Beneficiary Details
                 </h3>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field>
+                    <FieldLabel className="text-xs font-semibold text-gray-700">
+                      Beneficiary Name (as per Bank) <span className="text-red-500">*</span>
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      name="beneficiary_name"
+                      required
+                      placeholder="e.g. Shyam Construction Private Limited"
+                      value={formData.beneficiary_name}
+                      onChange={handleInputChange}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
+                      className="bg-white"
+                    />
+                  </Field>
+
                   <Field>
                     <FieldLabel className="text-xs font-semibold text-gray-700">
                       Bank Name <span className="text-red-500">*</span>
@@ -271,11 +444,13 @@ export default function CreatePaymentPage() {
                       placeholder="State Bank of India"
                       value={formData.bank_name}
                       onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
                       className="bg-white"
                     />
                   </Field>
+                </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel className="text-xs font-semibold text-gray-700">
                       Bank Account Number <span className="text-red-500">*</span>
@@ -287,13 +462,11 @@ export default function CreatePaymentPage() {
                       placeholder="309812345678"
                       value={formData.bank_account_number}
                       onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
                       className="bg-white"
                     />
                   </Field>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel className="text-xs font-semibold text-gray-700">
                       IFSC Code <span className="text-red-500">*</span>
@@ -305,11 +478,13 @@ export default function CreatePaymentPage() {
                       placeholder="SBIN0001234"
                       value={formData.ifsc_code}
                       onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
                       className="bg-white"
                     />
                   </Field>
+                </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel className="text-xs font-semibold text-gray-700">
                       Branch Name <span className="text-red-500">*</span>
@@ -321,25 +496,7 @@ export default function CreatePaymentPage() {
                       placeholder="Main Branch, District Center"
                       value={formData.branch}
                       onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
-                      className="bg-white"
-                    />
-                  </Field>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field>
-                    <FieldLabel className="text-xs font-semibold text-gray-700">
-                      Contractor Name as per Bank Account <span className="text-red-500">*</span>
-                    </FieldLabel>
-                    <Input
-                      type="text"
-                      name="contractor_name"
-                      required
-                      placeholder="ABC Infratech Pvt Ltd"
-                      value={formData.contractor_name}
-                      onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
                       className="bg-white"
                     />
                   </Field>
@@ -356,19 +513,19 @@ export default function CreatePaymentPage() {
                       placeholder="500000.00"
                       value={formData.amount}
                       onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
                       className="bg-white"
                     />
                   </Field>
                 </div>
               </div>
 
-              {/* Group 3: Voucher & Verification Document */}
+              {/* Group 3: Voucher & Verification Documents */}
               <div className="space-y-4 pt-4 border-t border-gray-100">
                 <h3 className="text-xs font-bold text-[#1a2b3c] uppercase tracking-wider text-gray-400">
-                  3. Voucher & Verification Document
+                  3. Voucher & Verification Documents
                 </h3>
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel className="text-xs font-semibold text-gray-700">
                       Voucher Number <span className="text-red-500">*</span>
@@ -380,93 +537,197 @@ export default function CreatePaymentPage() {
                       placeholder="VCH-2026-881"
                       value={formData.voucher_number}
                       onChange={handleInputChange}
-                      disabled={isPending || isUploadingPdf}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
+                      className="bg-white"
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel className="text-xs font-semibold text-gray-700">
+                      Cheque Number (Optional)
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      name="cheque_number"
+                      placeholder="CHQ-992102"
+                      value={formData.cheque_number}
+                      onChange={handleInputChange}
+                      disabled={isPending || isUploadingVoucher || isUploadingAdditional}
                       className="bg-white"
                     />
                   </Field>
                 </div>
 
-                {/* Voucher PDF Upload (Mandatory) */}
-                <div className="pt-2">
-                  <FieldLabel className="text-xs font-semibold text-gray-700 block mb-2">
-                    Voucher PDF Document <span className="text-red-500">*</span>
+                {/* Primary Voucher PDF Upload (Required) */}
+                <div className="space-y-2">
+                  <FieldLabel className="text-xs font-semibold text-gray-700">
+                    Primary Voucher PDF Document <span className="text-red-500">*</span>
                   </FieldLabel>
 
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="application/pdf"
-                    className="hidden"
-                    onChange={handleFileSelect}
-                    disabled={isPending || isUploadingPdf}
-                  />
-
-                  {!formData.voucher_file_url && !pdfFile ? (
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-gray-200 hover:border-[#136FB6] rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors bg-gray-50/50 hover:bg-blue-50/20"
-                    >
-                      <UploadCloud size={32} className="text-[#136FB6] mb-2" />
-                      <p className="text-sm font-semibold text-gray-800">
-                        Click to browse and upload Voucher PDF (Mandatory)
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        PDF files only, max 15MB
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 bg-gray-50">
-                      <div className="flex items-center gap-3 overflow-hidden">
-                        <FileText size={24} className="text-[#136FB6] shrink-0" />
-                        <div className="overflow-hidden">
-                          <p className="text-sm font-bold text-[#1a2b3c] truncate">
-                            {formData.file_name || pdfFile?.name}
+                  {formData.voucher_file_url ? (
+                    <div className="flex items-center justify-between p-3.5 border border-emerald-200 bg-emerald-50/50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700">
+                          <CheckCircle2 size={18} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-[#1a2b3c]">
+                            {formData.file_name || "Voucher_Document.pdf"}
                           </p>
-                          <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                            {isUploadingPdf ? (
-                              <span className="flex items-center gap-1 text-blue-600 font-semibold">
-                                <Loader2 size={12} className="animate-spin" /> Uploading to cloud...
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-1 text-emerald-600 font-semibold">
-                                <CheckCircle2 size={12} /> Cloud Uploaded
-                              </span>
-                            )}
-                            {formData.file_size ? (
-                              <span>({(formData.file_size / 1024).toFixed(1)} KB)</span>
-                            ) : null}
-                          </div>
+                          <p className="text-[11px] text-gray-500">
+                            {formData.file_size
+                              ? `${(formData.file_size / 1024).toFixed(1)} KB`
+                              : "PDF document uploaded"}
+                          </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        {formData.voucher_file_url && (
-                          <VoucherFileViewerModal
-                            fileUrl={formData.voucher_file_url}
-                            fileName={formData.file_name || pdfFile?.name}
-                            voucherNumber={formData.voucher_number}
-                          >
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="text-xs text-[#136FB6]"
-                            >
-                              <FileText size={14} className="mr-1" />
-                              View PDF
-                            </Button>
-                          </VoucherFileViewerModal>
-                        )}
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={handleRemoveFile}
-                          disabled={isUploadingPdf}
-                          className="text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="h-8 text-xs text-[#136FB6] hover:bg-[#DFEEF9]/50"
+                          onClick={() => {
+                            setPreviewModalUrl(formData.voucher_file_url);
+                            setPreviewModalTitle("Voucher Document Preview");
+                          }}
                         >
-                          <X size={16} />
+                          <ExternalLink size={14} className="mr-1" />
+                          View PDF
                         </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs text-red-600 hover:bg-red-50"
+                          onClick={handleRemoveVoucherFile}
+                          disabled={isPending}
+                        >
+                          <X size={14} className="mr-1" />
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="border-2 border-dashed border-gray-200 hover:border-[#136FB6] rounded-xl p-5 text-center cursor-pointer transition-colors bg-gray-50/50"
+                      onClick={() => voucherFileInputRef.current?.click()}
+                    >
+                      <input
+                        type="file"
+                        ref={voucherFileInputRef}
+                        accept="application/pdf"
+                        className="hidden"
+                        onChange={handleVoucherFileSelect}
+                        disabled={isUploadingVoucher || isPending}
+                      />
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-[#DFEEF9] flex items-center justify-center text-[#136FB6]">
+                          {isUploadingVoucher ? (
+                            <Loader2 size={20} className="animate-spin" />
+                          ) : (
+                            <UploadCloud size={20} />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-[#1a2b3c]">
+                            {isUploadingVoucher
+                              ? "Uploading Voucher PDF..."
+                              : "Click to upload Voucher PDF document"}
+                          </p>
+                          <p className="text-[11px] text-gray-500">
+                            PDF format only (Max 15MB)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Additional PDF Document Upload (Optional) */}
+                <div className="space-y-2 pt-2">
+                  <FieldLabel className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                    <FilePlus2 size={13} className="text-gray-400" />
+                    Additional PDF Document (Optional)
+                  </FieldLabel>
+
+                  {formData.additional_pdf_url ? (
+                    <div className="flex items-center justify-between p-3.5 border border-blue-200 bg-blue-50/40 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700">
+                          <FileText size={18} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-[#1a2b3c]">
+                            {formData.additional_file_name || "Additional_Document.pdf"}
+                          </p>
+                          <p className="text-[11px] text-gray-500">
+                            {formData.additional_file_size
+                              ? `${(formData.additional_file_size / 1024).toFixed(1)} KB`
+                              : "Optional document attached"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs text-[#136FB6] hover:bg-[#DFEEF9]/50"
+                          onClick={() => {
+                            setPreviewModalUrl(formData.additional_pdf_url);
+                            setPreviewModalTitle("Additional Document Preview");
+                          }}
+                        >
+                          <ExternalLink size={14} className="mr-1" />
+                          View PDF
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs text-red-600 hover:bg-red-50"
+                          onClick={handleRemoveAdditionalFile}
+                          disabled={isPending}
+                        >
+                          <X size={14} className="mr-1" />
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="border-2 border-dashed border-gray-200 hover:border-[#136FB6] rounded-xl p-4 text-center cursor-pointer transition-colors bg-gray-50/30"
+                      onClick={() => additionalFileInputRef.current?.click()}
+                    >
+                      <input
+                        type="file"
+                        ref={additionalFileInputRef}
+                        accept="application/pdf"
+                        className="hidden"
+                        onChange={handleAdditionalFileSelect}
+                        disabled={isUploadingAdditional || isPending}
+                      />
+                      <div className="flex flex-col items-center justify-center space-y-1.5">
+                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                          {isUploadingAdditional ? (
+                            <Loader2 size={16} className="animate-spin text-[#136FB6]" />
+                          ) : (
+                            <FilePlus2 size={16} />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-gray-700">
+                            {isUploadingAdditional
+                              ? "Uploading Document..."
+                              : "Upload an extra document (Optional)"}
+                          </p>
+                          <p className="text-[11px] text-gray-400">
+                            PDF format only (Max 15MB)
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -474,8 +735,8 @@ export default function CreatePaymentPage() {
               </div>
 
               {state.error && (
-                <div className="rounded-xl bg-red-50 p-4 border border-red-100">
-                  <p className="text-xs font-medium text-red-700">{state.error}</p>
+                <div className="rounded-xl bg-red-50 p-4 text-red-700 border border-red-100">
+                  <p className="text-xs font-semibold">{state.error}</p>
                 </div>
               )}
 
@@ -483,28 +744,29 @@ export default function CreatePaymentPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push("/completed-workflows")}
-                  disabled={isPending || isUploadingPdf}
+                  onClick={() => router.back()}
+                  disabled={isPending || isUploadingVoucher || isUploadingAdditional}
+                  className="h-10 text-xs font-semibold"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isPending || isUploadingPdf}
-                  className="bg-[#136FB6] hover:bg-[#0d5a8f] text-white px-6"
+                  disabled={
+                    isPending ||
+                    isUploadingVoucher ||
+                    isUploadingAdditional ||
+                    !formData.voucher_file_url
+                  }
+                  className="bg-[#136FB6] hover:bg-[#0d5a8f] text-white h-10 text-xs font-semibold px-6 shadow-sm"
                 >
                   {isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : isUploadingPdf ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Uploading PDF...
+                      <Loader2 size={14} className="animate-spin mr-2" />
+                      Creating Payment Record...
                     </>
                   ) : (
-                    "Create Payment Record"
+                    "Save & Create Payment"
                   )}
                 </Button>
               </div>
@@ -512,6 +774,16 @@ export default function CreatePaymentPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* PDF Document Viewer Modal */}
+      {previewModalUrl && (
+        <VoucherFileViewerModal
+          isOpen={!!previewModalUrl}
+          onClose={() => setPreviewModalUrl(null)}
+          fileUrl={previewModalUrl}
+          title={previewModalTitle}
+        />
+      )}
     </div>
   );
 }

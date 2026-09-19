@@ -24,6 +24,9 @@ export interface MobileNavItem {
   roles?: string[];
 }
 
+// Set to true to re-enable SD Payment menu item in JJM Admin
+const ENABLE_SD_PAYMENT_IN_JJM_ADMIN = false;
+
 const getMenuItems = (userRole?: string): MobileNavItem[] => {
   const baseItems: MobileNavItem[] = [
     {
@@ -118,21 +121,25 @@ const getMenuItems = (userRole?: string): MobileNavItem[] => {
       icon: <ClipboardList size={20} />,
       roles: [UserRole.Contractor, "CO"],
     },
-    {
-      label: "SD Payment",
-      href: "/completed-workflows",
-      icon: <CheckCircle2 size={20} />,
-      roles: [
-        UserRole.DistrictOfficer,
-        UserRole.DOStaff,
-        UserRole.ExecutiveEngineer,
-        UserRole.HeadOfficer,
-        "DO",
-        "DO_STAFF",
-        "EE",
-        "HO",
-      ],
-    },
+    ...(ENABLE_SD_PAYMENT_IN_JJM_ADMIN
+      ? [
+          {
+            label: "SD Payment",
+            href: "/completed-workflows",
+            icon: <CheckCircle2 size={20} />,
+            roles: [
+              UserRole.DistrictOfficer,
+              UserRole.DOStaff,
+              UserRole.ExecutiveEngineer,
+              UserRole.HeadOfficer,
+              "DO",
+              "DO_STAFF",
+              "EE",
+              "HO",
+            ],
+          },
+        ]
+      : []),
   ];
 
   return baseItems.filter((item) => {

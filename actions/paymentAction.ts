@@ -312,6 +312,26 @@ export const eeCheckPaymentAction = async (id: string) => {
   }
 };
 
+export const releasePaymentAction = async (id: string) => {
+  try {
+    const apiClient = await createServerApiClient();
+    const response = await apiClient.post(`/payments/${id}/release-payment`, {
+      details_verified: true,
+      release_confirmed: true,
+    });
+    revalidatePath("/completed-workflows");
+    return { success: true, data: response.data, error: null };
+  } catch (error: any) {
+    return {
+      success: false,
+      error:
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to release payment",
+    };
+  }
+};
+
 export const deletePaymentAction = async (id: string) => {
   try {
     const apiClient = await createServerApiClient();

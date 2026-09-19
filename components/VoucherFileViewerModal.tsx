@@ -18,6 +18,9 @@ type Props = {
   fileUrl?: string | null;
   fileName?: string | null;
   voucherNumber?: string | null;
+  title?: string;
+  isOpen?: boolean;
+  onClose?: () => void;
   children?: React.ReactNode;
 };
 
@@ -25,9 +28,21 @@ export default function VoucherFileViewerModal({
   fileUrl,
   fileName,
   voucherNumber,
+  title,
+  isOpen: controlledIsOpen,
+  onClose,
   children,
 }: Props) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [internalIsOpen, setInternalIsOpen] = React.useState(false);
+  const isControlled = controlledIsOpen !== undefined;
+  const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = isControlled
+    ? (val: boolean) => {
+        if (!val && onClose) onClose();
+      }
+    : setInternalIsOpen;
+
+  const displayTitle = title || (voucherNumber ? `Voucher: ${voucherNumber}` : (fileName ?? "Voucher PDF Document"));
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -43,7 +58,7 @@ export default function VoucherFileViewerModal({
       <DialogContent className="max-w-4xl w-[min(96vw,1200px)]">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold text-[#1a2b3c]">
-            {voucherNumber ? `Voucher: ${voucherNumber}` : (fileName ?? "Voucher PDF Document")}
+            {displayTitle}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
             Preview, download, or open the attached voucher PDF document.

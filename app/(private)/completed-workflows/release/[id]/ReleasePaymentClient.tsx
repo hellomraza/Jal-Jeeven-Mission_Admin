@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  doCheckPaymentAction,
-  eeCheckPaymentAction,
-  sendToDOAction,
-} from "@/actions/paymentAction";
+import { releasePaymentAction } from "@/actions/paymentAction";
 import BackButton from "@/components/BackButton";
 import VoucherFileViewerModal from "@/components/VoucherFileViewerModal";
 import { Badge } from "@/components/ui/badge";
@@ -13,10 +9,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { PaymentDetail } from "@/types/payment";
 import {
+  AlertTriangle,
   Building2,
   CheckCircle2,
+  FileCheck,
   FileText,
   Loader2,
+  Lock,
   Receipt,
   ShieldCheck,
   User as UserIcon,
@@ -24,125 +23,50 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-interface CheckPaymentDetailsClientProps {
+interface ReleasePaymentClientProps {
   payment: PaymentDetail;
   userRole?: string;
 }
 
-export default function CheckPaymentDetailsClient({
+export default function ReleasePaymentClient({
   payment,
   userRole,
-}: CheckPaymentDetailsClientProps) {
+}: ReleasePaymentClientProps) {
   const router = useRouter();
   const { toast } = useToast();
 
   const [detailsVerified, setDetailsVerified] = useState(false);
-  const [amountVerified, setAmountVerified] = useState(false);
+  const [releaseConfirmed, setReleaseConfirmed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const canSubmit = detailsVerified && amountVerified && !isSubmitting;
+  const canRelease = detailsVerified && releaseConfirmed && !isSubmitting;
 
-  const isStaffFlow = payment.status === "DETAILS_FILLED";
-  const isDOFlow = payment.status === "SEND_TO_DO";
-  const isEEFlow = payment.status === "SEND_TO_EE";
+  const contractorId = payment.contractor_id || (payment as any).contractor_code || "—";
+  const agreementNo = payment.agreement_number || (payment as any).work_order_code || "—";
+  const beneficiaryName = payment.beneficiary_name || payment.contractor_name || "—";
 
-  const getPageTitle = () => {
-    if (isStaffFlow) return "Verify & Send to Divisional Account Officer";
-    if (isDOFlow)
-      return "Divisional Account Officer - Check & Validate Details";
-    if (isEEFlow) return "Executive Engineer - Check & Validate Details";
-    return "Check Payment Details";
-  };
-
-  const getStatusBadge = () => {
-    if (isStaffFlow) {
-      return (
-        <Badge
-          variant="outline"
-          className="text-xs uppercase font-bold text-[#136FB6] border-blue-200 bg-blue-50/50"
-        >
-          Staff Verification
-        </Badge>
-      );
-    }
-    if (isDOFlow) {
-      return (
-        <Badge
-          variant="outline"
-          className="text-xs uppercase font-bold text-amber-700 border-amber-200 bg-amber-50/50"
-        >
-          DAO Check
-        </Badge>
-      );
-    }
-    if (isEEFlow) {
-      return (
-        <Badge
-          variant="outline"
-          className="text-xs uppercase font-bold text-purple-700 border-purple-200 bg-purple-50/50"
-        >
-          EE Check
-        </Badge>
-      );
-    }
-    return (
-      <Badge
-        variant="outline"
-        className="text-xs uppercase font-bold text-gray-700 border-gray-200 bg-gray-50/50"
-      >
-        {payment.status}
-      </Badge>
-    );
-  };
-
-  const getActionButtonLabel = () => {
-    if (isStaffFlow) return "Confirm & Send to DAO";
-    if (isDOFlow) return "Confirm & Validate Details";
-    if (isEEFlow) return "Confirm & Validate Details";
-    return "Confirm Verification";
-  };
-
-  const handleConfirm = async () => {
-    if (!canSubmit) return;
+  const handleReleasePayment = async () => {
+    if (!canRelease) return;
 
     setIsSubmitting(true);
     try {
-      let res;
-      if (isStaffFlow) {
-        res = await sendToDOAction(payment.id);
-      } else if (isDOFlow) {
-        res = await doCheckPaymentAction(payment.id);
-      } else if (isEEFlow) {
-        res = await eeCheckPaymentAction(payment.id);
-      } else {
-        toast({
-          title: "Invalid action",
-          description: "This record is not in a status requiring verification.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
+      const res = await releasePaymentAction(payment.id);
 
       if (!res.success) {
         toast({
-          title: "Verification Failed",
-          description: res.error || "Failed to submit verification.",
+          title: "Payment Release Failed",
+          description: res.error || "Failed to authorize and release payment.",
           variant: "destructive",
         });
         setIsSubmitting(false);
       } else {
         toast({
-          title: "Verification Successful",
-          description: isStaffFlow
-            ? "Payment record verified and sent to Divisional Account Officer."
-            : isDOFlow
-              ? "Payment record details validated by Divisional Account Officer."
-              : "Payment record verified by Executive Engineer.",
+          title: "Payment Successfully Released",
+          description: `Payment of ₹${Number(payment.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })} for ${payment.contractor_name} has been marked as PAID.`,
         });
 
-        // Automatically return to the payment table
-        router.push("/completed-workflows");
+        // Redirect directly to the Payment History tab
+        router.push("/completed-workflows?tab=history");
         router.refresh();
       }
     } catch (err: any) {
@@ -155,8 +79,8 @@ export default function CheckPaymentDetailsClient({
     }
   };
 
-  const contractorId = payment.contractor_id || payment.contractor_code || "—";
-  const agreementNo = payment.agreement_number || payment.work_order_code || "—";
+  const isAlreadyPaid = payment.status === "PAID";
+  const isReadyForRelease = payment.status === "EE_CHECKED";
 
   return (
     <div className="min-h-screen bg-gray-50/50 p-6">
@@ -167,14 +91,35 @@ export default function CheckPaymentDetailsClient({
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl sm:text-3xl font-bold text-[#1a2b3c]">
-                {getPageTitle()}
+                Authorize & Release Payment
               </h1>
-              {getStatusBadge()}
+              <Badge className="bg-purple-100 text-purple-700 border-purple-200 font-bold text-xs uppercase">
+                Executive Engineer
+              </Badge>
             </div>
             <p className="text-sm text-gray-600 font-medium mt-1">
-              Review all fields one by one against the physical voucher before
-              confirming.
+              Final authorization step. Review all details before releasing payment.
             </p>
+          </div>
+        </div>
+
+        {/* Warning / Instruction Banner */}
+        <div className="rounded-xl border border-amber-200 bg-amber-50/90 p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700 shrink-0 mt-0.5">
+              <Lock size={16} />
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wide">
+                Final Authorization Step
+              </h4>
+              <p className="text-xs sm:text-[13px] text-amber-800 leading-relaxed">
+                Releasing this payment will mark its status as{" "}
+                <strong className="font-extrabold text-amber-950">PAID</strong> and move it to the permanent{" "}
+                <strong className="font-extrabold text-amber-950">Payment History</strong> tab.
+                Once paid, the record will be permanently locked and cannot be edited or deleted.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -186,7 +131,7 @@ export default function CheckPaymentDetailsClient({
               <div className="flex items-center gap-2 pb-2.5 border-b border-gray-100">
                 <UserIcon size={18} className="text-[#136FB6]" />
                 <h2 className="text-[13px] font-bold uppercase tracking-wider text-gray-800">
-                  Contractor & Agreement Information
+                  1. Contractor & Agreement Information
                 </h2>
               </div>
 
@@ -238,7 +183,7 @@ export default function CheckPaymentDetailsClient({
               <div className="flex items-center gap-2 pb-2.5 border-b border-gray-100">
                 <Building2 size={18} className="text-[#136FB6]" />
                 <h2 className="text-[13px] font-bold uppercase tracking-wider text-gray-800">
-                  Bank Account Information
+                  2. Bank Account & Beneficiary Information
                 </h2>
               </div>
 
@@ -248,7 +193,7 @@ export default function CheckPaymentDetailsClient({
                   Beneficiary Name (as per Bank Account)
                 </label>
                 <div className="text-sm sm:text-base font-bold text-[#1a2b3c] bg-gray-50/80 p-3 rounded-lg border border-gray-200">
-                  {payment.beneficiary_name || payment.contractor_name || "—"}
+                  {beneficiaryName}
                 </div>
               </div>
 
@@ -297,14 +242,19 @@ export default function CheckPaymentDetailsClient({
               {/* Field: Total Payment Amount */}
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-800 block">
-                  Total Payment Amount (₹)
+                  Total Payable Amount (₹)
                 </label>
-                <div className="text-2xl sm:text-3xl font-extrabold text-[#136FB6] bg-blue-50/80 p-4 rounded-lg border border-blue-200">
-                  ₹
-                  {Number(payment.amount).toLocaleString("en-IN", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                <div className="text-2xl sm:text-3xl font-extrabold text-emerald-700 bg-emerald-50/90 p-4 rounded-lg border border-emerald-300 flex items-center justify-between">
+                  <span>
+                    ₹
+                    {Number(payment.amount).toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100/80 px-2.5 py-1 rounded">
+                    Authorized Amount
+                  </span>
                 </div>
               </div>
             </div>
@@ -314,7 +264,7 @@ export default function CheckPaymentDetailsClient({
               <div className="flex items-center gap-2 pb-2.5 border-b border-gray-100">
                 <Receipt size={18} className="text-[#136FB6]" />
                 <h2 className="text-[13px] font-bold uppercase tracking-wider text-gray-800">
-                  Voucher & Verification Document
+                  3. Voucher & Attached Documents
                 </h2>
               </div>
 
@@ -413,121 +363,146 @@ export default function CheckPaymentDetailsClient({
               )}
             </div>
 
-            {/* GROUP 4: Verification Checkpoints */}
-            <div className="space-y-4 pt-4 border-t-2 border-blue-100">
-              <div className="flex items-center gap-2 pb-1">
-                <ShieldCheck size={20} className="text-[#136FB6]" />
-                <h2 className="text-sm sm:text-base font-bold text-[#1a2b3c]">
-                  Verification Confirmation
-                </h2>
-              </div>
+            {/* GROUP 4: Two Mandatory Release Confirmations */}
+            {!isAlreadyPaid && isReadyForRelease && (
+              <div className="space-y-4 pt-4 border-t-2 border-purple-200">
+                <div className="flex items-center gap-2 pb-1">
+                  <ShieldCheck size={20} className="text-purple-700" />
+                  <h2 className="text-sm sm:text-base font-bold text-[#1a2b3c]">
+                    Executive Engineer Release Confirmation (Mandatory)
+                  </h2>
+                </div>
 
-              {/* Checkbox 1 */}
-              <div
-                onClick={() =>
-                  !isSubmitting && setDetailsVerified(!detailsVerified)
-                }
-                className={`p-4 rounded-xl border transition-colors cursor-pointer select-none flex items-start gap-3.5 ${
-                  detailsVerified
-                    ? "bg-blue-50/90 border-blue-400 shadow-sm"
-                    : "bg-gray-50/80 border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  id="chk_details"
-                  checked={detailsVerified}
-                  onChange={(e) => setDetailsVerified(e.target.checked)}
-                  className="h-5 w-5 mt-0.5 rounded border-gray-300 text-[#136FB6] focus:ring-[#136FB6] cursor-pointer shrink-0"
-                  disabled={isSubmitting}
-                />
-                <label
-                  htmlFor="chk_details"
-                  className="text-xs sm:text-sm font-semibold text-gray-900 cursor-pointer leading-relaxed"
+                {/* Checkbox 1 */}
+                <div
+                  onClick={() =>
+                    !isSubmitting && setDetailsVerified(!detailsVerified)
+                  }
+                  className={`p-4 rounded-xl border transition-colors cursor-pointer select-none flex items-start gap-3.5 ${
+                    detailsVerified
+                      ? "bg-purple-50/90 border-purple-400 shadow-sm"
+                      : "bg-gray-50/80 border-gray-200 hover:border-gray-300"
+                  }`}
                 >
-                  I verify that all the details filled in this payment record
-                  (Contractor Name:{" "}
-                  <span className="font-bold text-[#136FB6]">
-                    {payment.contractor_name}
-                  </span>
-                  , Contractor ID:{" "}
-                  <span className="font-mono font-bold text-gray-900">
-                    {contractorId}
-                  </span>
-                  {payment.year ? `, Year: ${payment.year}` : ""}, Agreement No:{" "}
-                  <span className="font-bold text-gray-900">
-                    {agreementNo}
-                  </span>
-                  , Beneficiary Name, Bank Account, and IFSC) are valid and
-                  correct as per the official voucher.
-                </label>
-              </div>
+                  <input
+                    type="checkbox"
+                    id="chk_details"
+                    checked={detailsVerified}
+                    onChange={(e) => setDetailsVerified(e.target.checked)}
+                    className="h-5 w-5 mt-0.5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer shrink-0"
+                    disabled={isSubmitting}
+                  />
+                  <label
+                    htmlFor="chk_details"
+                    className="text-xs sm:text-sm font-semibold text-gray-900 cursor-pointer leading-relaxed"
+                  >
+                    1. I verify that all the details in this payment record
+                    (Contractor Name:{" "}
+                    <span className="font-bold text-[#136FB6]">
+                      {payment.contractor_name}
+                    </span>
+                    , Contractor ID:{" "}
+                    <span className="font-mono font-bold text-gray-900">
+                      {contractorId}
+                    </span>
+                    {payment.year ? `, Year: ${payment.year}` : ""}, Agreement No:{" "}
+                    <span className="font-bold text-gray-900">
+                      {agreementNo}
+                    </span>
+                    , Beneficiary Name, Bank Account, and IFSC) are verified and
+                    accurate.
+                  </label>
+                </div>
 
-              {/* Checkbox 2 */}
-              <div
-                onClick={() =>
-                  !isSubmitting && setAmountVerified(!amountVerified)
-                }
-                className={`p-4 rounded-xl border transition-colors cursor-pointer select-none flex items-start gap-3.5 ${
-                  amountVerified
-                    ? "bg-blue-50/90 border-blue-400 shadow-sm"
-                    : "bg-gray-50/80 border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  id="chk_amount"
-                  checked={amountVerified}
-                  onChange={(e) => setAmountVerified(e.target.checked)}
-                  className="h-5 w-5 mt-0.5 rounded border-gray-300 text-[#136FB6] focus:ring-[#136FB6] cursor-pointer shrink-0"
-                  disabled={isSubmitting}
-                />
-                <label
-                  htmlFor="chk_amount"
-                  className="text-xs sm:text-sm font-semibold text-gray-900 cursor-pointer leading-relaxed"
+                {/* Checkbox 2 */}
+                <div
+                  onClick={() =>
+                    !isSubmitting && setReleaseConfirmed(!releaseConfirmed)
+                  }
+                  className={`p-4 rounded-xl border transition-colors cursor-pointer select-none flex items-start gap-3.5 ${
+                    releaseConfirmed
+                      ? "bg-emerald-50/90 border-emerald-400 shadow-sm"
+                      : "bg-gray-50/80 border-gray-200 hover:border-gray-300"
+                  }`}
                 >
-                  I have confirmed that the entered amount of{" "}
-                  <span className="text-[#136FB6] font-bold text-sm sm:text-base">
-                    ₹
-                    {Number(payment.amount).toLocaleString("en-IN", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </span>{" "}
-                  is accurate and matches the voucher.
-                </label>
+                  <input
+                    type="checkbox"
+                    id="chk_release"
+                    checked={releaseConfirmed}
+                    onChange={(e) => setReleaseConfirmed(e.target.checked)}
+                    className="h-5 w-5 mt-0.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer shrink-0"
+                    disabled={isSubmitting}
+                  />
+                  <label
+                    htmlFor="chk_release"
+                    className="text-xs sm:text-sm font-semibold text-gray-900 cursor-pointer leading-relaxed"
+                  >
+                    2. I hereby confirm and authorize the release of payment for{" "}
+                    <span className="text-emerald-700 font-extrabold text-sm sm:text-base">
+                      ₹
+                      {Number(payment.amount).toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                    . I understand this status will become{" "}
+                    <span className="font-bold text-emerald-700">PAID</span> and
+                    cannot be edited or deleted.
+                  </label>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Actions */}
+            {isAlreadyPaid && (
+              <div className="rounded-xl bg-emerald-50 p-4 text-emerald-800 border border-emerald-200 flex items-center gap-3">
+                <CheckCircle2 size={20} className="text-emerald-600 shrink-0" />
+                <p className="text-sm font-bold">
+                  This payment has already been released and is marked as PAID.
+                </p>
+              </div>
+            )}
+
+            {!isAlreadyPaid && !isReadyForRelease && (
+              <div className="rounded-xl bg-amber-50 p-4 text-amber-800 border border-amber-200 flex items-center gap-3">
+                <AlertTriangle size={20} className="text-amber-600 shrink-0" />
+                <p className="text-xs sm:text-sm font-medium">
+                  This payment is currently in status: <strong>{payment.status}</strong>. It must be in <strong>EE_CHECKED</strong> status before releasing payment.
+                </p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
             <div className="pt-4 border-t border-gray-200 flex flex-col sm:flex-row items-center gap-3">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push("/completed-workflows")}
+                onClick={() => router.push("/completed-workflows?tab=pay")}
                 disabled={isSubmitting}
                 className="w-full sm:w-1/3 h-11 text-xs sm:text-sm font-semibold text-gray-700"
               >
                 Cancel & Return
               </Button>
-              <Button
-                type="button"
-                onClick={handleConfirm}
-                disabled={!canSubmit}
-                className="w-full sm:w-2/3 bg-[#136FB6] hover:bg-[#0d5a8f] text-white h-11 text-sm font-bold flex items-center justify-center gap-2 shadow-sm"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Verifying & Submitting...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 size={16} />
-                    {getActionButtonLabel()}
-                  </>
-                )}
-              </Button>
+
+              {!isAlreadyPaid && isReadyForRelease && (
+                <Button
+                  type="button"
+                  onClick={handleReleasePayment}
+                  disabled={!canRelease}
+                  className="w-full sm:w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white h-11 text-sm font-bold flex items-center justify-center gap-2 shadow-sm"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Releasing Payment...
+                    </>
+                  ) : (
+                    <>
+                      <FileCheck size={18} />
+                      Release Payment (Mark as Paid)
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -535,4 +510,3 @@ export default function CheckPaymentDetailsClient({
     </div>
   );
 }
-

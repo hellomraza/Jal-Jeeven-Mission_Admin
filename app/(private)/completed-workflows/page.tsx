@@ -2,7 +2,10 @@ import PaymentDetailsTable from "@/components/PaymentDetailsTable";
 import { createServerApiClient } from "@/lib/server-api-client";
 import { UserRole } from "@/types/usertypes";
 import { cookies } from "next/headers";
-import { forbidden } from "next/navigation";
+import { forbidden, redirect } from "next/navigation";
+
+// Set to true to enable SD Payment workflow inside JJM Admin
+const ENABLE_SD_PAYMENT_IN_JJM_ADMIN = false;
 
 export interface CompletedWorkflowsPageProps {
   searchParams?: Promise<{
@@ -11,18 +14,24 @@ export interface CompletedWorkflowsPageProps {
     search?: string;
     status?: string;
     district_id?: string;
+    tab?: string;
   }>;
 }
 
 export default async function CompletedWorkflowsPage({
   searchParams,
 }: CompletedWorkflowsPageProps) {
+  if (!ENABLE_SD_PAYMENT_IN_JJM_ADMIN) {
+    redirect("/dashboard");
+  }
+
   const resolvedParams = searchParams ? await searchParams : {};
   const currentPage = Number(resolvedParams.page) || 1;
   const limit = Number(resolvedParams.limit) || 20;
   const search = resolvedParams.search || "";
   const status = resolvedParams.status || "";
   const district_id = resolvedParams.district_id || "";
+  const activeTab = resolvedParams.tab === "history" ? "history" : "pay";
 
   const cookieStore = await cookies();
   const role = cookieStore.get("admin_role")?.value || "";
@@ -62,6 +71,7 @@ export default async function CompletedWorkflowsPage({
           search: search || undefined,
           status: status || undefined,
           district_id: district_id || undefined,
+          tab: activeTab,
         },
       }),
     ];
@@ -92,11 +102,11 @@ export default async function CompletedWorkflowsPage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50/50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-[1600px] w-full mx-auto space-y-6">
         <div className="space-y-1">
-          <h1 className="text-[28px] font-bold text-[#1a2b3c]">SD Payment</h1>
-          <p className="text-[14px] text-gray-500 font-medium">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1a2b3c]">SD Payment</h1>
+          <p className="text-sm text-gray-500 font-medium">
             Manage contractor payment details, voucher verification, and
             approval workflow
           </p>
@@ -118,6 +128,7 @@ export default async function CompletedWorkflowsPage({
             districtId={district_id}
             districts={districts}
             role={role}
+            activeTab={activeTab}
           />
         )}
       </div>

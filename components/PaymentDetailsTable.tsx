@@ -348,17 +348,17 @@ export default function PaymentDetailsTable({
         </div>
 
         {/* Payments Table */}
-        <Card className="border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] bg-white">
+        <Card className="border-gray-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.03)] bg-white rounded-2xl overflow-hidden">
           <CardContent className="p-0">
             {initialPayments.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-[#DFEEF9]/60 flex items-center justify-center text-[#136FB6] mb-3">
-                  <Building2 size={28} />
+              <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+                <div className="w-16 h-16 rounded-2xl bg-[#DFEEF9]/70 flex items-center justify-center text-[#136FB6] mb-4">
+                  <Building2 size={32} />
                 </div>
-                <h3 className="text-[16px] font-bold text-[#1a2b3c]">
+                <h3 className="text-lg font-bold text-[#1a2b3c]">
                   No Payment Records Found
                 </h3>
-                <p className="text-[13px] text-gray-500 max-w-sm mt-1">
+                <p className="text-sm text-gray-500 max-w-md mt-1.5">
                   {hasActiveFilters
                     ? "No records match the current filter criteria. Try clearing your filters."
                     : isStaff || isDO
@@ -371,86 +371,242 @@ export default function PaymentDetailsTable({
                     variant="outline"
                     size="sm"
                     onClick={handleClearFilters}
-                    className="mt-4 text-xs"
+                    className="mt-5 text-xs font-semibold"
                   >
                     Clear Filters
                   </Button>
                 )}
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table className="min-w-[1100px]">
+              <div className="w-full overflow-x-auto">
+                <Table className="min-w-[1200px] w-full text-left">
                   <TableHeader>
-                    <TableRow className="border-gray-100 hover:bg-transparent">
-                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
-                        Contractor (as per Bank)
+                    <TableRow className="border-b border-gray-200 bg-gray-50/90 hover:bg-gray-50/90 h-10">
+                      <TableHead className="px-3.5 py-2.5 text-xs font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap min-w-[180px]">
+                        Contractor Name / ID
                       </TableHead>
-                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
-                        Work Order
+                      <TableHead className="px-3.5 py-2.5 text-xs font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                        Agreement No.
                       </TableHead>
-                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
-                        Bank & Account
+                      <TableHead className="px-3.5 py-2.5 text-xs font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
+                        Year
                       </TableHead>
-                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
-                        Voucher
+                      <TableHead className="px-3.5 py-2.5 text-xs font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap min-w-[130px]">
+                        Amount (₹)
                       </TableHead>
-                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
-                        Amount
-                      </TableHead>
-                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] whitespace-nowrap">
+                      <TableHead className="px-3.5 py-2.5 text-xs font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap min-w-[130px]">
                         Status
                       </TableHead>
-                      <TableHead className="text-[12px] font-bold text-[#1a2b3c] text-right whitespace-nowrap min-w-[280px]">
-                        Actions
+                      <TableHead className="px-3.5 py-2.5 text-xs font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap min-w-[160px]">
+                        Main Action
+                      </TableHead>
+                      <TableHead className="px-3.5 py-2.5 text-xs font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap min-w-[220px]">
+                        Beneficiary & Bank
+                      </TableHead>
+                      <TableHead className="px-3.5 py-2.5 text-xs font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap min-w-[160px]">
+                        Voucher & Docs
+                      </TableHead>
+                      <TableHead className="px-4 py-2.5 text-xs font-bold text-gray-800 uppercase tracking-wider text-right whitespace-nowrap min-w-[140px]">
+                        More
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {initialPayments.map((p) => {
                       const isRowLoading = loadingId === p.id;
+                      const contractorId =
+                        p.contractor_id || p.contractor_code || "—";
+                      const agreementNo =
+                        p.agreement_number || p.work_order_code || "—";
+                      const isPaid = p.status === "PAID";
 
                       return (
                         <TableRow
                           key={p.id}
-                          className="border-gray-100 hover:bg-gray-50/70"
+                          className="border-b border-gray-100 hover:bg-sky-50/25 transition-colors"
                         >
-                          <TableCell className="whitespace-nowrap">
+                          {/* 1. Contractor Name & ID */}
+                          <TableCell className="px-3.5 py-2.5 whitespace-nowrap">
                             <div className="space-y-0.5">
                               <span className="text-[13px] font-bold text-[#1a2b3c] block">
                                 {p.contractor_name}
                               </span>
-                              <span className="text-[11px] text-gray-500 font-mono">
-                                {p.contractor_code}
+                              <span className="text-[11px] text-gray-500 font-mono block">
+                                ID: {contractorId}
                               </span>
                             </div>
                           </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            <span className="text-[13px] font-medium text-[#1a2b3c] font-mono">
-                              {p.work_order_code}
+                          {/* 2. Agreement Number */}
+                          <TableCell className="px-3.5 py-2.5 whitespace-nowrap">
+                            <span className="text-[13px] font-semibold text-gray-900 font-mono">
+                              {agreementNo}
                             </span>
                           </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            <div className="space-y-0.5">
-                              <span className="text-[13px] font-medium text-[#1a2b3c] block">
-                                {p.bank_name}
+                          {/* 3. Year */}
+                          <TableCell className="px-3.5 py-2.5 whitespace-nowrap">
+                            <span className="text-xs font-semibold text-gray-800">
+                              {p.year || "—"}
+                            </span>
+                          </TableCell>
+
+                          {/* 4. Amount */}
+                          <TableCell className="px-3.5 py-2.5 whitespace-nowrap">
+                            <span className="text-sm font-extrabold text-emerald-700 font-mono">
+                              ₹
+                              {Number(p.amount).toLocaleString("en-IN", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </span>
+                          </TableCell>
+
+                          {/* 5. Status */}
+                          <TableCell className="px-3.5 py-2.5 whitespace-nowrap">
+                            {getStatusBadge(p.status)}
+                          </TableCell>
+
+                          {/* 6. Main Action */}
+                          <TableCell className="px-3.5 py-2.5 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5">
+                              {/* Staff / DO: Send to DAO */}
+                              {isStaff && p.status === "DETAILS_FILLED" && (
+                                <Button
+                                  size="sm"
+                                  className="h-7.5 text-xs font-bold bg-[#136FB6] hover:bg-[#0d5a8f] text-white shadow-sm px-2.5"
+                                  asChild
+                                >
+                                  <Link
+                                    href={`/completed-workflows/check/${p.id}`}
+                                  >
+                                    <Send size={12} className="mr-1" />
+                                    Send to DAO
+                                  </Link>
+                                </Button>
+                              )}
+
+                              {/* DO: Check Details */}
+                              {isDO && p.status === "SEND_TO_DO" && (
+                                <Button
+                                  size="sm"
+                                  className="h-7.5 text-xs font-bold bg-[#136FB6] hover:bg-[#0d5a8f] text-white shadow-sm px-2.5"
+                                  asChild
+                                >
+                                  <Link
+                                    href={`/completed-workflows/check/${p.id}`}
+                                  >
+                                    <CheckCircle size={12} className="mr-1" />
+                                    Check Details
+                                  </Link>
+                                </Button>
+                              )}
+
+                              {/* DO: Send to EE */}
+                              {isDO && p.status === "DO_CHECKED" && (
+                                <Button
+                                  size="sm"
+                                  className="h-7.5 text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-sm px-2.5"
+                                  onClick={() => handleSendToEE(p.id)}
+                                  disabled={isRowLoading}
+                                >
+                                  {isRowLoading ? (
+                                    <Loader2
+                                      size={12}
+                                      className="animate-spin mr-1"
+                                    />
+                                  ) : (
+                                    <Send size={12} className="mr-1" />
+                                  )}
+                                  Send to EE
+                                </Button>
+                              )}
+
+                              {/* EE: Check Details */}
+                              {isEE && p.status === "SEND_TO_EE" && (
+                                <Button
+                                  size="sm"
+                                  className="h-7.5 text-xs font-bold bg-[#136FB6] hover:bg-[#0d5a8f] text-white shadow-sm px-2.5"
+                                  asChild
+                                >
+                                  <Link
+                                    href={`/completed-workflows/check/${p.id}`}
+                                  >
+                                    <CheckCircle size={12} className="mr-1" />
+                                    Check Details
+                                  </Link>
+                                </Button>
+                              )}
+
+                              {/* EE: Release Payment */}
+                              {isEE && p.status === "EE_CHECKED" && (
+                                <Button
+                                  size="sm"
+                                  className="h-7.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm px-2.5"
+                                  disabled={isRowLoading}
+                                  asChild
+                                >
+                                  <Link
+                                    href={`/completed-workflows/release/${p.id}`}
+                                  >
+                                    <FileCheck size={12} className="mr-1" />
+                                    Release Payment
+                                  </Link>
+                                </Button>
+                              )}
+
+                              {/* Paid Status indicator */}
+                              {isPaid && (
+                                <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
+                                  <CheckCircle size={13} />
+                                  Completed
+                                </span>
+                              )}
+
+                              {/* Staff Edit */}
+                              {isStaff && p.status === "DETAILS_FILLED" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7.5 text-xs font-semibold text-gray-700 hover:bg-gray-100 px-2"
+                                  onClick={() => {
+                                    setSelectedPayment(p);
+                                    setIsEditOpen(true);
+                                  }}
+                                  disabled={isRowLoading}
+                                >
+                                  <Edit3 size={12} className="mr-1" />
+                                  Edit
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+
+                          {/* 7. Beneficiary & Bank */}
+                          <TableCell className="px-3.5 py-2.5 whitespace-nowrap">
+                            <div className="space-y-0.5 max-w-[220px]">
+                              <span
+                                className="text-xs font-semibold text-[#1a2b3c] block truncate"
+                                title={p.beneficiary_name || p.contractor_name}
+                              >
+                                {p.beneficiary_name || p.contractor_name}
                               </span>
-                              <span className="text-[11px] text-gray-500 font-mono block">
-                                A/C: {p.bank_account_number}
+                              <span className="text-[11px] text-gray-600 font-mono block truncate">
+                                {p.bank_name} • {p.bank_account_number}
                               </span>
-                              <span className="text-[10px] text-gray-400 font-mono">
+                              <span className="text-[10px] text-gray-400 font-mono block">
                                 IFSC: {p.ifsc_code} | {p.branch}
                               </span>
                             </div>
                           </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
+                          {/* 8. Voucher & Docs */}
+                          <TableCell className="px-3.5 py-2.5 whitespace-nowrap">
                             <div className="space-y-1">
+                              <span className="text-xs font-mono font-bold text-[#1a2b3c] block">
+                                {p.voucher_number}
+                              </span>
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-[12px] font-semibold text-[#1a2b3c] font-mono">
-                                  VCH: {p.voucher_number}
-                                </span>
                                 {p.voucher_file_url && (
                                   <VoucherFileViewerModal
                                     fileUrl={p.voucher_file_url}
@@ -458,9 +614,22 @@ export default function PaymentDetailsTable({
                                   >
                                     <button
                                       type="button"
-                                      className="inline-flex items-center text-[10px] font-bold text-[#136FB6] bg-blue-50 px-1.5 py-0.5 rounded hover:bg-blue-100 transition-colors"
+                                      className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-[#136FB6] border border-blue-200 hover:bg-blue-100 transition-colors"
                                     >
-                                      PDF
+                                      Voucher
+                                    </button>
+                                  </VoucherFileViewerModal>
+                                )}
+                                {p.additional_pdf_url && (
+                                  <VoucherFileViewerModal
+                                    fileUrl={p.additional_pdf_url}
+                                    title="Additional Document"
+                                  >
+                                    <button
+                                      type="button"
+                                      className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors"
+                                    >
+                                      Doc
                                     </button>
                                   </VoucherFileViewerModal>
                                 )}
@@ -468,136 +637,30 @@ export default function PaymentDetailsTable({
                             </div>
                           </TableCell>
 
-                          <TableCell className="whitespace-nowrap">
-                            <span className="text-[14px] font-extrabold text-[#136FB6]">
-                              ₹
-                              {Number(p.amount).toLocaleString("en-IN", {
-                                minimumFractionDigits: 2,
-                              })}
-                            </span>
-                          </TableCell>
-
-                          <TableCell className="whitespace-nowrap">
-                            {getStatusBadge(p.status)}
-                          </TableCell>
-
-                          <TableCell className="text-right whitespace-nowrap min-w-[280px]">
-                            <div className="flex items-center justify-end gap-2 whitespace-nowrap">
-                              {/* Staff Actions */}
-                              {isStaff && p.status === "DETAILS_FILLED" && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-8 text-xs font-semibold"
-                                    onClick={() => {
-                                      setSelectedPayment(p);
-                                      setIsEditOpen(true);
-                                    }}
-                                    disabled={isRowLoading}
-                                  >
-                                    <Edit3 size={13} className="mr-1" />
-                                    Edit
-                                  </Button>
-
-                                  <Button
-                                    size="sm"
-                                    className="h-8 text-xs font-semibold bg-[#136FB6] hover:bg-[#0d5a8f] text-white"
-                                    asChild
-                                  >
-                                    <Link
-                                      href={`/completed-workflows/check/${p.id}`}
-                                    >
-                                      <Send size={13} className="mr-1" />
-                                      Send to DAO
-                                    </Link>
-                                  </Button>
-                                </>
-                              )}
-
-                              {/* DO Actions */}
-                              {isDO && p.status === "SEND_TO_DO" && (
-                                <Button
-                                  size="sm"
-                                  className="h-8 text-xs font-semibold bg-[#136FB6] hover:bg-[#0d5a8f] text-white"
-                                  asChild
-                                >
-                                  <Link
-                                    href={`/completed-workflows/check/${p.id}`}
-                                  >
-                                    <CheckCircle size={13} className="mr-1" />
-                                    Check Details
-                                  </Link>
-                                </Button>
-                              )}
-
-                              {isDO && p.status === "DO_CHECKED" && (
-                                <Button
-                                  size="sm"
-                                  className="h-8 text-xs font-semibold bg-purple-600 hover:bg-purple-700 text-white"
-                                  onClick={() => handleSendToEE(p.id)}
-                                  disabled={isRowLoading}
-                                >
-                                  {isRowLoading ? (
-                                    <Loader2
-                                      size={13}
-                                      className="animate-spin mr-1"
-                                    />
-                                  ) : (
-                                    <Send size={13} className="mr-1" />
-                                  )}
-                                  Send to EE
-                                </Button>
-                              )}
-
-                              {/* EE Actions */}
-                              {isEE && p.status === "SEND_TO_EE" && (
-                                <Button
-                                  size="sm"
-                                  className="h-8 text-xs font-semibold bg-[#136FB6] hover:bg-[#0d5a8f] text-white"
-                                  asChild
-                                >
-                                  <Link
-                                    href={`/completed-workflows/check/${p.id}`}
-                                  >
-                                    <CheckCircle size={13} className="mr-1" />
-                                    Check Details
-                                  </Link>
-                                </Button>
-                              )}
-
-                              {isEE && p.status === "EE_CHECKED" && (
-                                <Button
-                                  size="sm"
-                                  className="h-8 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
-                                  disabled={isRowLoading}
-                                >
-                                  <FileCheck size={13} className="mr-1" />
-                                  Release Payment
-                                </Button>
-                              )}
-
-                              {/* View Details Page Link (Available to all users including HO) */}
+                          {/* 9. More (View, Audit, Delete) */}
+                          <TableCell className="px-4 py-2.5 text-right whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-1">
+                              {/* View Details Page Link */}
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-8 text-xs text-gray-600 hover:text-[#1a2b3c]"
+                                className="h-7 px-1.5 text-xs text-gray-600 hover:text-[#1a2b3c]"
                                 asChild
                                 title="View payment details"
                               >
                                 <Link
                                   href={`/completed-workflows/details/${p.id}`}
                                 >
-                                  <Eye size={14} className="mr-1 text-gray-400" />
-                                  View Details
+                                  <Eye size={13} className="mr-0.5 text-gray-400" />
+                                  View
                                 </Link>
                               </Button>
 
-                              {/* Audit Trail Page Link (Available to all users including HO) */}
+                              {/* Audit Trail Page Link */}
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-8 text-xs text-gray-600 hover:text-[#1a2b3c]"
+                                className="h-7 px-1.5 text-xs text-gray-600 hover:text-[#1a2b3c]"
                                 asChild
                                 title="View audit trail history"
                               >
@@ -605,28 +668,39 @@ export default function PaymentDetailsTable({
                                   href={`/completed-workflows/audit/${p.id}`}
                                 >
                                   <History
-                                    size={14}
-                                    className="mr-1 text-gray-400"
+                                    size={13}
+                                    className="mr-0.5 text-gray-400"
                                   />
-                                  Audit Log
+                                  Audit
                                 </Link>
                               </Button>
 
-                              {/* Delete Action (DO & EE Only, NOT HO) */}
-                              {(isDO || isEE) && (
+                              {/* Delete Action */}
+                              {!isPaid && (isDO || isEE) && (
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  className="h-8 text-xs text-red-600 hover:bg-red-50 hover:text-red-700 font-medium"
+                                  className="h-7 px-1.5 text-xs text-red-600 hover:bg-red-50 hover:text-red-700 font-medium"
                                   onClick={() => {
                                     setPaymentToDelete(p);
                                     setIsDeleteModalOpen(true);
                                   }}
                                   title="Delete payment record"
                                 >
-                                  <Trash2 size={13} className="mr-1" />
+                                  <Trash2 size={12} className="mr-0.5" />
                                   Delete
                                 </Button>
+                              )}
+
+                              {/* Paid Lock indicator */}
+                              {isPaid && (
+                                <span
+                                  className="inline-flex items-center gap-0.5 text-[10px] text-gray-400 px-1.5 py-0.5 bg-gray-50 rounded border border-gray-100"
+                                  title="Paid records are locked against deletion"
+                                >
+                                  <Lock size={10} className="text-gray-400" />
+                                  Locked
+                                </span>
                               )}
                             </div>
                           </TableCell>
